@@ -5,7 +5,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editTahunAjaranModalLabel{{ $tahun->id_tahunAjaran }}">Edit Tahun Ajaran</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -35,7 +35,8 @@
                         </div>
                     </div>                    
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times-circle"></i> Batal</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="location.reload();">
+                            <i class="fas fa-times-circle"></i> Batal</button>
                         <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan</button>
                     </div>
                 </form>

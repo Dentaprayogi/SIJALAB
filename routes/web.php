@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeralatanController;
+use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,8 @@ Route::middleware([
 
     //Route Peralatan
     Route::resource('peralatan', PeralatanController::class);
+
+    //Route Prodi
+    Route::resource('prodi', ProdiController::class);
 
 });

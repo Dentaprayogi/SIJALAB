@@ -12,10 +12,6 @@ class TahunAjaranController extends Controller
         return view('web.tahunajaran.index', compact('tahunAjaran'));
     }
 
-    public function create() {
-        return view('web.tahunajaran.create');
-    }
-
     public function store(Request $request) {
         $request->validate([
             'tahun_ajaran' => 'required',
@@ -36,13 +32,6 @@ class TahunAjaranController extends Controller
     
         return redirect()->route('tahunajaran.index')->with('success', 'Tahun Ajaran berhasil ditambahkan');
     }
-    
-
-    public function edit(TahunAjaran $tahunAjaran)
-    {
-        return view('web.tahunajaran.edit', compact('tahunAjaran'));
-    }
-
     
     public function update(Request $request, TahunAjaran $tahunAjaran)
     {

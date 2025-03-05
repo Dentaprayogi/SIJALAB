@@ -13,11 +13,6 @@ class PeralatanController extends Controller
         return view('web.peralatan.index', compact('peralatan'));
     }
 
-    public function create()
-    {
-        return view('web.peralatan.create');
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -28,12 +23,6 @@ class PeralatanController extends Controller
 
         Peralatan::create($request->all());
         return redirect()->route('peralatan.index')->with('success', 'Peralatan berhasil ditambahkan.');
-    }
-
-    public function edit($id)
-    {
-        $peralatan = Peralatan::findOrFail($id);
-        return view('web.peralatan.edit', compact('peralatan'));
     }
 
     public function update(Request $request, $id)

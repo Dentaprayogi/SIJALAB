@@ -68,6 +68,14 @@
                     <span>Peralatan</span>
                 </a>
             </li>  
+
+            <!-- Nav Item - Prodi -->
+            <li class="nav-item {{ Request::is('prodi') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('prodi.index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <span>Prodi</span>
+                </a>
+            </li>  
         </ul>
         <!-- End of Sidebar -->
 
