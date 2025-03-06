@@ -8,7 +8,7 @@ use App\Models\TahunAjaran;
 class TahunAjaranController extends Controller
 {
     public function index() {
-        $tahunAjaran = TahunAjaran::all();
+        $tahunAjaran = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
         return view('web.tahunajaran.index', compact('tahunAjaran'));
     }
 

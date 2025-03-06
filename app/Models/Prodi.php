@@ -15,4 +15,9 @@ class Prodi extends Model
         'nama_prodi',
         'kode_prodi',
     ];
+
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class, 'id_prodi');
+    }
 }

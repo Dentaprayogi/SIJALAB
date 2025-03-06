@@ -11,7 +11,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="dataTable">
+                <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead class="thead-primary">
                         <tr>
                             <th>No.</th>
@@ -22,7 +22,7 @@
                     <tbody>
                         @if ($peralatan->isEmpty()) 
                             <tr>
-                                <td colspan="3" class="text-center">Belum Ada Data</td>
+                                <td colspan="5" class="text-center">Belum Ada Data</td>
                             </tr>
                         @else
                             @foreach($peralatan as $peralatans)

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KelasController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
@@ -28,5 +29,8 @@ Route::middleware([
 
     //Route Prodi
     Route::resource('prodi', ProdiController::class);
+
+    //Route Kelas
+    Route::resource('kelas', KelasController::class);
 
 });

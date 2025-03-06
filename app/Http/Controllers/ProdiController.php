@@ -9,7 +9,7 @@ class ProdiController extends Controller
 {
     public function index()
     {
-        $prodi = Prodi::all();
+        $prodi = Prodi::orderBy('nama_prodi', 'asc')->get();
         return view('web.prodi.index', compact('prodi'));
     }
 

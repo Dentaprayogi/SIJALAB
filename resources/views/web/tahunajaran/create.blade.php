@@ -18,7 +18,7 @@
                     <div class="mb-3">
                         <label class="form-label">Semester</label>
                         <select name="semester" class="form-control" required>
-                            <option value="">Pilih Semester</option>
+                            <option value="" selected disabled >Pilih Semester</option>
                             <option value="ganjil">Ganjil</option>
                             <option value="genap">Genap</option>
                         </select>

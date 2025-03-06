@@ -9,7 +9,7 @@ class PeralatanController extends Controller
 {
     public function index()
     {
-        $peralatan = Peralatan::all();
+        $peralatan = Peralatan::orderBy('nama_peralatan', 'asc')->get();
         return view('web.peralatan.index', compact('peralatan'));
     }
 

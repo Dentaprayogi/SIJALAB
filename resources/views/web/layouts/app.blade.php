@@ -76,6 +76,14 @@
                     <span>Prodi</span>
                 </a>
             </li>  
+
+            <!-- Nav Item - Kelas -->
+            <li class="nav-item {{ Request::is('kelas') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('kelas.index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <span>Kelas</span>
+                </a>
+            </li>  
         </ul>
         <!-- End of Sidebar -->
 
