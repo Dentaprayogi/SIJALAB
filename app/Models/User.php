@@ -29,10 +29,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'nim',
-        'prodi',
-        'kelas',
-        'telepon',
         'foto_ktm',
         'role',
         'satus_user',
@@ -70,5 +66,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function mahasiswa()
+    {
+        return $this->hasOne(Mahasiswa::class, 'id');
     }
 }

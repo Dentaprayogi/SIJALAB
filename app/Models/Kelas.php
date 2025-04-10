@@ -20,4 +20,9 @@ class Kelas extends Model
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
+
+    public function mahasiswa()
+    {
+        return $this->hasMany(Mahasiswa::class, 'id_kelas');
+    }
 }
