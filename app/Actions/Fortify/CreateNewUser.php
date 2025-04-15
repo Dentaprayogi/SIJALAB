@@ -29,6 +29,7 @@ class CreateNewUser implements CreatesNewUsers
             'telepon' => ['required', 'string'],
             'id_prodi' => ['required', 'exists:prodi,id_prodi'],
             'id_kelas' => ['required', 'exists:kelas,id_kelas'],
+            // 'foto_ktm' => ['required', 'image', 'max:5120'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
@@ -40,6 +41,10 @@ class CreateNewUser implements CreatesNewUsers
                 'role' => 'mahasiswa', // default role mahasiswa
                 'status_user' => 'aktif', // default status user
             ]);
+
+            $foto = request()->file('foto_ktm');
+            $fotoPath = $foto->store('uploads/ktm', 'public');
+
     
             Mahasiswa::create([
                 'id' => $user->id,
@@ -47,7 +52,7 @@ class CreateNewUser implements CreatesNewUsers
                 'telepon' => $input['telepon'],
                 'id_prodi' => $input['id_prodi'],
                 'id_kelas' => $input['id_kelas'],
-                'foto_ktm' => null, // nanti bisa diupdate lewat form edit profil
+                'foto_ktm' => $fotoPath, // nanti bisa diupdate lewat form edit profil
             ]);
     
             return $user;

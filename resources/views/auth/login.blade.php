@@ -1,48 +1,80 @@
-<x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Meta Tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        <x-validation-errors class="mb-4" />
+    <!-- Import CSS -->
+    <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">
 
-        @session('status')
-            <div class="mb-4 font-medium text-sm text-green-600">
-                {{ $value }}
-            </div>
-        @endsession
+    <title>Login</title>
+</head>
+<body class="custom-bg">
 
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
+<div class="auth-box">
+    <h3 class="text-center text-primary-custom mb-3"><strong>Sistem Peminjaman Laboratorium</strong></h3>
+    <p class="text-center mb-4 text-secondary">Silakan login dengan memasukkan alamat email dan kata sandi Anda.</p>
 
-            <div>
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            </div>
+    <!-- Form Login -->
+    <form method="POST" action="{{ route('login') }}">
+        @csrf
 
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
-            </div>
+        <!-- Email Input -->
+        <div class="form-group mb-3">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   placeholder="your-email@gmail.com" value="{{ old('email') }}" required autofocus>
+        </div>
 
-            <div class="block mt-4">
-                <label for="remember_me" class="flex items-center">
-                    <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                </label>
-            </div>
+        <!-- Password Input -->
+        <div class="form-group mb-4">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   placeholder="Your Password" required>
+        </div>
 
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
+        <!-- Link Register dan Forgot Password -->
+        <div class="d-flex mb-4 align-items-center justify-content-between">
+            @if (Route::has('register'))
+                <a href="{{ route('register') }}" class="text-primary-custom text-decoration-none">
+                    Belum punya akun? <strong>Daftar di sini</strong>
+                </a>
+            @endif
+            @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" class="text-primary-custom text-decoration-none">
+                    Forgot Password
+                </a>
+            @endif
+        </div>
 
-                <x-button class="ms-4">
-                    {{ __('Log in') }}
-                </x-button>
-            </div>
-        </form>
-    </x-authentication-card>
-</x-guest-layout>
+        <!-- Submit Button -->
+        <input type="submit" value="Log In" class="btn btn-primary">
+
+        <!-- SweetAlert Error -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        @if ($errors->any())
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '{{ $errors->first() }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            </script>
+        @endif
+    </form>
+</div>
+
+<!-- Import JS -->
+<script src="{{ asset('login-form/js/jquery-3.3.1.min.js') }}"></script>
+<script src="{{ asset('login-form/js/popper.min.js') }}"></script>
+<script src="{{ asset('login-form/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('login-form/js/main.js') }}"></script>
+
+</body>
+</html>

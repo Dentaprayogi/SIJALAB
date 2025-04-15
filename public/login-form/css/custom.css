@@ -1,0 +1,82 @@
+body.custom-bg {
+    background-image: url("../images/poliwangi 2.jpg");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Figtree", sans-serif;
+}
+
+.login-container {
+    backdrop-filter: blur(15px); /* Efek buram */
+    background: rgba(255, 255, 255, 0.3); /* Background dengan transparansi */
+    border-radius: 15px; /* Border melengkung */
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bayangan untuk memperjelas form */
+}
+
+.forgot-pass {
+    margin-left: 10px; /* Jarak antara Remember Me dan Forgot Password */
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Warna hover baru untuk button login */
+.btn-primary:hover {
+    background-color: #0056b3; /* Ganti dengan warna biru lebih gelap */
+    border-color: #004085; /* Warna border saat hover */
+}
+
+/* Warna saat button ditekan (clicked) */
+.btn-primary:active {
+    background-color: #004085; /* Warna lebih gelap saat tombol diklik */
+    border-color: #003366; /* Border lebih gelap saat tombol diklik */
+}
+
+/* Tambahan untuk menghilangkan fokus outline pada button setelah diklik */
+.btn-primary:focus {
+    box-shadow: none;
+}
+
+.auth-box {
+    background-color: rgba(255, 255, 255, 0.85); /* Putih transparan */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 450px;
+}
+
+.register-box {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 900px;
+}
+
+.text-primary-custom {
+    color: #007bff;
+}
+
+.text-primary-custom:hover {
+    color: #007bff;
+}
+
+.btn-primary {
+    width: 100%;
+}
+
+label {
+    font-weight: 500;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}

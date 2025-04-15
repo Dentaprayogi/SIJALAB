@@ -1,4 +1,4 @@
-{{-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -21,7 +21,7 @@
         <x-banner />
 
         <div class="min-h-screen bg-gray-100">
-            @livewire('navigation-menu')
+            {{-- @livewire('navigation-menu') --}}
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -42,4 +42,4 @@
 
         @livewireScripts
     </body>
-</html> --}}
+</html>

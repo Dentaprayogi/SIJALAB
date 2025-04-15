@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('status_user', ['aktif', 'nonaktif'])->default('aktif');
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
+            $table->string('profile_photo_path', 6048)->nullable();
             $table->timestamps();
         });
 

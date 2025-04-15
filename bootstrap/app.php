@@ -1,8 +1,10 @@
 <?php
 
+use App\Livewire\Profile\UpdateMahasiswaForm;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Livewire\Livewire;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,3 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+Livewire::component('profile.update-mahasiswa-form', UpdateMahasiswaForm::class);
+
+return $app;

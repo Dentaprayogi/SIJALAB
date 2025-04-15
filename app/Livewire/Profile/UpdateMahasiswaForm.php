@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Livewire\Profile;
+
+use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Mahasiswa;
+use App\Models\Prodi;
+use App\Models\Kelas;
+use Illuminate\Validation\Rule;
+use Livewire\WithFileUploads;
+
+class UpdateMahasiswaForm extends Component
+{
+    use WithFileUploads;
+
+    public $nim;
+    public $telepon;
+    public $id_prodi;
+    public $id_kelas;
+    public $foto_ktm;
+    public $foto_ktm_preview;
+
+    public $prodiList = [];
+    public $kelasList = [];
+    
+    public function updatedIdProdi($value)
+    {
+        $this->kelasList = Kelas::where('id_prodi', $value)->get();
+        $this->id_kelas = null; // reset pilihan kelas agar user disuruh pilih lagi
+    }    
+
+    public function resetKelas()
+    {
+        $this->id_kelas = null;
+    }
+
+
+    public function mount()
+    {
+        $user = Auth::user();
+        $mahasiswa = Mahasiswa::where('id', $user->id)->first();
+
+        $this->prodiList = Prodi::all();
+
+        if ($mahasiswa) {
+            $this->nim = $mahasiswa->nim;
+            $this->telepon = $mahasiswa->telepon;
+            $this->id_prodi = $mahasiswa->id_prodi;
+            $this->id_kelas = $mahasiswa->id_kelas;
+            $this->foto_ktm_preview = $mahasiswa->foto_ktm;
+
+            $this->kelasList = Kelas::where('id_prodi', $mahasiswa->id_prodi)->get();
+        } else {
+            $this->kelasList = collect(); // kosongkan jika belum ada prodi
+        }
+    }
+
+    public function updateMahasiswa()
+    {
+        $this->validate([
+            'nim' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('mahasiswa', 'nim')->ignore(Auth::id(), 'id'),
+            ],
+            'telepon' => 'required|string|max:20',
+            'id_prodi' => 'required|exists:prodi,id_prodi',
+            'id_kelas' => 'required|exists:kelas,id_kelas',
+            'foto_ktm' => 'nullable|image|max:5120',
+        ]);
+
+        $mahasiswa = Mahasiswa::where('id', Auth::id())->first();
+
+        if ($this->foto_ktm) {
+            // Hapus foto lama jika ada
+            if ($mahasiswa && $mahasiswa->foto_ktm) {
+                Storage::disk('public')->delete($mahasiswa->foto_ktm);
+            }
+
+            $path = $this->foto_ktm->store('uploads/ktm', 'public');
+        } else {
+            $path = $mahasiswa->foto_ktm ?? null;
+        }
+
+        $mahasiswa->update([
+            'nim' => $this->nim,
+            'telepon' => $this->telepon,
+            'id_prodi' => $this->id_prodi,
+            'id_kelas' => $this->id_kelas,
+            'foto_ktm' => $path,
+        ]);
+
+        session()->flash('message', 'Data mahasiswa berhasil diperbarui.');
+    }
+
+    public function render()
+    {
+        return view('livewire.profile.update-mahasiswa-form');
+    }
+
+}

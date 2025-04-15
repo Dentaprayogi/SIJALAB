@@ -29,6 +29,10 @@ Route::middleware([
 ])->group(function () {
     route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/profile', function () {
+        return view('web.profile.show');
+    })->name('user.profile'); 
+
     //Route Tahun Ajaran
     Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
         'tahunajaran' => 'tahunAjaran'

@@ -1,132 +1,179 @@
-<x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">
 
-        <x-validation-errors class="mb-4" />
+</head>
+<body class="custom-bg">
 
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
+<div class="register-box">
+    <h3 class="form-title text-primary-custom"><strong>Form Registrasi</strong></h3>
 
-            <div>
-                <x-label for="name" value="{{ __('Nama Lengkap') }}" />
-                <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            </div>
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+        @csrf
 
-            <div class="mt-4">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            </div>
-
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            </div>
-
-            <div class="mt-4">
-                <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-                <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
-            </div>
-
-            <!-- NIM -->
-            <div class="mt-4">
-                <x-label for="nim" value="NIM" />
-                <x-input id="nim" class="block mt-1 w-full" type="text" name="nim" required autofocus />
-            </div>
-
-            <!-- Telepon -->
-            <div class="mt-4">
-                <x-label for="telepon" value="Telepon" />
-                <x-input id="telepon" class="block mt-1 w-full" type="text" name="telepon" required />
-            </div>
-
-            <!-- Prodi -->
-            <div class="mt-4">
-                <x-input-label for="id_prodi" value="Program Studi" />
-                <select id="id_prodi" name="id_prodi" class="block mt-1 w-full" required>
-                    <option value="" selected disabled >-- Pilih Prodi --</option>
-                    @foreach ($prodiList as $prodi)
-                        <option value="{{ $prodi->id_prodi }}">{{ $prodi->nama_prodi }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Kelas -->
-            <div class="mt-4">
-                <x-input-label for="id_kelas" value="Kelas" />
-                <select id="id_kelas" name="id_kelas" class="block mt-1 w-full" required>
-                    <option value="" selected disabled >-- Pilih Kelas --</option>
-                    <!-- akan diisi lewat JS -->
-                </select>
-            </div>
-
-
-            @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                <div class="mt-4">
-                    <x-label for="terms">
-                        <div class="flex items-center">
-                            <x-checkbox name="terms" id="terms" required />
-
-                            <div class="ms-2">
-                                {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                                        'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">'.__('Terms of Service').'</a>',
-                                        'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">'.__('Privacy Policy').'</a>',
-                                ]) !!}
-                            </div>
-                        </div>
-                    </x-label>
+        <div class="row">
+            <!-- KIRI -->
+            <div class="col-md-6 form-section">
+                <div class="form-group mb-3">
+                    <label for="name">Nama Lengkap</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required autofocus>
                 </div>
-            @endif
 
-            <div class="flex items-center justify-end mt-4">
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                    {{ __('Already registered?') }}
-                </a>
+                <div class="form-group mb-3">
+                    <label for="telepon">Telepon</label>
+                    <input type="text" class="form-control" id="telepon" name="telepon" required>
+                </div>
 
-                <x-button class="ms-4">
-                    {{ __('Register') }}
-                </x-button>
+                <div class="form-group mb-3">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="password_confirmation">Konfirmasi Password</label>
+                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                </div>
             </div>
-        </form>
+
+            <!-- KANAN -->
+            <div class="col-md-6 form-section">
+                <div class="form-group mb-3">
+                    <label for="nim">NIM</label>
+                    <input type="text" class="form-control" id="nim" name="nim" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="id_prodi">Program Studi</label>
+                    <select class="form-control" name="id_prodi" id="id_prodi" required>
+                        <option value="" selected disabled>-- Pilih Prodi --</option>
+                        @foreach ($prodiList as $prodi)
+                            <option value="{{ $prodi->id_prodi }}">{{ $prodi->nama_prodi }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="id_kelas">Kelas</label>
+                    <select class="form-control" name="id_kelas" id="id_kelas" required>
+                        <option value="" selected disabled>-- Pilih Kelas --</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="foto_ktm" class="form-label">Foto KTM (Max: 5 MB)</label>
+                    <input type="file" name="foto_ktm" id="foto_ktm" class="form-control" accept="image/*" required>
+                    <img id="preview-image" src="#" alt="Preview Foto KTM" style="max-width: 200px; margin-top: 10px; display: none;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkbox Terms -->
+        @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
+            <div class="form-group mt-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="terms" id="terms" required>
+                    <label class="form-check-label" for="terms">
+                        {!! __('Saya setuju dengan :terms_of_service dan :privacy_policy', [
+                            'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'">Syarat Layanan</a>',
+                            'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'">Kebijakan Privasi</a>',
+                        ]) !!}
+                    </label>
+                </div>
+            </div>
+        @endif
+
+        <div class="mt-4">
+            <input type="submit" class="btn btn-primary" value="Daftar">
+        </div>
+    </form>
+
+    <!-- Link Login -->
+    <div class="mt-3 text-center">
+        Sudah punya akun? <a href="{{ route('login') }}" class="text-primary-custom">Login di sini</a>
+    </div>
+
+    <!-- SweetAlert Error -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if ($errors->any())
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const prodiSelect = document.getElementById('id_prodi');
-                const kelasSelect = document.getElementById('id_kelas');
-                const form = document.querySelector('form'); // Ambil elemen form
-        
-                prodiSelect.addEventListener('change', function () {
-                    const idProdi = this.value;
-        
-                    // Reset opsi kelas dengan default yang disabled
-                    kelasSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas --</option>';
-        
-                    if (idProdi) {
-                        fetch(`/get-kelas/${idProdi}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                data.forEach(kelas => {
-                                    const option = document.createElement('option');
-                                    option.value = kelas.id_kelas;
-                                    option.textContent = kelas.nama_kelas;
-                                    kelasSelect.appendChild(option);
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Error ambil kelas:', error);
-                            });
-                    }
-                });
-        
-                // Cegah submit form jika kelas belum dipilih
-                form.addEventListener('submit', function (e) {
-                    if (!kelasSelect.value) {
-                        e.preventDefault();
-                        alert('Silakan pilih kelas terlebih dahulu.');
-                        kelasSelect.focus();
-                    }
-                });
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: '{{ $errors->first() }}',
+                timer: 3000,
+                showConfirmButton: false
             });
-        </script>        
-    </x-authentication-card>
-</x-guest-layout>
+        </script>
+    @endif
+</div>
+
+<script>
+    // Load kelas berdasarkan prodi
+    document.addEventListener('DOMContentLoaded', function () {
+        const prodiSelect = document.getElementById('id_prodi');
+        const kelasSelect = document.getElementById('id_kelas');
+
+        prodiSelect.addEventListener('change', function () {
+            const idProdi = this.value;
+            kelasSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas --</option>';
+
+            if (idProdi) {
+                fetch(`/get-kelas/${idProdi}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(kelas => {
+                            const option = document.createElement('option');
+                            option.value = kelas.id_kelas;
+                            option.textContent = kelas.nama_kelas;
+                            kelasSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Gagal mengambil data kelas:', error);
+                    });
+            }
+        });
+    });
+</script>
+<script>
+    document.getElementById('foto_ktm').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const maxSize = 5 * 1024 * 1024; // 5 MB
+
+            // Cek ukuran file
+            if (file.size > maxSize) {
+                alert("Ukuran file melebihi 5 MB. Silakan pilih file yang lebih kecil.");
+                event.target.value = ""; // reset input file
+                document.getElementById('preview-image').style.display = 'none';
+                return;
+            }
+
+            // Tampilkan preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('preview-image');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+    
+
+<script src="{{ asset('login-form/js/bootstrap.min.js') }}"></script>
+</body>
+</html>
