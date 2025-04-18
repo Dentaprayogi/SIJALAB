@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\CustomRegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
@@ -46,5 +47,8 @@ Route::middleware([
 
     //Route Kelas
     Route::resource('kelas', KelasController::class);
+
+    //Route Matakuliah
+    Route::resource('matakuliah', MatakuliahController::class);
 
 });

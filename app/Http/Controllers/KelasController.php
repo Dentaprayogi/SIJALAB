@@ -41,30 +41,40 @@ class KelasController extends Controller
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Kelas $kela)
+    public function update(Request $request, $id_kelas)
     {
         $request->validate([
             'id_prodi' => 'required|exists:prodi,id_prodi',
             'nama_kelas' => 'required|string|max:255',
         ]);
 
-        // Cek apakah ada kelas lain dengan nama yang sama dalam prodi yang sama
+        // Ambil data kelas berdasarkan ID
+        $kelas = Kelas::findOrFail($id_kelas);
+
+        // Cek apakah sudah ada kelas dengan nama dan prodi yang sama, tapi bukan dirinya sendiri
         $cekKelas = Kelas::where('id_prodi', $request->id_prodi)
                         ->where('nama_kelas', $request->nama_kelas)
-                        ->where('id_kelas', '!=', $kela->id_kelas) // Pastikan bukan kelas yang sedang diedit
+                        ->where('id_kelas', '!=', $kelas->id_kelas)
                         ->exists();
 
         if ($cekKelas) {
             return redirect()->route('kelas.index')->withInput()->with('error', 'Kelas dengan nama yang sama sudah ada dalam prodi ini!');
         }
 
-        $kela->update($request->all());
+        // Update data kelas
+        $kelas->update([
+            'id_prodi' => $request->id_prodi,
+            'nama_kelas' => $request->nama_kelas,
+        ]);
+
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil diperbarui!');
     }
 
-    public function destroy(Kelas $kela)
+    public function destroy($id_kelas)
     {
-        $kela->delete();
+        $kelas = Kelas::findOrFail($id_kelas);
+        $kelas->delete();
+
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus!');
     }
 }

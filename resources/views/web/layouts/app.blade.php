@@ -84,6 +84,14 @@
                     <span>Kelas</span>
                 </a>
             </li>  
+
+            <!-- Nav Item - Matakuliah -->
+            <li class="nav-item {{ Request::is('matakuliah') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('matakuliah.index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <span>Matakuliah</span>
+                </a>
+            </li>  
         </ul>
         <!-- End of Sidebar -->
 
