@@ -25,4 +25,9 @@ class Prodi extends Model
     {
         return $this->hasMany(Matakuliah::class, 'id_prodi');
     }
+
+    public function dosen()
+    {
+        return $this->hasMany(Matakuliah::class, 'id_prodi');
+    }
 }

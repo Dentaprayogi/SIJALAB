@@ -1,32 +1,32 @@
-@foreach ($matakuliah as $mk)
-<div class="modal fade" id="modalEditMatakuliah{{ $mk->id_mk }}" tabindex="-1">
+<div class="modal fade" id="modalTambahDosen" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit Matakuliah</h5>
+                <h5 class="modal-title">Tambah Dosen</h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('matakuliah.update', $mk->id_mk) }}" method="POST">
+            <form action="{{ route('dosen.store') }}" method="POST">
                 @csrf
-                @method('PUT')
-                <input type="hidden" name="id_mk" value="{{ $mk->id_mk }}">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nama Mata Kuliah</label>
-                        <input type="text" name="nama_mk" class="form-control" value="{{ $mk->nama_mk }}">
-                   </div>
+                        <label class="form-label">Nama Dosen</label>
+                        <input type="text" class="form-control" name="nama_dosen" required>
+                    </div>
                     <div class="mb-3">
-                        <label class="form-label"">Prodi</label>
+                        <label class="form-label">Telepon</label>
+                        <input type="text" class="form-control" name="telepon" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prodi</label>
                         <select class="form-control" name="id_prodi" required>
-                            @foreach ($prodi->sortBy('kode_prodi') as $p )
-                            <option value="{{ $p->id_prodi }}" {{ $mk->id_prodi == $p->id_prodi ? 'selected' : '' }}>
-                                {{ $p->kode_prodi }}
-                            </option>                                
+                            <option value="" selected disabled >Pilih Prodi</option> <!-- Opsi default -->
+                            @foreach ($prodi->sortBy('kode_prodi') as $p)
+                                <option value="{{ $p->id_prodi }}">{{ $p->kode_prodi }}</option>
                             @endforeach
                         </select>
-                   </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="location.reload();">
@@ -37,4 +37,3 @@
         </div>
     </div>
 </div>
-@endforeach

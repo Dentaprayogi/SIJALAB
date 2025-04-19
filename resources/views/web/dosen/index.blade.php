@@ -4,9 +4,9 @@
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between">
-            <h1 class="h3 mb-2 text-gray-800">Daftar Kelas</h1>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahKelas">
-                <i class="fas fa-plus"></i> Tambah Kelas
+            <h1 class="h3 mb-2 text-gray-800">Daftar Dosen</h1>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahDosen">
+                <i class="fas fa-plus"></i> Tambah Dosen
             </button>
         </div>
         <div class="card-body">
@@ -15,27 +15,29 @@
                     <thead class="thead-primary">
                         <tr>
                             <th>No.</th>
-                            <th>Nama Kelas</th>
+                            <th>Nama Dosen</th>
+                            <th>Telepon</th>
                             <th>Prodi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if ($kelas->isEmpty()) 
+                        @if ($dosens->isEmpty()) 
                             <tr>
                                 <td colspan="5" class="text-center">Belum Ada Data</td>
                             </tr>
                         @else
-                            @foreach($kelas as $kelass)
+                            @foreach($dosens as $dosen)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $kelass->nama_kelas }}</td>
-                                    <td>{{ $kelass->prodi->kode_prodi }}</td>
+                                    <td>{{ $dosen->nama_dosen }}</td>
+                                    <td>{{ $dosen->telepon }}</td>
+                                    <td>{{ $dosen->prodi->kode_prodi }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalEditKelas{{ $kelass->id_kelas }}">
+                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalEditDosen{{ $dosen->id_dosen }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <form action="{{ route('kelas.destroy', $kelass->id_kelas) }}" method="POST" style="display:inline-block;">
+                                        <form action="{{ route('dosen.destroy', $dosen->id_dosen) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-danger btn-delete" type="submit">
@@ -53,9 +55,11 @@
     </div>
 </div>
 
-@include('web.kelas.create')
-@include('web.kelas.edit')
+@include('web.dosen.create')
+@include('web.dosen.edit')
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Tambahkan SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -69,20 +73,20 @@
             });
         @endif
 
-        @if (session('error'))
+        @if ($errors->any())
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',
-                text: '{{ session("error") }}',
+                text: '{{ $errors->first() }}',
                 showConfirmButton: true
             }).then(() => {
-                let oldId = "{{ old('id_kelas') }}"; // Ambil id dari form edit yang gagal
+                let oldId = "{{ old('id_dosen') }}"; // Ambil id dari form edit yang gagal
 
                 if (oldId) {
-                    var editModal = new bootstrap.Modal(document.getElementById('modalEditKelas' + oldId));
+                    var editModal = new bootstrap.Modal(document.getElementById('modalEditDosen' + oldId));
                     editModal.show();
                 } else {
-                    var tambahModal = new bootstrap.Modal(document.getElementById('modalTambahKelas'));
+                    var tambahModal = new bootstrap.Modal(document.getElementById('modalTambahDosen'));
                     tambahModal.show();
                 }
             });
@@ -123,27 +127,23 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function (event) {
-                event.preventDefault(); // Mencegah submit langsung
-                
-                const form = this.closest('form'); // Ambil form terdekat
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Kelas yang dihapus tidak bisa dikembalikan!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit form setelah konfirmasi
-                    }
-                });
-            });
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function () {
+            const fasilitasId = this.getAttribute('data-id');
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Dosen yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.closest('form').submit();
+                }
+            })
         });
     });
 </script>

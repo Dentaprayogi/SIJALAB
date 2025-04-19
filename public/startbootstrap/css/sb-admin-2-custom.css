@@ -184,3 +184,18 @@ canvas {
     font-weight: 500;
     margin-right: 10px;
 }
+
+.nav-item:hover {
+    background-color: #e9f0fb;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-item:hover .nav-link {
+    color: #0d6efd !important;
+    font-weight: 600;
+}
+
+.nav-item {
+    cursor: pointer;
+}

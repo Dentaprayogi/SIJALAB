@@ -28,10 +28,11 @@
                     <div class="mb-3">
                         <label class="form-label">Status Tahun Ajaran</label>
                         <div class="form-switch-toggle">
-                            <input type="hidden" name="status_tahunAjaran" id="status_tahunAjaran_hidden" value="{{ $tahun->status_tahunAjaran }}">
-                            <input type="checkbox" id="status_tahunAjaran_switch" class="switch-toggle" {{ $tahun->status_tahunAjaran == 'aktif' ? 'checked' : '' }}>
-                            <label for="status_tahunAjaran_switch" class="switch-label"></label>
-                            <span id="status_text">{{ $tahun->status_tahunAjaran == 'aktif' ? 'Aktif' : 'Nonaktif' }}</span>
+                            @php $id = $tahun->id_tahunAjaran; @endphp
+                            <input type="hidden" name="status_tahunAjaran" id="status_tahunAjaran_hidden_{{ $id }}" value="{{ $tahun->status_tahunAjaran }}">
+                            <input type="checkbox" id="status_tahunAjaran_switch_{{ $id }}" class="switch-toggle" {{ $tahun->status_tahunAjaran == 'aktif' ? 'checked' : '' }}>
+                            <label for="status_tahunAjaran_switch_{{ $id }}" class="switch-label"></label>
+                            <span id="status_text_{{ $id }}">{{ $tahun->status_tahunAjaran == 'aktif' ? 'Aktif' : 'Nonaktif' }}</span>
                         </div>
                     </div>                    
                     <div class="modal-footer">
@@ -46,20 +47,21 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const statusSwitch = document.getElementById("status_tahunAjaran_switch");
-        const statusHidden = document.getElementById("status_tahunAjaran_hidden");
-        const statusText = document.getElementById("status_text");
+        const switch_{{ $id }} = document.getElementById("status_tahunAjaran_switch_{{ $id }}");
+        const hidden_{{ $id }} = document.getElementById("status_tahunAjaran_hidden_{{ $id }}");
+        const text_{{ $id }} = document.getElementById("status_text_{{ $id }}");
 
-        statusSwitch.addEventListener("change", function () {
-            if (this.checked) {
-                statusHidden.value = "aktif";
-                statusText.innerText = "Aktif";
-            } else {
-                statusHidden.value = "nonaktif";
-                statusText.innerText = "Nonaktif";
-            }
-        });
+        if (switch_{{ $id }}) {
+            switch_{{ $id }}.addEventListener("change", function () {
+                if (this.checked) {
+                    hidden_{{ $id }}.value = "aktif";
+                    text_{{ $id }}.innerText = "Aktif";
+                } else {
+                    hidden_{{ $id }}.value = "nonaktif";
+                    text_{{ $id }}.innerText = "Nonaktif";
+                }
+            });
+        }
     });
 </script>
-
 @endforeach

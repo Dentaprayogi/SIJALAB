@@ -14,6 +14,10 @@
                 <input type="hidden" name="id_kelas" value="{{ $kelass->id_kelas }}">
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label class="form-label">Nama Kelas</label>
+                        <input type="text" class="form-control" name="nama_kelas" value="{{ $kelass->nama_kelas }}" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Prodi</label>
                         <select class="form-control" name="id_prodi" required>
                             @foreach ($prodi->sortBy('kode_prodi') as $p)
@@ -22,10 +26,6 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Kelas</label>
-                        <input type="text" class="form-control" name="nama_kelas" value="{{ $kelass->nama_kelas }}" required>
                     </div>
                 </div>
                 <div class="modal-footer">

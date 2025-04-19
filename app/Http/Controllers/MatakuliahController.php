@@ -11,12 +11,14 @@ class MatakuliahController extends Controller
 {
     public function index()
     {
-        $matakuliah = Matakuliah::with('prodi')->get();
+        $matakuliah = Matakuliah::with('prodi')
+                        ->orderBy('nama_mk', 'asc') // urutkan berdasarkan nama_mk A-Z
+                        ->get();
+    
         $prodi = Prodi::all(); // ambil semua prodi untuk form
-
+    
         return view('web.matakuliah.index', compact('matakuliah', 'prodi'));
-    }
-
+    }  
 
     public function store(Request $request)
     {

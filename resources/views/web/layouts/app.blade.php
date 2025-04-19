@@ -48,7 +48,7 @@
             <!-- Nav Item - Dashboard -->
             <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('dashboard') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>   
@@ -56,7 +56,7 @@
             <!-- Nav Item - Tahun Ajaran -->
             <li class="nav-item {{ Request::is('tahunajaran') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('tahunajaran.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-calendar-alt"></i>
                     <span>Tahun Ajaran</span>
                 </a>
             </li>  
@@ -64,7 +64,7 @@
             <!-- Nav Item - Peralatan -->
             <li class="nav-item {{ Request::is('peralatan') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('peralatan.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-tools"></i>
                     <span>Peralatan</span>
                 </a>
             </li>  
@@ -72,7 +72,7 @@
             <!-- Nav Item - Prodi -->
             <li class="nav-item {{ Request::is('prodi') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('prodi.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-graduation-cap"></i>
                     <span>Prodi</span>
                 </a>
             </li>  
@@ -80,7 +80,7 @@
             <!-- Nav Item - Kelas -->
             <li class="nav-item {{ Request::is('kelas') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('kelas.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-chalkboard"></i>
                     <span>Kelas</span>
                 </a>
             </li>  
@@ -88,8 +88,16 @@
             <!-- Nav Item - Matakuliah -->
             <li class="nav-item {{ Request::is('matakuliah') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('matakuliah.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt text-primary"></i>
+                    <i class="fas fa-book-open"></i>
                     <span>Matakuliah</span>
+                </a>
+            </li>  
+
+            <!-- Nav Item - Dosen -->
+            <li class="nav-item {{ Request::is('dosen') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('dosen.index') }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Data Dosen</span>
                 </a>
             </li>  
         </ul>

@@ -11,6 +11,11 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label class="form-label">Nama Matakuliah</label>
+                        <input type="text" class="form-control @error('nama_mk') is-invalid @enderror" name="nama_mk" value="{{ old('nama_mk') }}" required>
+                        @error('nama_mk')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Prodi</label>
                         <select class="form-control @error('id_prodi') is-invalid @enderror" name="id_prodi" required>
                             <option value="" selected disabled>Pilih Prodi</option>
@@ -21,11 +26,6 @@
                             @endforeach
                         </select>
                         @error('id_prodi')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Matakuliah</label>
-                        <input type="text" class="form-control @error('nama_mk') is-invalid @enderror" name="nama_mk" value="{{ old('nama_mk') }}" required>
-                        @error('nama_mk')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
                 <div class="modal-footer">
