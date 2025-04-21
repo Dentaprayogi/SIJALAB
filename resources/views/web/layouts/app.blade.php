@@ -53,6 +53,14 @@
                 </a>
             </li>   
 
+            <!-- Nav Item - Manajemen Users -->
+            <li class="nav-item {{ Request::is('user') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('users.index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Manajemen User</span>
+                </a>
+            </li>   
+
             <!-- Nav Item - Tahun Ajaran -->
             <li class="nav-item {{ Request::is('tahunajaran') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('tahunajaran.index') }}">

@@ -8,6 +8,7 @@ use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
+use App\Http\Controllers\UserController;
 use App\Models\Kelas;
 use Illuminate\Support\Facades\Route;
 
@@ -54,5 +55,10 @@ Route::middleware([
 
     //Route Dosen
     Route::resource('dosen', DosenController::class);
+
+    //Route Manajemen Users
+    Route::resource('users', UserController::class);
+    Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+
 
 });

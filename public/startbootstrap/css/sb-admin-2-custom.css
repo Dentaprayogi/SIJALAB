@@ -122,6 +122,17 @@
     transform: translateX(25px);
 }
 
+/* Gaya toggle ketika disabled */
+.switch-toggle:disabled + .switch-label {
+    background-color: #ccc; /* Warna latar jadi abu-abu */
+    cursor: not-allowed;
+    opacity: 0.6; /* Membuatnya tampak redup */
+}
+
+.switch-toggle:disabled:checked + .switch-label::before {
+    background-color: #999; /* Warna tombol saat aktif tapi disabled */
+}
+
 /* Styling for the filter form */
 form.d-flex.align-items-center {
     background-color: #f8f9fa;
