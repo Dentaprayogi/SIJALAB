@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\CustomRegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\LabController;
 use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
@@ -60,5 +61,7 @@ Route::middleware([
     Route::resource('users', UserController::class);
     Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
 
+    //Route Manajemen Lab
+    Route::resource('lab', LabController::class);
 
 });

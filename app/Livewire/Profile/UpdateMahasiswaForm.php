@@ -93,6 +93,11 @@ class UpdateMahasiswaForm extends Component
             'foto_ktm' => $path,
         ]);
 
+        $mahasiswa->save();
+
+        // Trigger event
+        $this->dispatch('saved');
+
         session()->flash('message', 'Data mahasiswa berhasil diperbarui.');
     }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Register</title>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ asset('assets/img/logo poliwangi.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">

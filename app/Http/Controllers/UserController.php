@@ -10,7 +10,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::all();
+        $users = User::orderBy('name', 'asc')->get();
         return view('web.user.index', compact('users'));
     }
 

@@ -9,7 +9,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>sijalab</title>
+    <title>Sistem Peminjaman Lab Komputer Jurusan Bisnin dan Informatika</title>
+    <link rel="icon" href="{{ asset('assets/img/logo poliwangi.png') }}" type="image/png">
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('startbootstrap/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -36,17 +37,17 @@
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink text-primary"></i>
+                <div class="sidebar-brand-icon ">
+                    <img src="{{ asset('assets/img/logo poliwangi.png') }}" alt="Logo SIJALAB" style="height: 50px; width: 50px;">
                 </div>
-                <div class="sidebar-brand-text mx-3 text-primary">SIJALAB</div>
+                <div class="sidebar-brand-text mx-2 text-primary">SIJALAB</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('dashboard*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('dashboard') }}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
@@ -56,13 +57,13 @@
             <!-- Nav Item - Manajemen Users -->
             <li class="nav-item {{ Request::is('user') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('users.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-users-cog"></i>
                     <span>Manajemen User</span>
                 </a>
             </li>   
 
             <!-- Nav Item - Tahun Ajaran -->
-            <li class="nav-item {{ Request::is('tahunajaran') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('tahunajaran*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('tahunajaran.index') }}">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Tahun Ajaran</span>
@@ -70,7 +71,7 @@
             </li>  
 
             <!-- Nav Item - Peralatan -->
-            <li class="nav-item {{ Request::is('peralatan') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('peralatan*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('peralatan.index') }}">
                     <i class="fas fa-tools"></i>
                     <span>Peralatan</span>
@@ -78,7 +79,7 @@
             </li>  
 
             <!-- Nav Item - Prodi -->
-            <li class="nav-item {{ Request::is('prodi') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('prodi*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('prodi.index') }}">
                     <i class="fas fa-graduation-cap"></i>
                     <span>Prodi</span>
@@ -86,7 +87,7 @@
             </li>  
 
             <!-- Nav Item - Kelas -->
-            <li class="nav-item {{ Request::is('kelas') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('kelas*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('kelas.index') }}">
                     <i class="fas fa-chalkboard"></i>
                     <span>Kelas</span>
@@ -94,7 +95,7 @@
             </li>  
 
             <!-- Nav Item - Matakuliah -->
-            <li class="nav-item {{ Request::is('matakuliah') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('matakuliah*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('matakuliah.index') }}">
                     <i class="fas fa-book-open"></i>
                     <span>Matakuliah</span>
@@ -102,10 +103,18 @@
             </li>  
 
             <!-- Nav Item - Dosen -->
-            <li class="nav-item {{ Request::is('dosen') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('dosen*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('dosen.index') }}">
                     <i class="fas fa-user-tie"></i>
                     <span>Data Dosen</span>
+                </a>
+            </li>  
+
+            <!-- Nav Item - Lab -->
+            <li class="nav-item {{ Request::is('lab*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('lab.index') }}">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Manajemen Lab</span>
                 </a>
             </li>  
         </ul>
