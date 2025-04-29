@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\CustomRegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DosenController;
+use App\Http\Controllers\JadwalLabController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\MatakuliahController;
@@ -63,5 +64,10 @@ Route::middleware([
 
     //Route Manajemen Lab
     Route::resource('lab', LabController::class);
+
+    //Route Jadwal Lab
+    Route::resource('jadwal_lab', JadwalLabController::class);
+    Route::patch('/jadwal-lab/{id}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal-lab.toggleStatus');
+    Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
 
 });

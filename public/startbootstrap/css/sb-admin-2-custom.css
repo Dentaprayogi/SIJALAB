@@ -210,3 +210,18 @@ canvas {
 .nav-item {
     cursor: pointer;
 }
+
+/* Atur tinggi dan padding biar match dengan form-control */
+.select2-container--default .select2-selection--single {
+    height: 38px !important; /* Bootstrap 5 default */
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 0 0.375rem 0.375rem 0; /* biar match input-group */
+}
+
+/* Biar tombol panah dropdown tidak aneh */
+.select2-container--default
+    .select2-selection--single
+    .select2-selection__arrow {
+    height: 38px !important;
+}

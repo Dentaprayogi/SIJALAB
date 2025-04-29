@@ -25,6 +25,9 @@
      <!-- Custom styles for this page -->
      <link href="{{ asset('startbootstrap/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
+     {{-- Css Select2 --}}
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 </head>
 
 <body id="page-top">
@@ -115,6 +118,14 @@
                 <a class="nav-link" href="{{ route('lab.index') }}">
                     <i class="fas fa-network-wired"></i>
                     <span>Manajemen Lab</span>
+                </a>
+            </li>  
+
+            <!-- Nav Item - Jadwal Lab -->
+            <li class="nav-item {{ Request::is('jadwal_lab*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('jadwal_lab.index') }}">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Jadwal Lab</span>
                 </a>
             </li>  
         </ul>
@@ -274,12 +285,6 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('startbootstrap/js/sb-admin-2.min.js')}}"></script>
 
-    <!-- Page level plugins -->
-    <script src="{{ asset('startbootstrap/vendor/chart.js/Chart.min.js')}}"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="{{ asset('startbootstrap/js/demo/chart-area-demo.js')}}"></script>
-    <script src="{{ asset('startbootstrap/js/demo/chart-pie-demo.js')}}"></script>
 
     <!-- Page level plugins -->
     <script src="{{ asset('startbootstrap/vendor/datatables/jquery.dataTables.min.js')}}"></script>
@@ -292,6 +297,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    {{-- Js Select2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
 </body>
 
 </html>

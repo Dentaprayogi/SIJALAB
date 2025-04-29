@@ -48,7 +48,6 @@
                 <div class="d-flex justify-content-end">
                     <div>
                         <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan</button>
-                        <a href="{{ route('lab.index') }}" class="btn btn-danger ms-3"><i class="fas fa-times-circle"></i> Batal</a>
                     </div>
                 </div>
             </form>

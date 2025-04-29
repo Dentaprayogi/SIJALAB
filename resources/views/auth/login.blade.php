@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">
 
-    <title>Login</title>
+    <title>Login | Sistem Peminjaman lab Komputer Jurusan Bisnis dan Informatika</title>
 </head>
 <body class="custom-bg">
     <div class="auth-box-wrapper">

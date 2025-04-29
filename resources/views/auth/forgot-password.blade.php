@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">
-    <title>Lupa Password</title>
+    <title>Lupa Password | Sistem Peminjaman lab Komputer Jurusan Bisnis dan Informatika</title>
 </head>
 <body class="custom-bg">
     <div class="auth-box">

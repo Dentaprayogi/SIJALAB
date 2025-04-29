@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <title>Register | Sistem Peminjaman lab Komputer Jurusan Bisnis dan Informatika</title>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="icon" href="{{ asset('assets/img/logo poliwangi.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
