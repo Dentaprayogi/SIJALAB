@@ -11,59 +11,51 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="thead-primary">
-                        <tr>
-                            <th>No.</th>
-                            <th>Hari</th>
-                            <th>Lab</th>
-                            <th>Jam</th>
-                            <th>Mata Kuliah</th>
-                            <th>Dosen</th>
-                            <th>Prodi</th>
-                            <th>Tahun Ajaran</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if ($jadwalLabs->isEmpty())
-                            <tr>
-                                <td colspan="12" class="text-center">Belum Ada Data</td>
-                            </tr>
-                        @else
-                            @foreach ($jadwalLabs as $item)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->hari->nama_hari }}</td>
-                                    <td>{{ $item->lab->nama_lab }}</td>
-                                    <td>{{ $item->rentang_jam }}</td>                                  
-                                    <td>{{ $item->mataKuliah->nama_mk }}</td>
-                                    <td>{{ $item->dosen->nama_dosen }}</td>
-                                    <td>{{ $item->prodi->kode_prodi }} ({{ $item->kelas->nama_kelas }})</td>
-                                    <td>{{ $item->tahunAjaran->tahun_ajaran }} ({{ ucfirst($item->tahunAjaran->semester) }})</td>
-                                    <td>
-                                        <span class="badge-status {{ $item->status_jadwalLab === 'aktif' ? 'badge-success' : 'badge-danger' }}">
-                                            {{ ucfirst($item->status_jadwalLab) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('jadwal_lab.edit', $item->id_jadwalLab) }}" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('jadwal_lab.destroy', $item->id_jadwalLab) }}" method="POST" style="display:inline-block;" class="form-delete">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-delete" type="button" data-id="{{ $item->id_jadwalLab }}" title="Hapus">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endif
-                    </tbody>
-                </table>
+                <ul class="nav nav-tabs mb-3" id="jadwalTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="tab-semua" data-toggle="tab" href="#semua" role="tab">Semua</a>
+                    </li>
+                    @php
+                        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                    @endphp
+                    @foreach ($hariList as $hari)
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-{{ strtolower($hari) }}" data-toggle="tab" href="#{{ strtolower($hari) }}" role="tab">{{ $hari }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+                <div class="tab-content" id="jadwalTabContent">
+
+                    {{-- Semua --}}
+                    <div class="tab-pane fade show active" id="semua">
+                        @include('web.jadwal_lab.partials.table', [
+                            'data' => $jadwalLabs,
+                            'tableId' => 'dataTableSemua'
+                        ])
+                    </div>
+                
+                    {{-- Per Hari --}}
+                    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as $hari)
+                        <div class="tab-pane fade" id="{{ strtolower($hari) }}">
+                            @php
+                                $filtered = $jadwalLabs->filter(fn($item) => $item->hari->nama_hari === $hari);
+                            @endphp
+                            @include('web.jadwal_lab.partials.table', [
+                                'data' => $filtered,
+                                'tableId' => 'dataTable' . $hari
+                            ])
+                        </div>
+                    @endforeach
+                
+                </div>                                              
+                <form id="bulk-delete-form" method="POST" action="{{ route('jadwal_lab.bulkDelete') }}">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="selected_ids" id="selected-ids">
+                    <button type="submit" class="btn btn-danger mb-3" id="bulk-delete-btn">
+                        <i class="fas fa-trash"></i> Hapus Terpilih
+                    </button>
+                </form>                
             </div>
         </div>
     </div>
@@ -117,4 +109,95 @@
         });
     });
 </script>
+
+{{-- Toggle switch status jadwal lab --}}
+<script>
+    const jadwalToggles = document.querySelectorAll('.jadwalLab-toggle');
+
+    jadwalToggles.forEach(function (toggle) {
+    toggle.addEventListener('change', function (e) {
+        const jadwalId = this.dataset.id;
+        const isChecked = this.checked;
+        const newStatus = isChecked ? 'aktif' : 'nonaktif';
+        const switchEl = this;
+
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: `Status jadwal lab akan diubah menjadi ${newStatus.toUpperCase()}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, ubah!',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`status_jadwalLab_text_${jadwalId}`).textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                fetch(`/jadwal-lab/${jadwalId}/toggle-status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({ status_jadwalLab: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan saat mengubah status.'
+                    });
+                    switchEl.checked = !isChecked;
+                });
+            } else {
+                switchEl.checked = !isChecked;
+            }
+        });
+    });
+    });
+</script>
+
+{{-- Bulk Delete --}}
+<script>
+    document.getElementById('select-all').addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('.select-item');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    document.getElementById('bulk-delete-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const selected = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.value);
+
+        if (selected.length === 0) {
+            Swal.fire('Peringatan', 'Pilih minimal satu jadwal untuk dihapus.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: 'Data yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('selected-ids').value = selected.join(',');
+                e.target.submit();
+            }
+        });
+    });
+</script>
+
 @endsection

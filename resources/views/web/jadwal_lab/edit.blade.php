@@ -41,7 +41,7 @@
                                 <select name="id_tahunAjaran" id="id_tahunAjaran" class="form-control" required>
                                     <option value="">-- Pilih Tahun Ajaran --</option>
                                     @foreach($tahunAjaranList as $tahun)
-                                        <option value="{{ $tahun->id_tahunAjaran }}" {{ $jadwalLab->id_tahunAjaran == $tahun->id_tahunAjaran ? 'selected' : '' }}>{{ $tahun->tahun_ajaran }}</option>
+                                        <option value="{{ $tahun->id_tahunAjaran }}" {{ $jadwalLab->id_tahunAjaran == $tahun->id_tahunAjaran ? 'selected' : '' }}>{{ $tahun->tahun_ajaran }} ({{ ucfirst($tahun->semester) }})</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">Tahun ajaran wajib dipilih.</div>

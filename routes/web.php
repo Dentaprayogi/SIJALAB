@@ -67,7 +67,8 @@ Route::middleware([
 
     //Route Jadwal Lab
     Route::resource('jadwal_lab', JadwalLabController::class);
-    Route::patch('/jadwal-lab/{id}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal-lab.toggleStatus');
+    Route::patch('/jadwal-lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal-lab.toggle-status');
     Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
+    Route::delete('/jadwal-lab/bulk-delete', [JadwalLabController::class, 'bulkDelete'])->name('jadwal_lab.bulkDelete');
 
 });

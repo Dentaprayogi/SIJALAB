@@ -17,14 +17,17 @@ class JadwalLabController extends Controller
 {
     public function index()
     {
-        $jadwalLabs = JadwalLab::orderBy('id_hari', 'asc')
-                                ->orderBy('id_lab', 'asc')
-                                ->orderBy('jam_mulai', 'asc')
-                                ->get();
+        $jadwalLabs = JadwalLab::whereHas('tahunAjaran', function ($query) {
+                                $query->where('status_tahunAjaran', 'aktif');
+                            })
+                            ->orderBy('id_hari', 'asc')
+                            ->orderBy('id_lab', 'asc')
+                            ->orderBy('jam_mulai', 'asc')
+                            ->get();
 
         return view('web.jadwal_lab.index', compact('jadwalLabs'));
     }
-
+    
     public function create()
     {
         return view('web.jadwal_lab.create', [
@@ -256,21 +259,20 @@ class JadwalLabController extends Controller
         ]);
     }
 
-    public function toggleStatus(Request $request, $id)
+    public function toggleStatus(Request $request, $id_jadwalLab)
     {
-        $jadwalLab = JadwalLab::findOrFail($id);
-
+        $jadwal = JadwalLab::where('id_jadwalLab', $id_jadwalLab)->firstOrFail();
+    
         $status = $request->status_jadwalLab;
         if (!in_array($status, ['aktif', 'nonaktif'])) {
             return response()->json(['message' => 'Status tidak valid.'], 422);
         }
-
-        $jadwalLab->status_jadwalLab = $status;
-        $jadwalLab->save();
-
-        return response()->json(['message' => 'Status jadwal berhasil diubah']);
-    }
-
+    
+        $jadwal->status_jadwalLab = $status;
+        $jadwal->save();
+    
+        return response()->json(['message' => 'Status jadwal lab berhasil diubah']);
+    }     
 
     public function getData($id_prodi)
     {
@@ -285,5 +287,14 @@ class JadwalLabController extends Controller
             'mk' => $mk,
             'dosen' => $dosen,
         ]);
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = explode(',', $request->selected_ids);
+
+        JadwalLab::whereIn('id_jadwalLab', $ids)->delete();
+
+        return redirect()->route('jadwal_lab.index')->with('success', 'Beberapa jadwal lab berhasil dihapus.');
     }
 }
