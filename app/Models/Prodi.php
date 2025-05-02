@@ -16,16 +16,19 @@ class Prodi extends Model
         'kode_prodi',
     ];
 
+    //Relasi ke Kelas (Many to One)
     public function kelas()
     {
         return $this->hasMany(Kelas::class, 'id_prodi');
     }
 
+    //Relasi ke Mata Kuliah (Many to One)
     public function matakuliah()
     {
         return $this->hasMany(Matakuliah::class, 'id_prodi');
     }
 
+    //Relasi ke Dosen (Many to One)
     public function dosen()
     {
         return $this->hasMany(Matakuliah::class, 'id_prodi');

@@ -16,6 +16,7 @@ class Dosen extends Model
         'id_prodi',
     ];
 
+    //Relasi ke Prodi (One to Many)
     public function prodi()
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');

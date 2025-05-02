@@ -13,6 +13,7 @@ class Hari extends Model
     protected $primaryKey = 'id_hari';
     protected $fillable = ['nama_hari'];
 
+    //Relasi ke Jadwal Lab (Many to One)
     public function jadwalLab()
     {
         return $this->hasMany(JadwalLab::class, 'id_hari');

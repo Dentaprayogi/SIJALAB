@@ -16,11 +16,13 @@ class Kelas extends Model
         'nama_kelas'
     ];
 
+    //Relasi ke Prodi (One to Many)
     public function prodi()
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
 
+    //Relasi ke Mahasiswa (Many to One)
     public function mahasiswa()
     {
         return $this->hasMany(Mahasiswa::class, 'id_kelas');

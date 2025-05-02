@@ -68,6 +68,7 @@ class User extends Authenticatable
         ];
     }
 
+    // Relasi ke Mahasiswa (One to One)
     public function mahasiswa()
     {
         return $this->hasOne(Mahasiswa::class, 'id');

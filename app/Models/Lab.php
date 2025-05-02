@@ -17,4 +17,16 @@ class Lab extends Model
         'kapasitas_lab',
         'status_lab',
     ];  
+
+    // Relasi ke Jadwal Lab (Many to One)
+    public function jadwalLab()
+    {
+        return $this->hasMany(JadwalLab::class, 'id_lab');
+    }
+
+    // Relasi ke Peminjaman Manual (Many to One)
+    public function peminjamanManual()
+    {
+        return $this->hasMany(PeminjamanManual::class, 'id_lab');
+    }
 }

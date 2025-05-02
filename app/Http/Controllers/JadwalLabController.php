@@ -292,9 +292,14 @@ class JadwalLabController extends Controller
     public function bulkDelete(Request $request)
     {
         $ids = explode(',', $request->selected_ids);
-
+    
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+        }
+    
         JadwalLab::whereIn('id_jadwalLab', $ids)->delete();
-
+    
         return redirect()->route('jadwal_lab.index')->with('success', 'Beberapa jadwal lab berhasil dihapus.');
     }
+    
 }

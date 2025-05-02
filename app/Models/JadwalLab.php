@@ -31,45 +31,51 @@ class JadwalLab extends Model
         return \Carbon\Carbon::parse($this->jam_mulai)->format('H:i') . ' - ' . \Carbon\Carbon::parse($this->jam_selesai)->format('H:i');
     }    
 
-    // Relasi ke Hari
+    // Relasi ke Hari (One to Many)
     public function hari()
     {
         return $this->belongsTo(Hari::class, 'id_hari');
     }
 
-    // Relasi ke Lab
+    // Relasi ke Lab (One to Many)
     public function lab()
     {
         return $this->belongsTo(Lab::class, 'id_lab');
     }
 
-    // Relasi ke Mata Kuliah
+    // Relasi ke Mata Kuliah (One to Many)
     public function mataKuliah()
     {
         return $this->belongsTo(MataKuliah::class, 'id_mk');
     }
 
-    // Relasi ke Dosen
+    // Relasi ke Dosen (One to Many)
     public function dosen()
     {
         return $this->belongsTo(Dosen::class, 'id_dosen');
     }
 
-    // Relasi ke Prodi
+    // Relasi ke Prodi (One to Many)
     public function prodi()
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
 
-    // Relasi ke Kelas
+    // Relasi ke Kelas (One to Many)
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');
     }
 
-    // Relasi ke Tahun Ajaran
+    // Relasi ke Tahun Ajaran (One to Many)
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class, 'id_tahunAjaran');
+    }
+
+    // Relasi ke Peminjaman Jadwal (Many to One)
+    public function peminjamanJadwal()
+    {
+        return $this->hasMany(PeminjamanJadwal::class, 'id_jadwalLab');
     }
 }

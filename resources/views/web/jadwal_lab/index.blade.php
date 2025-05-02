@@ -169,17 +169,64 @@
 
 {{-- Bulk Delete --}}
 <script>
-    document.getElementById('select-all').addEventListener('change', function () {
-        const checkboxes = document.querySelectorAll('.select-item');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
+    // Simpan ID yang terpilih secara global
+    const selectedIds = new Set();
 
+    // Fungsi untuk sync checkbox dari selectedIds
+    function syncCheckboxes() {
+        document.querySelectorAll('.select-item').forEach(cb => {
+            cb.checked = selectedIds.has(cb.value);
+        });
+
+        // Cek apakah semua checkbox di dalam satu tabel tercentang
+        document.querySelectorAll('table').forEach(table => {
+            const checkboxes = table.querySelectorAll('.select-item');
+            const selectAll = table.querySelector('#select-all');
+            if (!selectAll || checkboxes.length === 0) return;
+            selectAll.checked = Array.from(checkboxes).every(cb => cb.checked);
+        });
+    }
+
+    // Event listener untuk setiap checkbox individu
+    function initCheckboxListeners() {
+        document.querySelectorAll('.select-item').forEach(cb => {
+            cb.addEventListener('change', function () {
+                if (this.checked) {
+                    selectedIds.add(this.value);
+                } else {
+                    selectedIds.delete(this.value);
+                }
+                syncCheckboxes();
+            });
+        });
+    }
+
+    // Event listener untuk select-all per tabel
+    function initSelectAllListeners() {
+        document.querySelectorAll('table').forEach(table => {
+            const selectAll = table.querySelector('#select-all');
+            if (selectAll) {
+                selectAll.addEventListener('change', function () {
+                    const checkboxes = table.querySelectorAll('.select-item');
+                    checkboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                        if (this.checked) {
+                            selectedIds.add(cb.value);
+                        } else {
+                            selectedIds.delete(cb.value);
+                        }
+                    });
+                    syncCheckboxes();
+                });
+            }
+        });
+    }
+
+    // Event untuk bulk delete form
     document.getElementById('bulk-delete-form').addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const selected = Array.from(document.querySelectorAll('.select-item:checked')).map(cb => cb.value);
-
-        if (selected.length === 0) {
+        if (selectedIds.size === 0) {
             Swal.fire('Peringatan', 'Pilih minimal satu jadwal untuk dihapus.', 'warning');
             return;
         }
@@ -193,10 +240,29 @@
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('selected-ids').value = selected.join(',');
+                document.getElementById('selected-ids').value = Array.from(selectedIds).join(',');
                 e.target.submit();
             }
         });
+    });
+
+    // Inisialisasi saat tab diganti
+    document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function () {
+            // Tunggu sedikit agar konten tab selesai dirender
+            setTimeout(() => {
+                syncCheckboxes();
+                initCheckboxListeners();
+                initSelectAllListeners();
+            }, 100);
+        });
+    });
+
+    // Inisialisasi awal
+    document.addEventListener('DOMContentLoaded', function () {
+        syncCheckboxes();
+        initCheckboxListeners();
+        initSelectAllListeners();
     });
 </script>
 

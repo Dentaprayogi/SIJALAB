@@ -28,13 +28,13 @@ class Mahasiswa extends Model
         return $this->belongsTo(User::class, 'id');
     }
 
-    // Relasi ke Prodi (One to One)
+    // Relasi ke Prodi (One to Many)
     public function prodi()
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
 
-    // Relasi ke Kelas (One to One)
+    // Relasi ke Kelas (One to Many)
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');
