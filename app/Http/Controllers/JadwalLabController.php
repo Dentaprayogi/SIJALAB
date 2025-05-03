@@ -134,18 +134,19 @@ class JadwalLabController extends Controller
     public function edit($id)
     {
         $jadwalLab = JadwalLab::findOrFail($id);
-        return view('web.jadwal_lab.edit',
-        [
+        $prodiId = $jadwalLab->id_prodi;
+    
+        return view('web.jadwal_lab.edit', [
             'hariList' => Hari::all(),
             'labList' => Lab::where('status_lab', 'aktif')->orderBy('nama_lab', 'asc')->get(),
-            'mkList' => Matakuliah::orderBy('nama_mk', 'asc')->get(),
-            'dosenList' => Dosen::orderBy('nama_dosen', 'asc')->get(),
+            'mkList' => Matakuliah::where('id_prodi', $prodiId)->orderBy('nama_mk', 'asc')->get(),
+            'dosenList' => Dosen::where('id_prodi', $prodiId)->orderBy('nama_dosen', 'asc')->get(),
             'prodiList' => Prodi::orderBy('kode_prodi', 'asc')->get(),
-            'kelasList' => Kelas::orderBy('nama_kelas', 'asc')->get(),
+            'kelasList' => Kelas::where('id_prodi', $prodiId)->orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
-        ], compact('jadwalLab'));
-    }
-
+            'jadwalLab' => $jadwalLab,
+        ]);
+    }    
     public function update(Request $request, $id)
     {
         $request->validate([

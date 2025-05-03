@@ -134,8 +134,13 @@
                                     <i class="fas fa-users"></i>
                                 </span>
                                 <select name="id_kelas" id="id_kelas" class="form-control select2 dynamic-select" required>
-                                    <option value="{{ $jadwalLab->kelas->id_kelas }}">{{ $jadwalLab->kelas->nama_kelas }}</option>
-                                </select>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @foreach($kelasList as $kelas)
+                                        <option value="{{ $kelas->id_kelas }}" {{ $jadwalLab->id_kelas == $kelas->id_kelas ? 'selected' : '' }}>
+                                            {{ $kelas->nama_kelas }}
+                                        </option>
+                                    @endforeach
+                                </select>                                
                                 <div class="invalid-feedback">Kelas wajib dipilih.</div>
                             </div>
                         </div>
@@ -148,8 +153,13 @@
                                     <i class="fas fa-book"></i>
                                 </span>
                                 <select name="id_mk" id="id_mk" class="form-control select2 dynamic-select" required>
-                                    <option value="{{ $jadwalLab->matakuliah->id_mk }}">{{ $jadwalLab->matakuliah->nama_mk }}</option>
-                                </select>
+                                    <option value="">-- Pilih Mata Kuliah --</option>
+                                    @foreach($mkList as $mk)
+                                        <option value="{{ $mk->id_mk }}" {{ $jadwalLab->id_mk == $mk->id_mk ? 'selected' : '' }}>
+                                            {{ $mk->nama_mk }}
+                                        </option>
+                                    @endforeach
+                                </select>                                
                                 <div class="invalid-feedback">Mata kuliah wajib dipilih.</div>
                             </div>
                         </div>
@@ -162,8 +172,13 @@
                                     <i class="fas fa-chalkboard-teacher"></i>
                                 </span>
                                 <select name="id_dosen" id="id_dosen" class="form-control select2 dynamic-select" required>
-                                    <option value="{{ $jadwalLab->dosen->id_dosen }}">{{ $jadwalLab->dosen->nama_dosen }}</option>
-                                </select>
+                                    <option value="">-- Pilih Dosen --</option>
+                                    @foreach($dosenList as $dosen)
+                                        <option value="{{ $dosen->id_dosen }}" {{ $jadwalLab->id_dosen == $dosen->id_dosen ? 'selected' : '' }}>
+                                            {{ $dosen->nama_dosen }}
+                                        </option>
+                                    @endforeach
+                                </select>                                
                                 <div class="invalid-feedback">Dosen wajib dipilih.</div>
                             </div>
                         </div>
