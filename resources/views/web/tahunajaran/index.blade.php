@@ -33,10 +33,23 @@
                                     <td>{{ $tahun->tahun_ajaran }}</td>
                                     <td>{{ ucfirst($tahun->semester) }}</td>
                                     <td>
-                                        <span class="badge-status {{ $tahun->status_tahunAjaran === 'aktif' ? 'badge-success' : 'badge-danger' }}">
-                                            {{ ucfirst($tahun->status_tahunAjaran) }}
-                                        </span>
-                                    </td>
+                                        <div class="form-switch-toggle">
+                                            @php
+                                                $tahunId = $tahun->id_tahunAjaran;
+                                            @endphp
+                                    
+                                            <input type="hidden" name="status_tahunAjaran" id="status_tahunAjaran_hidden_{{ $tahunId }}" value="{{ $tahun->status_tahunAjaran }}">
+                                    
+                                            <input type="checkbox"
+                                                id="status_tahunAjaran_switch_{{ $tahunId }}"
+                                                class="switch-toggle tahunAjaran-toggle"
+                                                data-id="{{ $tahunId }}"
+                                                {{ $tahun->status_tahunAjaran == 'aktif' ? 'checked' : '' }}>
+                                    
+                                            <label for="status_tahunAjaran_switch_{{ $tahunId }}" class="switch-label"></label>
+                                            <span id="status_tahunAjaran_text_{{ $tahunId }}">{{ ucfirst($tahun->status_tahunAjaran) }}</span>
+                                        </div>
+                                    </td>                                    
                                     <td>
                                         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editTahunAjaranModal{{ $tahun->id_tahunAjaran }}" title="Edit">
                                             <i class="fas fa-edit"></i>
@@ -135,6 +148,62 @@
                     this.closest('form').submit();
                 }
             })
+        });
+    });
+</script>
+
+{{-- Toggle Switch Status Tahun Ajaran --}}
+<script>
+    const tahunToggles = document.querySelectorAll('.tahunAjaran-toggle');
+    tahunToggles.forEach(function (toggle) {
+        toggle.addEventListener('change', function () {
+            const tahunId = this.dataset.id;
+            const isChecked = this.checked;
+            const newStatus = isChecked ? 'aktif' : 'nonaktif';
+            const switchEl = this;
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: `Status tahun ajaran akan diubah menjadi ${newStatus.toUpperCase()}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, ubah!',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`status_tahunAjaran_text_${tahunId}`).textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                    fetch(`/tahun-ajaran/${tahunId}/toggle-status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({ status_tahunAjaran: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat mengubah status.'
+                        });
+                        switchEl.checked = !isChecked;
+                    });
+                } else {
+                    switchEl.checked = !isChecked;
+                }
+            });
         });
     });
 </script>

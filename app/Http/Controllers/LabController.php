@@ -62,4 +62,19 @@ class LabController extends Controller
         Lab::destroy($id_lab);
         return redirect()->route('lab.index')->with('success', 'Data lab berhasil dihapus.');
     }
+
+    public function toggleStatus(Request $request, $id_lab)
+    {
+        $lab = Lab::where('id_lab', $id_lab)->firstOrFail();
+
+        $status = $request->status_lab;
+        if (!in_array($status, ['aktif', 'nonaktif'])) {
+            return response()->json(['message' => 'Status tidak valid.'], 422);
+        }
+
+        $lab->status_lab = $status;
+        $lab->save();
+
+        return response()->json(['message' => 'Status lab berhasil diubah.']);
+    }
 }

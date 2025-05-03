@@ -42,6 +42,8 @@ Route::middleware([
     Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
         'tahunajaran' => 'tahunAjaran'
     ]);
+    Route::patch('/tahun-ajaran/{id_tahunAjaran}/toggle-status', [TahunAjaranController::class, 'toggleStatus']);
+
 
     //Route Peralatan
     Route::resource('peralatan', PeralatanController::class);
@@ -64,6 +66,8 @@ Route::middleware([
 
     //Route Manajemen Lab
     Route::resource('lab', LabController::class);
+    Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus']);
+
 
     //Route Jadwal Lab
     Route::resource('jadwal_lab', JadwalLabController::class);

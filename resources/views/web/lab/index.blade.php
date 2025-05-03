@@ -35,10 +35,23 @@
                                     <td>{{ $labs->fasilitas_lab }}</td>
                                     <td>{{ $labs->kapasitas_lab }}</td>
                                     <td>
-                                        <span class="badge-status {{ $labs->status_lab === 'aktif' ? 'badge-success' : 'badge-danger' }}">
-                                            {{ ucfirst($labs->status_lab) }}
-                                        </span>
-                                    </td>
+                                        <div class="form-switch-toggle">
+                                            @php
+                                                $labId = $labs->id_lab;
+                                            @endphp
+                                    
+                                            <input type="hidden" name="status_lab" id="status_lab_hidden_{{ $labId }}" value="{{ $labs->status_lab }}">
+                                    
+                                            <input type="checkbox"
+                                                id="status_lab_switch_{{ $labId }}"
+                                                class="switch-toggle lab-toggle"
+                                                data-id="{{ $labId }}"
+                                                {{ $labs->status_lab == 'aktif' ? 'checked' : '' }}>
+                                    
+                                            <label for="status_lab_switch_{{ $labId }}" class="switch-label"></label>
+                                            <span id="status_lab_text_{{ $labId }}">{{ ucfirst($labs->status_lab) }}</span>
+                                        </div>
+                                    </td>                                    
                                     <td>
                                         <a href="{{ route('lab.edit', $labs->id_lab) }}" class="btn btn-warning">
                                             <i class="fas fa-edit"></i>
@@ -108,4 +121,62 @@
         });
     });
 </script>
+
+{{-- Script Toggle Switch Status Lab --}}
+<script>
+    const labToggles = document.querySelectorAll('.lab-toggle');
+
+    labToggles.forEach(function (toggle) {
+        toggle.addEventListener('change', function () {
+            const labId = this.dataset.id;
+            const isChecked = this.checked;
+            const newStatus = isChecked ? 'aktif' : 'nonaktif';
+            const switchEl = this;
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: `Status lab akan diubah menjadi ${newStatus.toUpperCase()}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, ubah!',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`status_lab_text_${labId}`).textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                    fetch(`/lab/${labId}/toggle-status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({ status_lab: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat mengubah status.'
+                        });
+                        switchEl.checked = !isChecked;
+                    });
+                } else {
+                    switchEl.checked = !isChecked;
+                }
+            });
+        });
+    });
+</script>
+
 @endsection

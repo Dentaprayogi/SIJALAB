@@ -66,4 +66,19 @@ class TahunAjaranController extends Controller
         $tahunAjaran->delete();
         return redirect()->route('tahunajaran.index')->with('success', 'Tahun Ajaran berhasil dihapus');
     }
+
+    public function toggleStatus(Request $request, $id_tahunAjaran)
+    {
+        $tahun = TahunAjaran::findOrFail($id_tahunAjaran);
+
+        $status = $request->status_tahunAjaran;
+        if (!in_array($status, ['aktif', 'nonaktif'])) {
+            return response()->json(['message' => 'Status tidak valid.'], 422);
+        }
+
+        $tahun->status_tahunAjaran = $status;
+        $tahun->save();
+
+        return response()->json(['message' => 'Status tahun ajaran berhasil diubah.']);
+    }
 }
