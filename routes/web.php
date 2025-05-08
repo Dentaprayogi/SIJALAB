@@ -7,6 +7,7 @@ use App\Http\Controllers\JadwalLabController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\MatakuliahController;
+use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
@@ -74,5 +75,21 @@ Route::middleware([
     Route::patch('/jadwal-lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal-lab.toggle-status');
     Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
     Route::delete('/jadwal-lab/bulk-delete', [JadwalLabController::class, 'bulkDelete'])->name('jadwal_lab.bulkDelete');
+
+    //Route Peminjaman
+    Route::prefix('peminjaman')->middleware('auth')->group(function () {
+        Route::get('/', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/jadwal/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+        Route::post('/jadwal/store', [PeminjamanController::class, 'storeJadwal'])->name('peminjaman.storeJadwal');
+        Route::post('/manual/store', [PeminjamanController::class, 'storeManual'])->name('peminjaman.storeManual');
+        Route::get('/{peminjaman}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
+        Route::delete('/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
+        Route::put('/peminjaman/{id}/setujui', [PeminjamanController::class, 'setujui'])->name('peminjaman.setujui');
+        Route::put('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('peminjaman.selesai');
+        Route::put('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
+        Route::delete('/peminjaman/bulk-delete', [PeminjamanController::class, 'bulkDelete'])->name('peminjaman.bulkDelete');
+
+    });
+    
 
 });

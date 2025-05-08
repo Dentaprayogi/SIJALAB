@@ -128,6 +128,14 @@
                     <span>Jadwal Lab</span>
                 </a>
             </li>  
+
+            <!-- Nav Item - Riwayat Peminjaman Lab -->
+            <li class="nav-item {{ Request::is('peminjaman*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('peminjaman.index') }}">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Riwayat Peminjaman</span>
+                </a>
+            </li>  
         </ul>
         <!-- End of Sidebar -->
 
@@ -307,7 +315,10 @@
         $('#dataTableSelasa').DataTable();
         $('#dataTableRabu').DataTable();
         $('#dataTableKamis').DataTable();
-        $('#dataTableJumat').DataTable();
+        $('#dataTablePengajuan').DataTable();
+        $('#dataTableDipinjam').DataTable();
+        $('#dataTableSelesai').DataTable();
+        $('#dataTableDitolak').DataTable();
     });
     </script>
     

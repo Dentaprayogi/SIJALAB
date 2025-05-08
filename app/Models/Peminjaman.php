@@ -52,5 +52,17 @@ class Peminjaman extends Model
     {
         return $this->hasOne(PeminjamanDitolak::class, 'id_peminjaman');
     }
+
+    public function jadwalLab()
+    {
+        return $this->hasOneThrough(
+            JadwalLab::class,
+            PeminjamanJadwal::class,
+            'id_peminjaman', // Foreign key on PeminjamanJadwal
+            'id_jadwalLab',  // Foreign key on JadwalLab
+            'id_peminjaman', // Local key on Peminjaman
+            'id_jadwalLab'   // Local key on PeminjamanJadwal
+        );
+    }
 }
 

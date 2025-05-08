@@ -10,8 +10,10 @@ class PeminjamanJadwal extends Model
     use HasFactory;
 
     protected $table = 'peminjaman_jadwal';
-    protected $primaryKey = 'id_peminjaman';
+    protected $primaryKey = null;
+    public $incrementing = false;
     protected $fillable = [
+        'id_peminjaman',
         'id_jadwalLab'
     ];
 

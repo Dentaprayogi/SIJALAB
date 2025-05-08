@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_peminjaman');
             $table->date('tgl_peminjaman');
             $table->foreignId('id')->constrained('users', 'id')->onDelete('cascade');
-            $table->enum('status_peminjaman', ['pengajuan', 'disetujui', 'ditolak', 'selesai']);
+            $table->enum('status_peminjaman', ['pengajuan', 'dipinjam', 'ditolak', 'selesai']);
             $table->timestamps();
         });
         

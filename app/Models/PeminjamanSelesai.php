@@ -10,10 +10,12 @@ class PeminjamanSelesai extends Model
     use HasFactory;
 
     protected $table = 'peminjaman_selesai';
-    protected $primaryKey = 'id_peminjaman';
+    protected $primaryKey = null;
+    public $incrementing = false;
     protected $fillable = [
+        'id_peminjaman',
         'tgl_pengembalian', 
-        'jam_dikembaliakn'
+        'jam_dikembalikan'
     ];
 
     // Relasi ke Peminjaman (One to One)

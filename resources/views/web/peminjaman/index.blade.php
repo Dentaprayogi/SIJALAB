@@ -1,58 +1,47 @@
 @extends('web.layouts.app')
-
 @section('content')
+
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between">
-            <h1 class="h3 mb-2 text-gray-800">Manajemen Jadwal Lab</h1>
-            <a href="{{ route('jadwal_lab.create') }}" class="btn btn-primary mb-3">
-                <i class="fas fa-plus"></i> Tambah Jadwal
+            <h1 class="h3 mb-2 text-gray-800">Riwayat Peminjaman</h1>
+            <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tambah Peminjaman
             </a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <ul class="nav nav-tabs mb-3" id="jadwalTabs" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="tab-semua" data-toggle="tab" href="#semua" role="tab">Semua</a>
-                    </li>
+                <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
                     @php
-                        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                        $statusList = ['semua' => 'Semua', 'pengajuan' => 'Pengajuan', 'dipinjam' => 'Dipinjam', 'selesai' => 'Selesai', 'ditolak' => 'Ditolak'];
                     @endphp
-                    @foreach ($hariList as $hari)
+                    @foreach ($statusList as $key => $label)
                         <li class="nav-item">
-                            <a class="nav-link" id="tab-{{ strtolower($hari) }}" data-toggle="tab" href="#{{ strtolower($hari) }}" role="tab">{{ $hari }}</a>
+                            <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="tab-{{ $key }}" data-toggle="tab" href="#{{ $key }}" role="tab">
+                                {{ $label }}
+                            </a>
                         </li>
                     @endforeach
                 </ul>
-                <div class="tab-content" id="jadwalTabContent">
 
-                    {{-- Semua --}}
-                    <div class="tab-pane fade show active" id="semua">
-                        @include('web.jadwal_lab.partials.table', [
-                            'data' => $jadwalLabs,
-                            'tableId' => 'dataTableSemua'
-                        ])
-                    </div>
-                
-                    {{-- Per Hari --}}
-                    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as $hari)
-                        <div class="tab-pane fade" id="{{ strtolower($hari) }}">
+                <div class="tab-content" id="statusTabContent">
+                    @foreach ($statusList as $key => $label)
+                        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $key }}">
                             @php
-                                $filtered = $jadwalLabs->filter(fn($item) => $item->hari->nama_hari === $hari);
+                                $filtered = $key === 'semua' ? $peminjamans : $peminjamans->where('status_peminjaman', $key);
                             @endphp
-                            @include('web.jadwal_lab.partials.table', [
+                            @include('web.peminjaman.partials.table', [
                                 'data' => $filtered,
-                                'tableId' => 'dataTable' . $hari
+                                'tableId' => 'dataTable' . ucfirst($key)
                             ])
                         </div>
                     @endforeach
-                
-                </div>                                              
-                <form id="bulk-delete-form" method="POST" action="{{ route('jadwal_lab.bulkDelete') }}">
+                </div>
+                <form id="bulk-delete-form" method="POST" action="{{ route('peminjaman.bulkDelete') }}">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="selected_ids" id="selected-ids">
-                    <button type="submit" class="btn btn-danger mb-3" id="bulk-delete-btn">
+                    <button type="submit" class="btn btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Hapus Terpilih
                     </button>
                 </form>                
@@ -61,7 +50,7 @@
     </div>
 </div>
 
-{{-- SweetAlert untuk success dan error --}}
+{{-- SweetAlert2 --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @if (session('success'))
 <script>
@@ -89,11 +78,11 @@
 
 <script>
     document.querySelectorAll('.btn-delete').forEach(button => {
-        button.addEventListener('click', function () {
-            const id = this.getAttribute('data-id');
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
             Swal.fire({
                 title: 'Apakah Anda yakin?',
-                text: "Data jadwal lab yang dihapus tidak bisa dikembalikan!",
+                text: "Data peminjaman akan dihapus secara permanen.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -104,80 +93,20 @@
                 if (result.isConfirmed) {
                     this.closest('form').submit();
                 }
-            })
+            });
         });
-    });
-</script>
-
-{{-- Toggle switch status jadwal lab --}}
-<script>
-    const jadwalToggles = document.querySelectorAll('.jadwalLab-toggle');
-
-    jadwalToggles.forEach(function (toggle) {
-    toggle.addEventListener('change', function (e) {
-        const jadwalId = this.dataset.id;
-        const isChecked = this.checked;
-        const newStatus = isChecked ? 'aktif' : 'nonaktif';
-        const switchEl = this;
-
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: `Status jadwal lab akan diubah menjadi ${newStatus.toUpperCase()}`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, ubah!',
-            cancelButtonColor: '#d33',
-            cancelButtonText: 'Batal',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById(`status_jadwalLab_text_${jadwalId}`).textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-
-                fetch(`/jadwal-lab/${jadwalId}/toggle-status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({ status_jadwalLab: newStatus })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: data.message
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan saat mengubah status.'
-                    });
-                    switchEl.checked = !isChecked;
-                });
-            } else {
-                switchEl.checked = !isChecked;
-            }
-        });
-    });
     });
 </script>
 
 {{-- Bulk Delete --}}
 <script>
-    // Simpan ID yang terpilih secara global
     const selectedIds = new Set();
 
-    // Fungsi untuk sync checkbox dari selectedIds
     function syncCheckboxes() {
         document.querySelectorAll('.select-item').forEach(cb => {
             cb.checked = selectedIds.has(cb.value);
         });
 
-        // Cek apakah semua checkbox di dalam satu tabel tercentang
         document.querySelectorAll('table').forEach(table => {
             const checkboxes = table.querySelectorAll('.select-item');
             const selectAll = table.querySelector('#select-all');
@@ -186,7 +115,6 @@
         });
     }
 
-    // Event listener untuk setiap checkbox individu
     function initCheckboxListeners() {
         document.querySelectorAll('.select-item').forEach(cb => {
             cb.addEventListener('change', function () {
@@ -200,7 +128,6 @@
         });
     }
 
-    // Event listener untuk select-all per tabel
     function initSelectAllListeners() {
         document.querySelectorAll('table').forEach(table => {
             const selectAll = table.querySelector('#select-all');
@@ -221,12 +148,11 @@
         });
     }
 
-    // Event untuk bulk delete form
     document.getElementById('bulk-delete-form').addEventListener('submit', function (e) {
         e.preventDefault();
 
         if (selectedIds.size === 0) {
-            Swal.fire('Peringatan', 'Pilih minimal satu jadwal untuk dihapus.', 'warning');
+            Swal.fire('Peringatan', 'Pilih minimal satu data untuk dihapus.', 'warning');
             return;
         }
 
@@ -245,10 +171,8 @@
         });
     });
 
-    // Inisialisasi saat tab diganti
     document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
         tab.addEventListener('shown.bs.tab', function () {
-            // Tunggu sedikit agar konten tab selesai dirender
             setTimeout(() => {
                 syncCheckboxes();
                 initCheckboxListeners();
@@ -257,7 +181,6 @@
         });
     });
 
-    // Inisialisasi awal
     document.addEventListener('DOMContentLoaded', function () {
         syncCheckboxes();
         initCheckboxListeners();

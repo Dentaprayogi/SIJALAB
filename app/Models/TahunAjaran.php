@@ -17,7 +17,7 @@ class TahunAjaran extends Model
         'status_tahunAjaran'
     ];
 
-    // Relasi ke Tahun Ajaran (One to Many)
+    // Relasi ke Tahun Ajaran (Many to One)
     public function jadwalLab()
     {
         return $this->hashMany(JadwalLab::class, 'id_tahunAjaran');

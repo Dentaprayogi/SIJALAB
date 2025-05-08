@@ -10,8 +10,10 @@ class PeminjamanManual extends Model
     use HasFactory;
 
     protected $table = 'peminjaman_manual';
-    protected $primaryKey = 'id_peminjaman';
+    protected $primaryKey = null;
+    public $incrementing = false;
     protected $fillable = [
+        'id_peminjaman',
         'jam_mulai',
         'jam_selesai',
         'id_lab',

@@ -10,8 +10,10 @@ class PeminjamanDitolak extends Model
     use HasFactory;
 
     protected $table = 'peminjaman_ditolak';
-    protected $primaryKey = 'id_peminjaman';
+    protected $primaryKey = null;
+    public $incrementing = false;
     protected $fillable = [
+        'id_peminjaman',
         'alasan_ditolak'
     ];
 
@@ -19,5 +21,10 @@ class PeminjamanDitolak extends Model
     public function peminjaman()
     {
         return $this->belongsTo(Peminjaman::class, 'id_peminjaman');
+    }
+
+    public function jadwalLab()
+    {
+        return $this->belongsTo(JadwalLab::class, 'id_jadwalLab');
     }
 }
