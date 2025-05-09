@@ -3,11 +3,43 @@
 
 <div class="container-fluid">
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between">
-            <h1 class="h3 mb-2 text-gray-800">Riwayat Peminjaman</h1>
-            <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tambah Peminjaman
-            </a>
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h1 class="h3 mb-0 text-gray-800">Riwayat Peminjaman</h1>
+                <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Peminjaman
+                </a>
+            </div>
+            <form method="GET" action="{{ route('peminjaman.index') }}" class="form-inline">
+                <div class="form-group mr-2">
+                    <label for="bulan" class="mr-2">Pilih Bulan</label>
+                    <select name="bulan" id="bulan" class="form-control">
+                        <option value="">Semua</option>
+                        @foreach(range(1, 12) as $b)
+                            <option value="{{ $b }}" {{ request('bulan') == $b ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($b)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label for="tahun" class="mr-2">Pilih Tahun</label>
+                    <select name="tahun" id="tahun" class="form-control">
+                        <option value="">Semua</option>
+                        @for ($year = now()->year; $year >= 2020; $year--)
+                            <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                                {{ $year }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{{ route('peminjaman.export', request()->query()) }}" class="btn btn-success ml-2">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+            </form>
         </div>
         <div class="card-body">
             <div class="table-responsive">

@@ -38,6 +38,7 @@
     @endif
     <tr><th>Lab</th><td>{{ $peminjaman->jadwalLab->lab->nama_lab ?? '-' }}</td></tr>
     <tr><th>Mata Kuliah</th><td>{{ $peminjaman->jadwalLab->mataKuliah->nama_mk ?? '-' }}</td></tr>
+    <tr><th>Dosen</th><td>{{ $peminjaman->peminjamanJadwal->jadwalLab->dosen->nama_dosen ?? '-'}}</td></tr>
     <tr><th>Kelas</th><td>{{ $peminjaman->jadwalLab->kelas->nama_kelas ?? '-' }}</td></tr>
     <tr>
         <th>Jam</th>

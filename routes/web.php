@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\PeminjamanExport;
 use App\Http\Controllers\Auth\CustomRegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DosenController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\UserController;
 use App\Models\Kelas;
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -88,6 +90,10 @@ Route::middleware([
         Route::put('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('peminjaman.selesai');
         Route::put('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
         Route::delete('/peminjaman/bulk-delete', [PeminjamanController::class, 'bulkDelete'])->name('peminjaman.bulkDelete');
+
+        Route::get('/peminjaman/export', function () {
+            return Excel::download(new PeminjamanExport, 'peminjaman.xlsx');
+        })->name('peminjaman.export');
 
     });
     

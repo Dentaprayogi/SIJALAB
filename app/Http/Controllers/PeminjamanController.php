@@ -16,14 +16,30 @@ use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $peminjamans = Peminjaman::with([
-            'user', 
+        $query = Peminjaman::with([
+            'user',
             'peralatan',
             'peminjamanManual.lab',
             'peminjamanJadwal.jadwalLab.lab'
-        ])->latest()->get();
+        ]);
+
+        // Ambil input filter
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+
+        // Terapkan filter jika ada
+        if ($bulan) {
+            $query->whereMonth('tgl_peminjaman', $bulan);
+        }
+
+        if ($tahun) {
+            $query->whereYear('tgl_peminjaman', $tahun);
+        }
+
+        $peminjamans = $query->latest()->get();
+
         return view('web.peminjaman.index', compact('peminjamans'));
     }
 
