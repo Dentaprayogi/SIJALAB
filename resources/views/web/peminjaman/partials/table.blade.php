@@ -17,7 +17,7 @@
     <tbody>
         @if ($data->isEmpty())
             <tr>
-                <td colspan="5" class="text-center">Belum Ada Data</td>
+                <td colspan="12" class="text-center">Belum Ada Data</td>
             </tr>
         @else
             @foreach ($data as $peminjaman)

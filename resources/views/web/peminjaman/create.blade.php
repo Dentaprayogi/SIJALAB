@@ -1,25 +1,48 @@
 @extends('web.layouts.app')
 @section('content')
-<div class="container">
-    <h1>Form Peminjaman</h1>
-
+<div class="card-header py-3">
+    <h3 class="h3 mb-2 text-gray-800">Form Peminjaman</h3>
+    <h2 class="h6 mb-2">
+        <span class="text-primary">
+            <a href="{{ route('peminjaman.index') }}" class="text-primary">Riwayat Peminjaman</a> / 
+            <a href="{{ route('peminjaman.create') }}" class="text-primary">Tambah Peminjaman</a>
+        </span>
+    </h2>
+</div>
+<div class="container-fluid">
+    <br>
     {{-- Menentukan tab aktif berdasarkan error --}}
     @php
-        $activeTab = old('_form_type') === 'manual' ? 'manual' : 'jadwal';
+        $activeTab = session()->getOldInput('_form_type', 'jadwal');
+        function isActiveTab($tab) {
+            return session('active_tab') === $tab ? 'show active' : '';
+        }
     @endphp
+    
 
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link {{ $activeTab == 'jadwal' ? 'active' : '' }}" id="jadwal-tab" data-bs-toggle="tab" data-bs-target="#jadwal" type="button" role="tab">Sesuai Jadwal</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link {{ $activeTab == 'manual' ? 'active' : '' }}" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab">Di Luar Jadwal</button>
-        </li>
+
+    <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+        @php
+            $tabs = ['jadwal' => 'Sesuai Jadwal', 'manual' => 'Di Luar Jadwal'];
+        @endphp
+
+        @foreach ($tabs as $key => $label)
+            <li class="nav-item">
+                <a class="nav-link {{ $activeTab == $key ? 'active' : '' }}" id="{{ $key }}-tab"
+                data-toggle="tab" href="#{{ $key }}" role="tab">
+                    {{ $label }}
+                </a>
+            </li>
+        @endforeach
     </ul>
 
-    <div class="tab-content mt-3" id="myTabContent">
-        @include('web.peminjaman.form_jadwal', ['active' => $activeTab === 'jadwal'])
-        @include('web.peminjaman.form_manual', ['active' => $activeTab === 'manual'])
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+                @include('web.peminjaman.form_jadwal', ['active' => $activeTab === 'jadwal'])
+                @include('web.peminjaman.form_manual', ['active' => $activeTab === 'manual'])
+            </div>
+        </div>
     </div>
 </div>
 
@@ -48,14 +71,15 @@
 
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@if ($errors->any())
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal menyimpan data!',
-            html: `{!! implode('<br>', $errors->all()) !!}`,
-            confirmButtonText: 'OK'
-        });
-    </script>
+@if (session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: '{{ session('error') }}',
+        timer: 1500,
+        showConfirmButton: false
+    });
+</script>
 @endif
 @endsection

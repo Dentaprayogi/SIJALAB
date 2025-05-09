@@ -38,7 +38,9 @@
                                 <select name="id_tahunAjaran" class="form-control" required>
                                     <option value="">-- Pilih Tahun Ajaran --</option>
                                     @foreach($tahunAjaranList as $tahun)
-                                        <option value="{{ $tahun->id_tahunAjaran }}">{{ $tahun->tahun_ajaran }} ({{ ucfirst($tahun->semester) }})</option>
+                                        <option value="{{ $tahun->id_tahunAjaran }}" {{ old('id_tahunAjaran') == $tahun->id_tahunAjaran ? 'selected' : '' }}>
+                                            {{ $tahun->tahun_ajaran }} ({{ ucfirst($tahun->semester) }})
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">Tahun ajaran wajib dipilih.</div>
@@ -55,7 +57,9 @@
                                 <select name="id_hari" class="form-control" required>
                                     <option value="">-- Pilih Hari --</option>
                                     @foreach($hariList as $hari)
-                                        <option value="{{ $hari->id_hari }}">{{ $hari->nama_hari }}</option>
+                                        <option value="{{ $hari->id_hari }}" {{ old('id_hari') == $hari->id_hari ? 'selected' : '' }}>
+                                            {{ $hari->nama_hari }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">Hari wajib dipilih.</div>
@@ -72,7 +76,9 @@
                                 <select name="id_lab" class="form-control" required>
                                     <option value="">-- Pilih Lab --</option>
                                     @foreach($labList as $lab)
-                                        <option value="{{ $lab->id_lab }}">{{ $lab->nama_lab }}</option>
+                                        <option value="{{ $lab->id_lab }}" {{ old('id_lab') == $lab->id_lab ? 'selected' : '' }}>
+                                            {{ $lab->nama_lab }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">Lab wajib dipilih.</div>
@@ -87,7 +93,7 @@
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-clock"></i>
                                     </span>
-                                    <input type="text" name="jam_mulai" id="jam_mulai" class="form-control" required>
+                                    <input type="text" name="jam_mulai" id="jam_mulai" class="form-control" value="{{ old('jam_mulai') }}" required>
                                     <div class="invalid-feedback">Jam mulai wajib diisi.</div>
                                 </div>
                             </div>
@@ -99,7 +105,7 @@
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-clock"></i>
                                     </span>
-                                    <input type="text" name="jam_selesai" id="jam_selesai" class="form-control" required>
+                                    <input type="text" name="jam_selesai" id="jam_selesai" class="form-control" value="{{ old('jam_selesai') }}" required>
                                     <div class="invalid-feedback">Jam selesai wajib diisi.</div>
                                 </div>
                             </div>
@@ -118,7 +124,9 @@
                                 <select name="id_prodi" id="id_prodi" class="form-control" required>
                                     <option value="">-- Pilih Prodi --</option>
                                     @foreach($prodiList as $prodi)
-                                        <option value="{{ $prodi->id_prodi }}">{{ $prodi->kode_prodi }}</option>
+                                        <option value="{{ $prodi->id_prodi }}" {{ old('id_prodi') == $prodi->id_prodi ? 'selected' : '' }}>
+                                            {{ $prodi->kode_prodi }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">Prodi wajib dipilih.</div>
@@ -134,6 +142,15 @@
                                 </span>
                                 <select name="id_kelas" id="id_kelas" class="form-control" required>
                                     <option value="">-- Pilih Kelas --</option>
+                                    @if(old('id_prodi'))
+                                        @foreach($kelasList as $kelas)
+                                            @if($kelas->id_prodi == old('id_prodi'))
+                                                <option value="{{ $kelas->id_kelas }}" {{ old('id_kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                                                    {{ $kelas->nama_kelas }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <div class="invalid-feedback">Kelas wajib dipilih.</div>
                             </div>
@@ -148,6 +165,15 @@
                                 </span>
                                 <select name="id_mk" id="id_mk" class="form-control" required>
                                     <option value="">-- Pilih Mata Kuliah --</option>
+                                    @if(old('id_prodi'))
+                                        @foreach($mkList as $mk)
+                                            @if($mk->id_prodi == old('id_prodi'))
+                                                <option value="{{ $mk->id_mk }}" {{ old('id_mk') == $mk->id_mk ? 'selected' : '' }}>
+                                                    {{ $mk->nama_mk }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <div class="invalid-feedback">Mata kuliah wajib dipilih.</div>
                             </div>
@@ -162,6 +188,15 @@
                                 </span>
                                 <select name="id_dosen" id="id_dosen" class="form-control" required>
                                     <option value="">-- Pilih Dosen --</option>
+                                    @if(old('id_prodi'))
+                                        @foreach($dosenList as $dosen)
+                                            @if($dosen->id_prodi == old('id_prodi'))
+                                                <option value="{{ $dosen->id_dosen }}" {{ old('id_dosen') == $dosen->id_dosen ? 'selected' : '' }}>
+                                                    {{ $dosen->nama_dosen }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    @endif
                                 </select>
                                 <div class="invalid-feedback">Dosen wajib dipilih.</div>
                             </div>
@@ -177,6 +212,7 @@
                     </div>
                 </div>
             </form>
+            
         </div>
     </div>
 </div>

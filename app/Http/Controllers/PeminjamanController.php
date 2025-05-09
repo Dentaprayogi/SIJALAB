@@ -32,6 +32,7 @@ class PeminjamanController extends Controller
         $labs = Lab::all();
         $jadwals = JadwalLab::all();
         $peralatans = Peralatan::all();
+        $activeTab = session('active_tab', 'jadwal');
         return view('web.peminjaman.create', compact('labs','jadwals', 'peralatans'));
     }
 
@@ -41,6 +42,24 @@ class PeminjamanController extends Controller
             'id_jadwalLab' => 'required|exists:jadwal_lab,id_jadwalLab',
             'peralatan' => 'array',
         ]);
+
+        // Cek apakah jadwal sudah dipinjam (selain ditolak/selesai)
+        $isBooked = PeminjamanJadwal::where('id_jadwalLab', $request->id_jadwalLab)
+            ->whereHas('peminjaman', function ($query) {
+                $query->whereNotIn('status_peminjaman', ['ditolak', 'selesai']);
+            })
+            ->exists();
+
+        // if ($isBooked) {
+        //     return redirect()->back()->with('error', 'Jadwal lab sudah dipinjam di waktu yang sama.');
+        // }
+        
+        if ($isBooked) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Jadwal lab sudah dipinjam di waktu yang sama.')
+                ->with('active_tab', 'jadwal'); 
+        }
 
         DB::transaction(function () use ($request) {
             $peminjaman = Peminjaman::create([
@@ -63,11 +82,36 @@ class PeminjamanController extends Controller
     public function storeManual(Request $request)
     {
         $request->validate([
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required|after:jam_mulai',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|after:jam_mulai|date_format:H:i',
             'id_lab' => 'required|exists:lab,id_lab',
             'peralatan' => 'array',
         ]);
+
+        // Cek apakah ada jadwal tumpang tindih
+        $conflict = PeminjamanManual::where('id_lab', $request->id_lab)
+            ->whereHas('peminjaman', function ($query) {
+                $query->whereNotIn('status_peminjaman', ['ditolak', 'selesai']);
+            })
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            })
+            ->exists();
+
+        // Set session untuk menentukan tab aktif
+        session(['active_tab' => 'manual']);
+
+        if ($conflict) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Lab sudah dipinjam pada rentang waktu tersebut.')
+                ->with('active_tab', 'manual'); 
+        }
 
         DB::transaction(function () use ($request) {
             $peminjaman = Peminjaman::create([
@@ -152,20 +196,33 @@ class PeminjamanController extends Controller
 
     public function destroy(Peminjaman $peminjaman)
     {
+        if (!in_array($peminjaman->status_peminjaman, ['pengajuan', 'ditolak', 'selesai'])) {
+            return back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam.');
+        }
+    
         $peminjaman->delete();
         return back()->with('success', 'Peminjaman berhasil dihapus.');
-    }
+    }    
 
     public function bulkDelete(Request $request)
     {
         $ids = explode(',', $request->selected_ids);
-    
+
         if (empty($ids) || !is_array($ids)) {
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
         }
-    
-        Peminjaman::whereIn('id_peminjaman', $ids)->delete();
-    
+
+        // Filter hanya peminjaman yang statusnya diizinkan untuk dihapus
+        $deletable = Peminjaman::whereIn('id_peminjaman', $ids)
+            ->whereIn('status_peminjaman', ['pengajuan', 'ditolak', 'selesai'])
+            ->pluck('id_peminjaman');
+
+        if ($deletable->isEmpty()) {
+            return redirect()->back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam.');
+        }
+
+        Peminjaman::whereIn('id_peminjaman', $deletable)->delete();
+
         return redirect()->route('peminjaman.index')->with('success', 'Beberapa riwayat peminjaman berhasil dihapus.');
     }
 }
