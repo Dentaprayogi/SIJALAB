@@ -22,5 +22,10 @@ class Matakuliah extends Model
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
-}
 
+    //Relasi ke Jadwal Lab (One to Many)
+    public function jadwalLab()
+    {
+        return $this->hasMany(JadwalLab::class, 'id_mk');
+    }
+}

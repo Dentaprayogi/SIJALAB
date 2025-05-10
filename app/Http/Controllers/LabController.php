@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JadwalLab;
 use App\Models\Lab;
+use App\Models\PeminjamanJadwal;
+use App\Models\PeminjamanManual;
 use Illuminate\Http\Request;
 
 class LabController extends Controller
@@ -59,7 +62,18 @@ class LabController extends Controller
 
     public function destroy($id_lab)
     {
+        // Cek apakah lab masih terhubung dengan jadwal lab, peminjaman jadwal, atau peminjaman manual
+        $hasJadwalLab = JadwalLab::where('id_lab', $id_lab)->exists();
+        $hasPeminjamanManual = PeminjamanManual::where('id_lab', $id_lab)->exists();
+
+        if ($hasJadwalLab || $hasPeminjamanManual) {
+            return redirect()->route('lab.index')
+                ->with('error', 'Lab tidak dapat dihapus karena masih terhubung dengan jadwal lab atau peminjaman manual.');
+        }
+
+        // Hapus data lab jika tidak terhubung
         Lab::destroy($id_lab);
+
         return redirect()->route('lab.index')->with('success', 'Data lab berhasil dihapus.');
     }
 

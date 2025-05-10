@@ -45,8 +45,19 @@ class ProdiController extends Controller
 
     public function destroy($id)
     {
-        Prodi::destroy($id);
+        $prodi = Prodi::findOrFail($id);
+
+        $hasKelas = $prodi->kelas()->exists();
+        $hasMahasiswa = $prodi->mahasiswa()->exists();
+        $hasDosen = $prodi->dosen()->exists();
+        $hasJadwalLab = $prodi->jadwalLab()->exists();
+
+        if ($hasKelas || $hasMahasiswa || $hasDosen || $hasJadwalLab) {
+            return redirect()->route('prodi.index')->with('error', 'Prodi tidak dapat dihapus karena masih terhubung dengan data lain.');
+        }
+
+        $prodi->delete();
+
         return redirect()->route('prodi.index')->with('success', 'Prodi berhasil dihapus.');
     }
 }
-

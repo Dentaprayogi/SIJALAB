@@ -12,7 +12,7 @@ class Kelas extends Model
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
     protected $fillable = [
-        'id_prodi', 
+        'id_prodi',
         'nama_kelas'
     ];
 
@@ -26,5 +26,11 @@ class Kelas extends Model
     public function mahasiswa()
     {
         return $this->hasMany(Mahasiswa::class, 'id_kelas');
+    }
+
+    //Relasi ke Jadwal Lab (Many to One)
+    public function jadwalLab()
+    {
+        return $this->hasMany(JadwalLab::class, 'id_kelas');
     }
 }

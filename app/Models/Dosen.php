@@ -21,4 +21,10 @@ class Dosen extends Model
     {
         return $this->belongsTo(Prodi::class, 'id_prodi');
     }
+
+    //Relasi ke Jadwal Lab (Many to One)
+    public function jadwalLab()
+    {
+        return $this->hasMany(JadwalLab::class, 'id_dosen');
+    }
 }

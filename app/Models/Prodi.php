@@ -33,4 +33,16 @@ class Prodi extends Model
     {
         return $this->hasMany(Matakuliah::class, 'id_prodi');
     }
+
+    // Relasi ke Mahasiswa (Many to One)
+    public function mahasiswa()
+    {
+        return $this->hasMany(Mahasiswa::class, 'id_prodi');
+    }
+
+    // Relasi ke Jadwal Lab (Many to One)
+    public function jadwalLab()
+    {
+        return $this->hasMany(JadwalLab::class, 'id_prodi');
+    }
 }

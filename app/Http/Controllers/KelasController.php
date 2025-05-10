@@ -16,10 +16,10 @@ class KelasController extends Controller
             ->select('kelas.*') // Pastikan hanya mengambil kolom dari kelas
             ->with('prodi') // Pastikan relasi tetap dipanggil
             ->get();
-    
+
         $prodi = Prodi::all();
         return view('web.kelas.index', compact('kelas', 'prodi'));
-    }    
+    }
 
     public function store(Request $request)
     {
@@ -30,8 +30,8 @@ class KelasController extends Controller
 
         // Cek apakah kelas dengan nama yang sama sudah ada dalam prodi yang dipilih
         $cekKelas = Kelas::where('id_prodi', $request->id_prodi)
-                        ->where('nama_kelas', $request->nama_kelas)
-                        ->exists();
+            ->where('nama_kelas', $request->nama_kelas)
+            ->exists();
 
         if ($cekKelas) {
             return redirect()->route('kelas.index')->with('error', 'Kelas dengan nama yang sama sudah ada dalam prodi ini!');
@@ -53,9 +53,9 @@ class KelasController extends Controller
 
         // Cek apakah sudah ada kelas dengan nama dan prodi yang sama, tapi bukan dirinya sendiri
         $cekKelas = Kelas::where('id_prodi', $request->id_prodi)
-                        ->where('nama_kelas', $request->nama_kelas)
-                        ->where('id_kelas', '!=', $kelas->id_kelas)
-                        ->exists();
+            ->where('nama_kelas', $request->nama_kelas)
+            ->where('id_kelas', '!=', $kelas->id_kelas)
+            ->exists();
 
         if ($cekKelas) {
             return redirect()->route('kelas.index')->withInput()->with('error', 'Kelas dengan nama yang sama sudah ada dalam prodi ini!');
@@ -73,9 +73,15 @@ class KelasController extends Controller
     public function destroy($id_kelas)
     {
         $kelas = Kelas::findOrFail($id_kelas);
-        $kelas->delete();
 
+        $hasMahasiswa = $kelas->mahasiswa()->exists();
+        $hasJadwalLab = $kelas->jadwalLab()->exists();
+
+        if ($hasMahasiswa || $hasJadwalLab) {
+            return redirect()->route('kelas.index')->with('error', 'Kelas tidak dapat dihapus karena masih memiliki mahasiswa atau jadwal lab.');
+        }
+
+        $kelas->delete();
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus!');
     }
 }
-

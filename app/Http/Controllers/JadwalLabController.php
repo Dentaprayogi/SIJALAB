@@ -18,16 +18,16 @@ class JadwalLabController extends Controller
     public function index()
     {
         $jadwalLabs = JadwalLab::whereHas('tahunAjaran', function ($query) {
-                                $query->where('status_tahunAjaran', 'aktif');
-                            })
-                            ->orderBy('id_hari', 'asc')
-                            ->orderBy('id_lab', 'asc')
-                            ->orderBy('jam_mulai', 'asc')
-                            ->get();
+            $query->where('status_tahunAjaran', 'aktif');
+        })
+            ->orderBy('id_hari', 'asc')
+            ->orderBy('id_lab', 'asc')
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
 
         return view('web.jadwal_lab.index', compact('jadwalLabs'));
     }
-    
+
     public function create()
     {
         return view('web.jadwal_lab.create', [
@@ -54,23 +54,23 @@ class JadwalLabController extends Controller
             'id_kelas'         => 'required',
             'id_tahunAjaran'   => 'required',
         ]);
-    
+
         $year = $request->id_tahunAjaran;
         $day  = $request->id_hari;
         $lab  = $request->id_lab;
         $start = $request->jam_mulai;
         $end   = $request->jam_selesai;
-    
+
         // Fungsi bantu untuk cek overlap
-        $overlap = function($query) use ($start, $end) {
+        $overlap = function ($query) use ($start, $end) {
             $query->whereBetween('jam_mulai', [$start, $end])
-                  ->orWhereBetween('jam_selesai', [$start, $end])
-                  ->orWhere(function($q) use ($start, $end) {
-                      $q->where('jam_mulai', '<=', $start)
+                ->orWhereBetween('jam_selesai', [$start, $end])
+                ->orWhere(function ($q) use ($start, $end) {
+                    $q->where('jam_mulai', '<=', $start)
                         ->where('jam_selesai', '>=', $end);
-                  });
+                });
         };
-    
+
         // 1) Cek bentrok Lab
         if (JadwalLab::where('id_hari', $day)
             ->where('id_lab', $lab)
@@ -82,7 +82,7 @@ class JadwalLabController extends Controller
                 'jam_mulai' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut (tahun ajaran sama).'],
             ]);
         }
-    
+
         // 2) Cek bentrok Dosen
         if (JadwalLab::where('id_hari', $day)
             ->where('id_dosen', $request->id_dosen)
@@ -94,7 +94,7 @@ class JadwalLabController extends Controller
                 'id_dosen' => ['Dosen sudah memiliki jadwal mengajar di rentang waktu tersebut (tahun ajaran sama).'],
             ]);
         }
-    
+
         //  3) Cek bentrok Kelas
         if (JadwalLab::where('id_hari', $day)
             ->where('id_kelas', $request->id_kelas)
@@ -106,7 +106,7 @@ class JadwalLabController extends Controller
                 'id_kelas' => ['Kelas sudah terjadwal di rentang waktu tersebut (tahun ajaran sama).'],
             ]);
         }
-    
+
         // Jika semua lolos, simpan
         JadwalLab::create([
             'id_hari'         => $day,
@@ -118,13 +118,13 @@ class JadwalLabController extends Controller
             'id_prodi'        => $request->id_prodi,
             'id_kelas'        => $request->id_kelas,
             'id_tahunAjaran'  => $year,
-            'status_jadwalLab'=> 'aktif',
+            'status_jadwalLab' => 'aktif',
         ]);
-    
+
         return redirect()->route('jadwal_lab.index')
-                         ->with('success', 'Jadwal Lab berhasil ditambahkan.');
+            ->with('success', 'Jadwal Lab berhasil ditambahkan.');
     }
-   
+
     public function show($id)
     {
         $jadwalLab = JadwalLab::findOrFail($id);
@@ -135,7 +135,7 @@ class JadwalLabController extends Controller
     {
         $jadwalLab = JadwalLab::findOrFail($id);
         $prodiId = $jadwalLab->id_prodi;
-    
+
         return view('web.jadwal_lab.edit', [
             'hariList' => Hari::all(),
             'labList' => Lab::where('status_lab', 'aktif')->orderBy('nama_lab', 'asc')->get(),
@@ -146,7 +146,7 @@ class JadwalLabController extends Controller
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
             'jadwalLab' => $jadwalLab,
         ]);
-    }    
+    }
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -161,26 +161,26 @@ class JadwalLabController extends Controller
             'id_tahunAjaran'   => 'required',
             'status_jadwalLab' => 'required',
         ]);
-    
+
         $jadwalLab = JadwalLab::findOrFail($id);
-    
+
         // Ambil input
         $year  = $request->id_tahunAjaran;
         $day   = $request->id_hari;
         $lab   = $request->id_lab;
         $start = $request->jam_mulai;
         $end   = $request->jam_selesai;
-    
+
         // Closure untuk cek overlap
-        $overlap = function($query) use ($start, $end) {
+        $overlap = function ($query) use ($start, $end) {
             $query->whereBetween('jam_mulai', [$start, $end])
-                  ->orWhereBetween('jam_selesai', [$start, $end])
-                  ->orWhere(function($q) use ($start, $end) {
-                      $q->where('jam_mulai', '<=', $start)
+                ->orWhereBetween('jam_selesai', [$start, $end])
+                ->orWhere(function ($q) use ($start, $end) {
+                    $q->where('jam_mulai', '<=', $start)
                         ->where('jam_selesai', '>=', $end);
-                  });
+                });
         };
-    
+
         // 1) Lab bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_lab', $lab)
@@ -193,7 +193,7 @@ class JadwalLabController extends Controller
                 'jam_mulai' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut.'],
             ]);
         }
-    
+
         // 2) Dosen bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_dosen', $request->id_dosen)
@@ -206,7 +206,7 @@ class JadwalLabController extends Controller
                 'id_dosen' => ['Dosen sudah memiliki jadwal di rentang waktu tersebut.'],
             ]);
         }
-    
+
         // 3) Kelas bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_kelas', $request->id_kelas)
@@ -219,7 +219,7 @@ class JadwalLabController extends Controller
                 'id_kelas' => ['Kelas sudah terjadwal di rentang waktu tersebut.'],
             ]);
         }
-    
+
         // Semua aman, update data
         $jadwalLab->update([
             'id_hari'         => $day,
@@ -231,11 +231,11 @@ class JadwalLabController extends Controller
             'id_prodi'        => $request->id_prodi,
             'id_kelas'        => $request->id_kelas,
             'id_tahunAjaran'  => $year,
-            'status_jadwalLab'=> $request->status_jadwalLab,
+            'status_jadwalLab' => $request->status_jadwalLab,
         ]);
-    
+
         return redirect()->route('jadwal_lab.index')
-                         ->with('success', 'Jadwal Lab berhasil diperbarui.');
+            ->with('success', 'Jadwal Lab berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -244,7 +244,7 @@ class JadwalLabController extends Controller
         $jadwalLab->delete();
 
         return redirect()->route('jadwal_lab.index')
-                         ->with('success', 'Jadwal Lab berhasil dihapus.');
+            ->with('success', 'Jadwal Lab berhasil dihapus.');
     }
 
     public function getDependentData($prodiId)
@@ -263,17 +263,17 @@ class JadwalLabController extends Controller
     public function toggleStatus(Request $request, $id_jadwalLab)
     {
         $jadwal = JadwalLab::where('id_jadwalLab', $id_jadwalLab)->firstOrFail();
-    
+
         $status = $request->status_jadwalLab;
         if (!in_array($status, ['aktif', 'nonaktif'])) {
             return response()->json(['message' => 'Status tidak valid.'], 422);
         }
-    
+
         $jadwal->status_jadwalLab = $status;
         $jadwal->save();
-    
+
         return response()->json(['message' => 'Status jadwal lab berhasil diubah']);
-    }     
+    }
 
     public function getData($id_prodi)
     {
@@ -293,14 +293,13 @@ class JadwalLabController extends Controller
     public function bulkDelete(Request $request)
     {
         $ids = explode(',', $request->selected_ids);
-    
+
         if (empty($ids) || !is_array($ids)) {
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
         }
-    
+
         JadwalLab::whereIn('id_jadwalLab', $ids)->delete();
-    
+
         return redirect()->route('jadwal_lab.index')->with('success', 'Beberapa jadwal lab berhasil dihapus.');
     }
-    
 }

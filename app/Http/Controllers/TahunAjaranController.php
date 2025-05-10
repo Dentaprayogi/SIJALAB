@@ -2,37 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JadwalLab;
 use Illuminate\Http\Request;
 use App\Models\TahunAjaran;
 
 class TahunAjaranController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $tahunAjaran = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
         return view('web.tahunajaran.index', compact('tahunAjaran'));
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $request->validate([
             'tahun_ajaran' => 'required',
             'semester' => 'required|in:ganjil,genap',
             'status_tahunAjaran' => 'aktif'
         ]);
-    
+
         // Cek apakah kombinasi tahun ajaran dan semester sudah ada
         $exists = TahunAjaran::where('tahun_ajaran', $request->tahun_ajaran)
-                    ->where('semester', $request->semester)
-                    ->exists();
-    
+            ->where('semester', $request->semester)
+            ->exists();
+
         if ($exists) {
             return redirect()->back()->withInput()->with('error', 'Tahun ajaran dan semester ini sudah ada.');
         }
-    
+
         TahunAjaran::create($request->all());
-    
+
         return redirect()->route('tahunajaran.index')->with('success', 'Tahun Ajaran berhasil ditambahkan');
     }
-    
+
     public function update(Request $request, TahunAjaran $tahunAjaran)
     {
         $request->validate([
@@ -43,9 +46,9 @@ class TahunAjaranController extends Controller
 
         // Cek apakah kombinasi tahun ajaran dan semester sudah ada, kecuali untuk data yang sedang diupdate
         $exists = TahunAjaran::where('tahun_ajaran', $request->tahun_ajaran)
-                    ->where('semester', $request->semester)
-                    ->where('id_tahunAjaran', '!=', $tahunAjaran->id_tahunAjaran)
-                    ->exists();
+            ->where('semester', $request->semester)
+            ->where('id_tahunAjaran', '!=', $tahunAjaran->id_tahunAjaran)
+            ->exists();
 
         if ($exists) {
             return redirect()->back()->withInput()->with('error', 'Tahun ajaran dan semester ini sudah ada.');
@@ -62,9 +65,20 @@ class TahunAjaranController extends Controller
     }
 
 
-    public function destroy(TahunAjaran $tahunAjaran) {
+    public function destroy(TahunAjaran $tahunAjaran)
+    {
+        // Cek apakah ada jadwal lab yang terkait dengan tahun ajaran ini
+        $hasJadwal = JadwalLab::where('id_tahunAjaran', $tahunAjaran->id_tahunAjaran)->exists();
+
+        if ($hasJadwal) {
+            return redirect()->route('tahunajaran.index')
+                ->with('error', 'Tidak dapat menghapus Tahun Ajaran karena masih memiliki jadwal lab.');
+        }
+
         $tahunAjaran->delete();
-        return redirect()->route('tahunajaran.index')->with('success', 'Tahun Ajaran berhasil dihapus');
+
+        return redirect()->route('tahunajaran.index')
+            ->with('success', 'Tahun Ajaran berhasil dihapus');
     }
 
     public function toggleStatus(Request $request, $id_tahunAjaran)

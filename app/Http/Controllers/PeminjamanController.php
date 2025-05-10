@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Hari;
 use App\Models\JadwalLab;
 use App\Models\Lab;
 use App\Models\Peminjaman;
@@ -10,6 +11,7 @@ use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\PeminjamanSelesai;
 use App\Models\Peralatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -46,10 +48,79 @@ class PeminjamanController extends Controller
     public function create()
     {
         $labs = Lab::all();
-        $jadwals = JadwalLab::all();
         $peralatans = Peralatan::all();
         $activeTab = session('active_tab', 'jadwal');
-        return view('web.peminjaman.create', compact('labs','jadwals', 'peralatans'));
+
+        $now = Carbon::now();
+
+        // Ambil nama hari sekarang, sesuaikan format kapitalisasi jika perlu
+        $namaHari = ucfirst(strtolower($now->locale('id')->isoFormat('dddd'))); // e.g. 'Senin'
+
+        // Cari id_hari berdasarkan nama hari
+        $hari = Hari::where('nama_hari', $namaHari)->first();
+
+        // Ambil user login
+        $user = Auth::user();
+
+        $jadwals = JadwalLab::where('status_jadwalLab', 'aktif')
+            ->where('id_hari', $hari->id_hari ?? null)
+            ->where('id_prodi', $user->mahasiswa->id_prodi)
+            ->where('id_kelas', $user->mahasiswa->id_kelas)
+            ->get()
+            ->filter(function ($jadwal) use ($now) {
+                $jamMulai = Carbon::createFromFormat('H:i:s', $jadwal->jam_mulai);
+                $jamSelesai = Carbon::createFromFormat('H:i:s', $jadwal->jam_selesai);
+
+                return $now->greaterThanOrEqualTo($jamMulai->subMinutes(30)) &&
+                    $now->lessThan($jamSelesai);
+            });
+
+        return view('web.peminjaman.create', compact('labs', 'jadwals', 'peralatans'));
+    }
+
+    public function getAvailableLabs(Request $request)
+    {
+        $request->validate([
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+        ]);
+
+        $user = Auth::user();
+        $now = Carbon::now();
+        $namaHari = ucfirst(strtolower($now->locale('id')->isoFormat('dddd')));
+        $hari = Hari::where('nama_hari', $namaHari)->first();
+
+        $jamMulai = Carbon::createFromFormat('H:i', $request->jam_mulai)->format('H:i:s');
+        $jamSelesai = Carbon::createFromFormat('H:i', $request->jam_selesai)->format('H:i:s');
+
+        // Ambil semua lab yang aktif
+        $labs = Lab::where('status_lab', 'aktif')->get();
+
+        // Filter lab yang tidak bentrok dengan jadwal
+        $availableLabs = $labs->filter(function ($lab) use ($hari, $jamMulai, $jamSelesai, $user) {
+            // Cek apakah bentrok dengan jadwal yang sudah ada
+            $bentrok = JadwalLab::where('id_hari', $hari->id_hari ?? null)
+                ->where('status_jadwalLab', 'aktif')
+                ->where('id_lab', $lab->id_lab)
+                ->where(function ($q) use ($jamMulai, $jamSelesai) {
+                    $q->where(function ($query) use ($jamMulai, $jamSelesai) {
+                        $query->where('jam_mulai', '<', $jamSelesai)
+                            ->where('jam_selesai', '>', $jamMulai);
+                    });
+                })
+                ->exists();
+
+            // Cek apakah lab sedang dipinjam atau diajukan tanpa jadwal (peminjaman_manual)
+            $sedangDipinjamManual = PeminjamanManual::where('id_lab', $lab->id_lab)
+                ->whereHas('peminjaman', function ($query) {
+                    $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
+                })
+                ->exists();
+
+            return !$bentrok && !$sedangDipinjamManual;
+        })->values();
+
+        return response()->json($availableLabs);
     }
 
     public function storeJadwal(Request $request)
@@ -59,28 +130,49 @@ class PeminjamanController extends Controller
             'peralatan' => 'array',
         ]);
 
-        // Cek apakah jadwal sudah dipinjam (selain ditolak/selesai)
+        $jadwalLab = JadwalLab::findOrFail($request->id_jadwalLab);
+        $idLab = $jadwalLab->id_lab;
+
+        // Cek apakah lab sedang dipinjam TANPA jadwal (dari tabel peminjaman_manual)
+        $hasUnscheduledBooking = PeminjamanManual::whereHas('peminjaman', function ($query) {
+            $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
+        })
+            ->where('id_lab', $idLab)
+            ->exists();
+
+        if ($hasUnscheduledBooking) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Lab sedang dalam peminjaman tanpa jadwal.')
+                ->with('active_tab', 'jadwal');
+        }
+
+        if ($hasUnscheduledBooking) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Lab sedang dalam peminjaman tanpa jadwal.')
+                ->with('active_tab', 'jadwal');
+        }
+
+        // Cek apakah jadwal sudah dipinjam
         $isBooked = PeminjamanJadwal::where('id_jadwalLab', $request->id_jadwalLab)
             ->whereHas('peminjaman', function ($query) {
-                $query->whereNotIn('status_peminjaman', ['ditolak', 'selesai']);
+                $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
             })
             ->exists();
 
-        // if ($isBooked) {
-        //     return redirect()->back()->with('error', 'Jadwal lab sudah dipinjam di waktu yang sama.');
-        // }
-        
         if ($isBooked) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Jadwal lab sudah dipinjam di waktu yang sama.')
-                ->with('active_tab', 'jadwal'); 
+                ->with('error', 'Jadwal lab sudah dipinjam.')
+                ->with('active_tab', 'jadwal');
         }
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request, $idLab) {
             $peminjaman = Peminjaman::create([
                 'tgl_peminjaman' => now()->format('Y-m-d'),
                 'status_peminjaman' => 'pengajuan',
+                'id_lab' => $idLab,
                 'id' => Auth::id(),
             ]);
 
@@ -126,7 +218,7 @@ class PeminjamanController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Lab sudah dipinjam pada rentang waktu tersebut.')
-                ->with('active_tab', 'manual'); 
+                ->with('active_tab', 'manual');
         }
 
         DB::transaction(function () use ($request) {
@@ -160,7 +252,7 @@ class PeminjamanController extends Controller
             'jadwalLab.mataKuliah',
             'jadwalLab.kelas',
         ])->findOrFail($id);
-    
+
         return view('web.peminjaman.show', compact('peminjaman'));
     }
 
@@ -215,10 +307,10 @@ class PeminjamanController extends Controller
         if (!in_array($peminjaman->status_peminjaman, ['pengajuan', 'ditolak', 'selesai'])) {
             return back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam.');
         }
-    
+
         $peminjaman->delete();
         return back()->with('success', 'Peminjaman berhasil dihapus.');
-    }    
+    }
 
     public function bulkDelete(Request $request)
     {
@@ -242,4 +334,3 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman.index')->with('success', 'Beberapa riwayat peminjaman berhasil dihapus.');
     }
 }
-

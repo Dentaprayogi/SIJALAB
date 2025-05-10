@@ -16,66 +16,67 @@
             <th>Jam Dikembalikan</th>
             <th>Alasan Ditolak</th>
             <th>Status</th>
-            
+
         </tr>
     </thead>
     <tbody>
-        @foreach($peminjamans as $p)
-        <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $p->tgl_peminjaman ?? '-'}}</td>
-            <td>
-                @if($p->peminjamanJadwal)
-                    {{ $p->peminjamanJadwal->jadwalLab->lab->nama_lab ?? '-' }}
-                @else
-                    {{ $p->peminjamanManual->lab->nama_lab ?? '-' }}
-                @endif
-            </td>
-            <td>
-                @if($p->peminjamanJadwal && $p->peminjamanJadwal->jadwalLab)
-                    {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }} - 
-                    {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') ?? '-' }}
-                @else
-                    {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }} - 
-                    {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
-                @endif
-            </td>
-            <td>{{ $p->user->name ?? '-' }}</td>
-            <td>{{ $p->user->mahasiswa->nim  ?? '-'}}</td>
-            <td>{{ $p->user->mahasiswa->prodi->kode_prodi ?? '-'}} ({{ $p->user->mahasiswa->kelas->nama_kelas ?? '-'}})</td>
-            <td>{{ $p->peminjamanJadwal->jadwalLab->mataKuliah->nama_mk ?? '-'}}</td>
-            <td>{{ $p->peminjamanJadwal->jadwalLab->dosen->nama_dosen ?? '-'}}</td>
-            <td>{{ $p->peminjamanManual->keterangan ?? '-'}}</td>
-            <td>
-                <ul>
-                    @foreach ($p->peralatan as $alat)
-                        <li>{{ $alat->nama_peralatan }}</li>
-                    @endforeach
-                </ul>
-            </td>
-            <td>
-                @if ($p->peminjamanSelesai && $p->peminjamanSelesai->tgl_pengembalian)
-                    {{ \Carbon\Carbon::parse($p->peminjamanSelesai->tgl_pengembalian)->format('d-m-Y') }}
-                @else
-                    -
-                @endif
-            </td>
-            <td>
-                @if ($p->peminjamanSelesai && $p->peminjamanSelesai->jam_dikembalikan)
-                    {{ \Carbon\Carbon::parse($p->peminjamanSelesai->jam_dikembalikan)->format('H:i') }}
-                @else
-                    -
-                @endif
-            </td>
-            <td>
-                @if ($p->peminjamanDitolak && $p->peminjamanDitolak->alasan_ditolak)
-                     {{ $p->peminjamanDitolak->alasan_ditolak}}
-                @else
-                    -
-                @endif
-            </td>
-            <td>{{ ucfirst($p->status_peminjaman) ?? '-'}}</td>
-        </tr>
+        @foreach ($peminjamans as $p)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $p->tgl_peminjaman ?? '-' }}</td>
+                <td>
+                    @if ($p->peminjamanJadwal)
+                        {{ $p->peminjamanJadwal->jadwalLab->lab->nama_lab ?? '-' }}
+                    @else
+                        {{ $p->peminjamanManual->lab->nama_lab ?? '-' }}
+                    @endif
+                </td>
+                <td>
+                    @if ($p->peminjamanJadwal && $p->peminjamanJadwal->jadwalLab)
+                        {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }} -
+                        {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') ?? '-' }}
+                    @else
+                        {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }} -
+                        {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+                    @endif
+                </td>
+                <td>{{ $p->user->name ?? '-' }}</td>
+                <td>{{ $p->user->mahasiswa->nim ?? '-' }}</td>
+                <td>{{ $p->user->mahasiswa->prodi->kode_prodi ?? '-' }}
+                    ({{ $p->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td>
+                <td>{{ $p->peminjamanJadwal->jadwalLab->mataKuliah->nama_mk ?? '-' }}</td>
+                <td>{{ $p->peminjamanJadwal->jadwalLab->dosen->nama_dosen ?? '-' }}</td>
+                <td>{{ $p->peminjamanManual->keterangan ?? '-' }}</td>
+                <td>
+                    <ul>
+                        @foreach ($p->peralatan as $alat)
+                            <li>{{ $alat->nama_peralatan }}</li>
+                        @endforeach
+                    </ul>
+                </td>
+                <td>
+                    @if ($p->peminjamanSelesai && $p->peminjamanSelesai->tgl_pengembalian)
+                        {{ \Carbon\Carbon::parse($p->peminjamanSelesai->tgl_pengembalian)->format('d-m-Y') }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if ($p->peminjamanSelesai && $p->peminjamanSelesai->jam_dikembalikan)
+                        {{ \Carbon\Carbon::parse($p->peminjamanSelesai->jam_dikembalikan)->format('H:i') }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if ($p->peminjamanDitolak && $p->peminjamanDitolak->alasan_ditolak)
+                        {{ $p->peminjamanDitolak->alasan_ditolak }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>{{ ucfirst($p->status_peminjaman) ?? '-' }}</td>
+            </tr>
         @endforeach
     </tbody>
 </table>

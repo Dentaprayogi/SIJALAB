@@ -35,11 +35,11 @@ Route::middleware([
     'verified',
     'checkStatus',
 ])->group(function () {
-    route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
+    route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', function () {
         return view('web.profile.show');
-    })->name('user.profile'); 
+    })->name('user.profile');
 
     //Route Tahun Ajaran
     Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
@@ -82,6 +82,7 @@ Route::middleware([
     Route::prefix('peminjaman')->middleware('auth')->group(function () {
         Route::get('/', [PeminjamanController::class, 'index'])->name('peminjaman.index');
         Route::get('/jadwal/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+        Route::post('/labs/available', [PeminjamanController::class, 'getAvailableLabs'])->name('labs.available');
         Route::post('/jadwal/store', [PeminjamanController::class, 'storeJadwal'])->name('peminjaman.storeJadwal');
         Route::post('/manual/store', [PeminjamanController::class, 'storeManual'])->name('peminjaman.storeManual');
         Route::get('/{peminjaman}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
@@ -94,8 +95,5 @@ Route::middleware([
         Route::get('/peminjaman/export', function () {
             return Excel::download(new PeminjamanExport, 'peminjaman.xlsx');
         })->name('peminjaman.export');
-
     });
-    
-
 });

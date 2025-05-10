@@ -3,7 +3,8 @@
 <table class="table table-striped table-bordered">
     <tr>
         <th>Tanggal Peminjaman</th>
-        <td>{{ \Carbon\Carbon::parse($peminjaman->tgl_peminjaman)->translatedFormat('l') }}, {{ \Carbon\Carbon::parse($peminjaman->tgl_peminjaman)->format('d-m-Y') }}
+        <td>{{ \Carbon\Carbon::parse($peminjaman->tgl_peminjaman)->translatedFormat('l') }},
+            {{ \Carbon\Carbon::parse($peminjaman->tgl_peminjaman)->format('d-m-Y') }}
         </td>
     </tr>
     <tr>
@@ -15,36 +16,54 @@
                     'ditolak' => 'badge-danger',
                     'dipinjam' => 'badge-primary',
                     'selesai' => 'badge-success',
-                    default => 'badge-secondary'
+                    default => 'badge-secondary',
                 };
             @endphp
             <span class="badge-status {{ $badgeClass }}">
                 {{ ucfirst($peminjaman->status_peminjaman) }}
             </span>
-        </td>                            
+        </td>
     </tr>
-    
+
     @if ($peminjaman->status_peminjaman === 'selesai')
-    <tr>
-        <th>Tanggal Pengembalian</th>
-        <td>{{ \Carbon\Carbon::parse($peminjaman->peminjamanSelesai->tgl_pengembalian)->format('d-m-Y') }} ({{ \Carbon\Carbon::parse($peminjaman->peminjamanSelesai->jam_dikembalikan)->format('H:i') }})</td>
-    </tr>
+        <tr>
+            <th>Tanggal Pengembalian</th>
+            <td>{{ \Carbon\Carbon::parse($peminjaman->peminjamanSelesai->tgl_pengembalian)->format('d-m-Y') }}
+                ({{ \Carbon\Carbon::parse($peminjaman->peminjamanSelesai->jam_dikembalikan)->format('H:i') }})</td>
+        </tr>
     @endif
 
     @if ($peminjaman->status_peminjaman === 'ditolak')
-    <tr>
-        <th>Alasan Ditolak</th>
-        <td>{{ $peminjaman->peminjamanDitolak->alasan_ditolak ?? '-' }}</td>
-    </tr>
+        <tr>
+            <th>Alasan Ditolak</th>
+            <td>{{ $peminjaman->peminjamanDitolak->alasan_ditolak ?? '-' }}</td>
+        </tr>
     @endif
-    <tr><th>Lab</th><td>{{ $peminjaman->peminjamanManual->lab->nama_lab ?? '-' }}</td></tr>
-    <tr><th>Prodi</th><td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi ?? '-' }} ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td></tr>
+    <tr>
+        <th>Lab</th>
+        <td>{{ $peminjaman->peminjamanManual->lab->nama_lab ?? '-' }}</td>
+    </tr>
+    <tr>
+        <th>Prodi</th>
+        <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi ?? '-' }}
+            ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td>
+    </tr>
     <tr>
         <th>Jam</th>
         <td>
-            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') }} -
-            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_selesai)->format('H:i') }}
-        </td>
+            @if (
+                $peminjaman->peminjamanManual &&
+                    $peminjaman->peminjamanManual->jam_mulai &&
+                    $peminjaman->peminjamanManual->jam_selesai)
+                {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }}
+                -
+                {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+            @else
+                -
+            @endif
     </tr>
-    <tr><th>Keterangan</th><td>{{ $peminjaman->peminjamanManual->keterangan ?? '-' }}</td></tr>
+    <tr>
+        <th>Keterangan</th>
+        <td>{{ $peminjaman->peminjamanManual->keterangan ?? '-' }}</td>
+    </tr>
 </table>

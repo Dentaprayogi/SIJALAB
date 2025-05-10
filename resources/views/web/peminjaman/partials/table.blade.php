@@ -26,24 +26,33 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $peminjaman->tgl_peminjaman }}</td>
                     <td>
-                        @if($peminjaman->peminjamanJadwal)
+                        @if ($peminjaman->peminjamanJadwal)
                             {{ $peminjaman->peminjamanJadwal->jadwalLab->lab->nama_lab ?? 'Lab kosong' }}
                         @else
                             {{ $peminjaman->peminjamanManual->lab->nama_lab ?? 'Lab manual kosong' }}
                         @endif
                     </td>
                     <td>
-                        @if($peminjaman->peminjamanJadwal && $peminjaman->peminjamanJadwal->jadwalLab)
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }} - 
+                        @if ($peminjaman->peminjamanJadwal && $peminjaman->peminjamanJadwal->jadwalLab)
+                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }}
+                            -
                             {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') ?? '-' }}
-                        @else
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }} - 
+                        @elseif (
+                            $peminjaman->peminjamanManual &&
+                                $peminjaman->peminjamanManual->jam_mulai &&
+                                $peminjaman->peminjamanManual->jam_selesai)
+                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }}
+                            -
                             {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+                        @else
+                            -
                         @endif
-                    </td>                    
+                    </td>
                     <td>{{ $peminjaman->user->name }}</td>
                     <td>{{ $peminjaman->user->mahasiswa->nim }}</td>
-                    <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi }} ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas }})</td>                             
+                    <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi }}
+                        ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas }})
+                    </td>
                     <td>
                         @php
                             $badgeClass = match ($peminjaman->status_peminjaman) {
@@ -51,13 +60,13 @@
                                 'ditolak' => 'badge-danger',
                                 'dipinjam' => 'badge-primary',
                                 'selesai' => 'badge-success',
-                                default => 'badge-secondary'
+                                default => 'badge-secondary',
                             };
                         @endphp
                         <span class="badge-status {{ $badgeClass }}">
                             {{ ucfirst($peminjaman->status_peminjaman) }}
                         </span>
-                    </td> 
+                    </td>
                     {{-- <td>
                         <ul class="mb-0">
                             @foreach ($peminjaman->peralatan as $alat)
@@ -69,7 +78,8 @@
                         <a href="{{ route('peminjaman.show', $peminjaman) }}" class="btn btn-info btn-sm">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST" style="display:inline-block">
+                        <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST"
+                            style="display:inline-block">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm btn-delete">
@@ -82,4 +92,3 @@
         @endif
     </tbody>
 </table>
-
