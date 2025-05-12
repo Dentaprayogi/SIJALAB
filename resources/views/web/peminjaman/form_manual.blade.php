@@ -19,7 +19,7 @@
                     <i class="fas fa-clock"></i>
                 </span>
                 <input type="text" name="jam_mulai" id="jam_mulai" class="form-control"
-                    value="{{ old('jam_mulai') }}" required>
+                    value="{{ old('jam_mulai') }}" readonly>
             </div>
         </div>
 

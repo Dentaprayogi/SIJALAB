@@ -12,7 +12,7 @@ class Peminjaman extends Model
     protected $table = 'peminjaman';
     protected $primaryKey = 'id_peminjaman';
     protected $fillable = [
-        'tgl_peminjaman', 
+        'tgl_peminjaman',
         'id',
         'status_peminjaman',
     ];
@@ -33,6 +33,12 @@ class Peminjaman extends Model
     public function peminjamanSelesai()
     {
         return $this->hasOne(PeminjamanSelesai::class, 'id_peminjaman');
+    }
+
+    // Relasi ke Peminjaman Bermasalah (One to One)
+    public function peminjamanBermasalah()
+    {
+        return $this->hasOne(PeminjamanBermasalah::class, 'id_peminjaman');
     }
 
     // Relasi ke Peminjaman Jadwal (One to One)
@@ -65,4 +71,3 @@ class Peminjaman extends Model
         );
     }
 }
-

@@ -6,6 +6,7 @@ use App\Models\Hari;
 use App\Models\JadwalLab;
 use App\Models\Lab;
 use App\Models\Peminjaman;
+use App\Models\PeminjamanBermasalah;
 use App\Models\PeminjamanDitolak;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
@@ -27,6 +28,11 @@ class PeminjamanController extends Controller
             'peminjamanJadwal.jadwalLab.lab'
         ]);
 
+        // Cek apakah user adalah mahasiswa
+        if (Auth::user()->role === 'mahasiswa') {
+            $query->where('id', auth::id());
+        }
+
         // Ambil input filter
         $bulan = $request->input('bulan');
         $tahun = $request->input('tahun');
@@ -44,6 +50,7 @@ class PeminjamanController extends Controller
 
         return view('web.peminjaman.index', compact('peminjamans'));
     }
+
 
     public function create()
     {
@@ -133,6 +140,18 @@ class PeminjamanController extends Controller
         $jadwalLab = JadwalLab::findOrFail($request->id_jadwalLab);
         $idLab = $jadwalLab->id_lab;
 
+        // Cek apakah user masih punya peminjaman aktif
+        $hasActive = Peminjaman::where('id', Auth::id())
+            ->whereNotIn('status_peminjaman', ['ditolak', 'selesai', 'bermasalah'])
+            ->exists();
+
+        if ($hasActive) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Anda sudah membuat pengajuan yang belum dikonfirmasi atau peminjaman yang anda lakukan belum selesai.')
+                ->with('active_tab', 'manual');
+        }
+
         // Cek apakah lab sedang dipinjam TANPA jadwal (dari tabel peminjaman_manual)
         $hasUnscheduledBooking = PeminjamanManual::whereHas('peminjaman', function ($query) {
             $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
@@ -196,10 +215,22 @@ class PeminjamanController extends Controller
             'peralatan' => 'array',
         ]);
 
+        // Cek apakah user masih punya peminjaman aktif
+        $hasActive = Peminjaman::where('id', Auth::id())
+            ->whereNotIn('status_peminjaman', ['ditolak', 'selesai', 'bermasalah'])
+            ->exists();
+
+        if ($hasActive) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Anda sudah membuat pengajuan yang belum dikonfirmasi atau peminjaman yang anda lakukan belum selesai.')
+                ->with('active_tab', 'manual');
+        }
+
         // Cek apakah ada jadwal tumpang tindih
         $conflict = PeminjamanManual::where('id_lab', $request->id_lab)
             ->whereHas('peminjaman', function ($query) {
-                $query->whereNotIn('status_peminjaman', ['ditolak', 'selesai']);
+                $query->whereNotIn('status_peminjaman', ['ditolak', 'selesai', 'bermasalah']);
             })
             ->where(function ($query) use ($request) {
                 $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
@@ -265,6 +296,31 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman.show', $id)->with('success', 'Peminjaman disetujui.');
     }
 
+    public function bermasalah(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'required|string|max:255',
+        ]);
+
+        $peminjaman = Peminjaman::findOrFail($id);
+
+
+        // Update status peminjaman
+        $peminjaman->status_peminjaman = 'bermasalah';
+        $peminjaman->save();
+
+        // Simpan ke tabel peminjaman_bermasalah
+        PeminjamanBermasalah::create([
+            'id_peminjaman' => $peminjaman->id_peminjaman,
+            'jam_dikembalikan' => now()->format('H:i:s'),
+            'tgl_pengembalian' => now()->format('Y-m-d'),
+            'catatan' => $request->catatan,
+        ]);
+
+        return redirect()->route('peminjaman.show', $id)->with('success', 'Peminjaman ditandai sebagai bermasalah.');
+    }
+
+
     public function selesai($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
@@ -304,11 +360,26 @@ class PeminjamanController extends Controller
 
     public function destroy(Peminjaman $peminjaman)
     {
-        if (!in_array($peminjaman->status_peminjaman, ['pengajuan', 'ditolak', 'selesai'])) {
-            return back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam.');
+        // Mengecek apakah user yang login adalah mahasiswa
+        if (Auth::user()->role === 'mahasiswa') {
+            // Mahasiswa hanya bisa menghapus peminjaman dengan status pengajuan
+            if ($peminjaman->status_peminjaman !== 'pengajuan') {
+                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya pengajuan.');
+            }
         }
 
+        // Mengecek apakah user yang login adalah teknisi
+        if (Auth::user()->role === 'teknisi') {
+            // Teknisi bisa menghapus peminjaman dengan status pengajuan, ditolak, atau selesai
+            if (!in_array($peminjaman->status_peminjaman, ['ditolak', 'selesai'])) {
+                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya ditolak, atau selesai.');
+            }
+        }
+
+        // Jika semua kondisi terpenuhi, lakukan penghapusan peminjaman
         $peminjaman->delete();
+
+        // Mengarahkan kembali dengan pesan sukses
         return back()->with('success', 'Peminjaman berhasil dihapus.');
     }
 

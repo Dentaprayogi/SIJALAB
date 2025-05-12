@@ -3,9 +3,11 @@
 namespace App\Exports;
 
 use App\Models\Peminjaman;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
+
 
 class PeminjamanExport implements FromView
 {
@@ -17,6 +19,12 @@ class PeminjamanExport implements FromView
             'peminjamanManual.lab',
             'peminjamanJadwal.jadwalLab.lab'
         ]);
+
+        // Filter data hanya milik mahasiswa jika role = 'mahasiswa'
+        if (Auth::user()->role === 'mahasiswa') {
+            $query->where('id', auth::id());
+        }
+
 
         // Tambahkan filter jika perlu
         if (request()->has('bulan') && request('bulan')) {
@@ -32,4 +40,3 @@ class PeminjamanExport implements FromView
         ]);
     }
 }
-

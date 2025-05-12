@@ -41,42 +41,62 @@ Route::middleware([
         return view('web.profile.show');
     })->name('user.profile');
 
-    //Route Tahun Ajaran
-    Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
-        'tahunajaran' => 'tahunAjaran'
-    ]);
-    Route::patch('/tahun-ajaran/{id_tahunAjaran}/toggle-status', [TahunAjaranController::class, 'toggleStatus']);
+    // Route khusus untuk teknisi
+    Route::group(['middleware' => 'checkRole:teknisi'], function () {
+        //Route Manajemen Users
+        Route::resource('users', UserController::class);
+        Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+
+        //Route Tahun Ajaran
+        Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
+            'tahunajaran' => 'tahunAjaran'
+        ]);;
+        Route::patch('/tahun-ajaran/{id_tahunAjaran}/toggle-status', [TahunAjaranController::class, 'toggleStatus']);
 
 
-    //Route Peralatan
-    Route::resource('peralatan', PeralatanController::class);
+        //Route Peralatan
+        Route::resource('peralatan', PeralatanController::class);
 
-    //Route Prodi
-    Route::resource('prodi', ProdiController::class);
+        //Route Prodi
+        Route::resource('prodi', ProdiController::class);
 
-    //Route Kelas
-    Route::resource('kelas', KelasController::class);
+        //Route Kelas
+        Route::resource('kelas', KelasController::class);
 
-    //Route Matakuliah
-    Route::resource('matakuliah', MatakuliahController::class);
+        //Route Matakuliah
+        Route::resource('matakuliah', MatakuliahController::class);
 
-    //Route Dosen
-    Route::resource('dosen', DosenController::class);
+        //Route Dosen
+        Route::resource('dosen', DosenController::class);
 
-    //Route Manajemen Users
-    Route::resource('users', UserController::class);
-    Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+        //Route Manajemen Lab
+        Route::resource('lab', LabController::class);
+        Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus']);
 
-    //Route Manajemen Lab
-    Route::resource('lab', LabController::class);
-    Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus']);
+        // Route Jadwal Lab
+        Route::get('/jadwal_lab/create', [JadwalLabController::class, 'create'])->name('jadwal_lab.create');
+        Route::post('/jadwal_lab', [JadwalLabController::class, 'store'])->name('jadwal_lab.store');
+        Route::get('/jadwal_lab/{id_jadwalLab}/edit', [JadwalLabController::class, 'edit'])->name('jadwal_lab.edit');
+        Route::put('/jadwal_lab/{id_jadwalLab}', [JadwalLabController::class, 'update'])->name('jadwal_lab.update');
+        Route::patch('/jadwal_lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal_lab.toggle-status');
+        Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
+        Route::delete('/jadwal_lab/{id_jadwalLab}', [JadwalLabController::class, 'destroy'])->name('jadwal_lab.destroy');
+        Route::delete('/jadwal_lab/bulk-delete', [JadwalLabController::class, 'bulkDelete'])->name('jadwal_lab.bulkDelete');
+
+        // Route Peminjaman
+        Route::prefix('peminjaman')->middleware('auth')->group(function () {
+            Route::put('/peminjaman/{id}/setujui', [PeminjamanController::class, 'setujui'])->name('peminjaman.setujui');
+            Route::put('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('peminjaman.selesai');
+            Route::put('/peminjaman/{id}/bermasalah', [PeminjamanController::class, 'bermasalah'])->name('peminjaman.bermasalah');
+            Route::put('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
+            Route::delete('/peminjaman/bulk-delete', [PeminjamanController::class, 'bulkDelete'])->name('peminjaman.bulkDelete');
+        });
+    });
 
 
-    //Route Jadwal Lab
-    Route::resource('jadwal_lab', JadwalLabController::class);
-    Route::patch('/jadwal-lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal-lab.toggle-status');
-    Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
-    Route::delete('/jadwal-lab/bulk-delete', [JadwalLabController::class, 'bulkDelete'])->name('jadwal_lab.bulkDelete');
+    // Route Umum
+    // Route Jadwal Lab
+    Route::get('/jadwal_lab', [JadwalLabController::class, 'index'])->name('jadwal_lab.index');
 
     //Route Peminjaman
     Route::prefix('peminjaman')->middleware('auth')->group(function () {
@@ -86,14 +106,9 @@ Route::middleware([
         Route::post('/jadwal/store', [PeminjamanController::class, 'storeJadwal'])->name('peminjaman.storeJadwal');
         Route::post('/manual/store', [PeminjamanController::class, 'storeManual'])->name('peminjaman.storeManual');
         Route::get('/{peminjaman}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
-        Route::delete('/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
-        Route::put('/peminjaman/{id}/setujui', [PeminjamanController::class, 'setujui'])->name('peminjaman.setujui');
-        Route::put('/peminjaman/{id}/selesai', [PeminjamanController::class, 'selesai'])->name('peminjaman.selesai');
-        Route::put('/peminjaman/{id}/tolak', [PeminjamanController::class, 'tolak'])->name('peminjaman.tolak');
-        Route::delete('/peminjaman/bulk-delete', [PeminjamanController::class, 'bulkDelete'])->name('peminjaman.bulkDelete');
-
         Route::get('/peminjaman/export', function () {
             return Excel::download(new PeminjamanExport, 'peminjaman.xlsx');
         })->name('peminjaman.export');
+        Route::delete('/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
     });
 });

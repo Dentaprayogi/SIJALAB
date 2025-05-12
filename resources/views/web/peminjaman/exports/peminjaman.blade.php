@@ -15,6 +15,7 @@
             <th>Tanggal Pengembalian</th>
             <th>Jam Dikembalikan</th>
             <th>Alasan Ditolak</th>
+            <th>Catatan</th>
             <th>Status</th>
 
         </tr>
@@ -71,6 +72,13 @@
                 <td>
                     @if ($p->peminjamanDitolak && $p->peminjamanDitolak->alasan_ditolak)
                         {{ $p->peminjamanDitolak->alasan_ditolak }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if ($p->peminjamanBermasalah && $p->peminjamanBermasalah->catatan)
+                        {{ $p->peminjamanBermasalah->catatan }}
                     @else
                         -
                     @endif

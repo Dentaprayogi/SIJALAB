@@ -73,4 +73,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Mahasiswa::class, 'id');
     }
+
+    // Relasi ke Mahasiswa (Many to One)
+    public function peminjaman()
+    {
+        return $this->hasMany(Peminjaman::class, 'id');
+    }
 }

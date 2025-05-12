@@ -53,22 +53,30 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
     <script>
+        const jamMulaiInput = document.getElementById('jam_mulai');
+        const now = new Date();
+        const pad = num => String(num).padStart(2, '0');
+        const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        jamMulaiInput.value = currentTime;
+
         flatpickr("#jam_mulai", {
             enableTime: true,
             noCalendar: true,
-            dateFormat: "H:i", // format 24 jam
+            dateFormat: "H:i",
             time_24hr: true,
-            locale: "id"
+            locale: "id",
+            clickOpens: false // ⛔ Mencegah user membuka time picker
         });
 
         flatpickr("#jam_selesai", {
             enableTime: true,
             noCalendar: true,
-            dateFormat: "H:i", // format 24 jam
+            dateFormat: "H:i",
             time_24hr: true,
             locale: "id"
         });
     </script>
+
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -78,8 +86,18 @@
                 icon: 'error',
                 title: 'Gagal',
                 text: '{{ session('error') }}',
-                timer: 1500,
-                showConfirmButton: false
+                showConfirmButton: 'Ok'
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal menyimpan data!',
+                html: `{!! implode('<br>', $errors->all()) !!}`,
+                confirmButtonText: 'OK'
             });
         </script>
     @endif
@@ -95,28 +113,27 @@
             const errorJamSelesai = document.getElementById('error-jam_selesai');
             const errorLab = document.getElementById('error-lab');
 
-            function fetchAvailableLabs() {
-                const jamMulai = jamMulaiInput.value;
-                const jamSelesai = jamSelesaiInput.value;
+            // 🕒 Atur jam mulai otomatis sesuai waktu saat ini
+            const now = new Date();
+            const pad = num => String(num).padStart(2, '0');
+            const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            jamMulaiInput.value = currentTime;
 
-                // Reset error messages
+            function resetErrorMessages() {
                 errorJamMulai.innerText = '';
                 errorJamSelesai.innerText = '';
                 errorLab.innerText = '';
+            }
+
+            function fetchAvailableLabs() {
+                resetErrorMessages();
                 labSelect.innerHTML = '<option value="">-- Pilih Lab --</option>';
 
+                const jamMulai = jamMulaiInput.value;
+                const jamSelesai = jamSelesaiInput.value;
+
                 if (!jamMulai || !jamSelesai) {
-                    errorLab.innerText = 'Silakan isi jam mulai dan jam selesai terlebih dahulu.';
-                    return;
-                }
-
-                // Validasi: jamMulai tidak boleh kurang dari waktu sekarang
-                const now = new Date();
-                const nowTime = now.toTimeString().slice(0, 5); // Format "HH:MM"
-
-                if (jamMulai < nowTime) {
-                    errorJamMulai.innerText = 'Jam mulai tidak boleh lebih kecil dari waktu saat ini (' + nowTime +
-                        ').';
+                    errorLab.innerText = 'Silakan isi jam selesai terlebih dahulu.';
                     return;
                 }
 
@@ -125,7 +142,7 @@
                     return;
                 }
 
-                // Fetch data lab tersedia
+                // Kirim permintaan ke server
                 fetch("{{ route('labs.available') }}", {
                         method: "POST",
                         headers: {
@@ -141,12 +158,15 @@
                     .then(data => {
                         if (data.length === 0) {
                             errorLab.innerText = 'Tidak ada lab tersedia di waktu tersebut.';
-                        } else {
-                            data.forEach(lab => {
-                                labSelect.innerHTML +=
-                                    `<option value="${lab.id_lab}">${lab.nama_lab}</option>`;
-                            });
+                            return;
                         }
+
+                        data.forEach(lab => {
+                            const option = document.createElement('option');
+                            option.value = lab.id_lab;
+                            option.textContent = lab.nama_lab;
+                            labSelect.appendChild(option);
+                        });
                     })
                     .catch(error => {
                         console.error('Error fetching labs:', error);
@@ -154,7 +174,6 @@
                     });
             }
 
-            jamMulaiInput.addEventListener('change', fetchAvailableLabs);
             jamSelesaiInput.addEventListener('change', fetchAvailableLabs);
         });
     </script>

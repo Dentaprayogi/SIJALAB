@@ -25,6 +25,18 @@
         </td>
     </tr>
 
+    @if ($peminjaman->status_peminjaman === 'bermasalah')
+        <tr>
+            <th>Tanggal Pengembalian</th>
+            <td>{{ \Carbon\Carbon::parse($peminjaman->peminjamanBermasalah->tgl_pengembalian)->format('d-m-Y') }}
+                ({{ \Carbon\Carbon::parse($peminjaman->peminjamanBermasalah->jam_dikembalikan)->format('H:i') }})</td>
+        </tr>
+        <tr>
+            <th>Catatan</th>
+            <td>{{ $peminjaman->peminjamanBermasalah->catatan ?? '-' }}</td>
+        </tr>
+    @endif
+
     @if ($peminjaman->status_peminjaman === 'selesai')
         <tr>
             <th>Tanggal Pengembalian</th>

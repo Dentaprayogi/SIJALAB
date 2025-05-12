@@ -40,7 +40,21 @@ class PeralatanController extends Controller
 
     public function destroy($id)
     {
-        Peralatan::destroy($id);
+        // Menemukan peralatan berdasarkan ID
+        $peralatan = Peralatan::findOrFail($id);
+
+        // Mengecek apakah peralatan masih terhubung dengan peminjaman yang statusnya dipinjam, pengajuan, atau bermasalah
+        $isUsedInPeminjaman = $peralatan->peminjaman()->whereIn('status_peminjaman', ['dipinjam', 'pengajuan', 'bermasalah'])->exists();
+
+        if ($isUsedInPeminjaman) {
+            // Jika peralatan masih terhubung dengan peminjaman yang statusnya dipinjam, pengajuan, atau bermasalah
+            return redirect()->route('peralatan.index')->with('error', 'Peralatan tidak dapat dihapus karena masih terhubung dengan peminjaman yang aktif.');
+        }
+
+        // Jika peralatan tidak terhubung dengan peminjaman yang statusnya dipinjam, pengajuan, atau bermasalah, hapus peralatan
+        $peralatan->delete();
+
+        // Redirect dengan pesan sukses
         return redirect()->route('peralatan.index')->with('success', 'Peralatan berhasil dihapus.');
     }
 }

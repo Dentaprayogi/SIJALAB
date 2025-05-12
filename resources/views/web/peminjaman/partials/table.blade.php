@@ -78,14 +78,38 @@
                         <a href="{{ route('peminjaman.show', $peminjaman) }}" class="btn btn-info btn-sm">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST"
-                            style="display:inline-block">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger btn-sm btn-delete">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
+                        @auth
+                            @if (Auth::user()->role === 'teknisi')
+                                <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST"
+                                    style="display:inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm btn-delete"
+                                        @if (in_array($peminjaman->status_peminjaman, ['pengajuan', 'dipinjam', 'bermasalah'])) disabled 
+                style="cursor: not-allowed;" @endif>
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            @elseif (Auth::user()->role === 'mahasiswa' && $peminjaman->status_peminjaman === 'pengajuan')
+                                <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST"
+                                    style="display:inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm btn-delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('peminjaman.destroy', $peminjaman) }}" method="POST"
+                                    style="display:inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm btn-delete" disabled style="cursor: not-allowed;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        @endauth
                     </td>
                 </tr>
             @endforeach

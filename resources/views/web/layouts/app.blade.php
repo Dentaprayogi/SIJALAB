@@ -14,7 +14,7 @@
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('startbootstrap/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 
@@ -22,11 +22,11 @@
     <link href="{{ asset('startbootstrap/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('startbootstrap/css/sb-admin-2-custom.css') }}" rel="stylesheet">
 
-     <!-- Custom styles for this page -->
-     <link href="{{ asset('startbootstrap/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <!-- Custom styles for this page -->
+    <link href="{{ asset('startbootstrap/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
-     {{-- Css Select2 --}}
-     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    {{-- Css Select2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 </head>
 
@@ -41,7 +41,8 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="">
                 <div class="sidebar-brand-icon ">
-                    <img src="{{ asset('assets/img/logo poliwangi.png') }}" alt="Logo SIJALAB" style="height: 50px; width: 50px;">
+                    <img src="{{ asset('assets/img/logo poliwangi.png') }}" alt="Logo SIJALAB"
+                        style="height: 50px; width: 50px;">
                 </div>
                 <div class="sidebar-brand-text mx-2 text-primary">SIJALAB</div>
             </a>
@@ -55,87 +56,91 @@
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-            </li>   
+            </li>
 
-            <!-- Nav Item - Manajemen Users -->
-            <li class="nav-item {{ Request::is('user') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('users.index') }}">
-                    <i class="fas fa-users-cog"></i>
-                    <span>Manajemen User</span>
-                </a>
-            </li>   
+            @auth
+                @if (Auth::user()->role === 'teknisi')
+                    <!-- Nav Item - Manajemen Users -->
+                    <li class="nav-item {{ Request::is('user') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('users.index') }}">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Manajemen User</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Tahun Ajaran -->
-            <li class="nav-item {{ Request::is('tahunajaran*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('tahunajaran.index') }}">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Tahun Ajaran</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Tahun Ajaran -->
+                    <li class="nav-item {{ Request::is('tahunajaran*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('tahunajaran.index') }}">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Tahun Ajaran</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Peralatan -->
-            <li class="nav-item {{ Request::is('peralatan*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('peralatan.index') }}">
-                    <i class="fas fa-tools"></i>
-                    <span>Peralatan</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Peralatan -->
+                    <li class="nav-item {{ Request::is('peralatan*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('peralatan.index') }}">
+                            <i class="fas fa-tools"></i>
+                            <span>Peralatan</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Prodi -->
-            <li class="nav-item {{ Request::is('prodi*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('prodi.index') }}">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Prodi</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Prodi -->
+                    <li class="nav-item {{ Request::is('prodi*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('prodi.index') }}">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Prodi</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Kelas -->
-            <li class="nav-item {{ Request::is('kelas*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('kelas.index') }}">
-                    <i class="fas fa-chalkboard"></i>
-                    <span>Kelas</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Kelas -->
+                    <li class="nav-item {{ Request::is('kelas*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('kelas.index') }}">
+                            <i class="fas fa-chalkboard"></i>
+                            <span>Kelas</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Matakuliah -->
-            <li class="nav-item {{ Request::is('matakuliah*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('matakuliah.index') }}">
-                    <i class="fas fa-book-open"></i>
-                    <span>Matakuliah</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Matakuliah -->
+                    <li class="nav-item {{ Request::is('matakuliah*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('matakuliah.index') }}">
+                            <i class="fas fa-book-open"></i>
+                            <span>Matakuliah</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Dosen -->
-            <li class="nav-item {{ Request::is('dosen*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('dosen.index') }}">
-                    <i class="fas fa-user-tie"></i>
-                    <span>Data Dosen</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Dosen -->
+                    <li class="nav-item {{ Request::is('dosen*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('dosen.index') }}">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Data Dosen</span>
+                        </a>
+                    </li>
 
-            <!-- Nav Item - Lab -->
-            <li class="nav-item {{ Request::is('lab*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('lab.index') }}">
-                    <i class="fas fa-network-wired"></i>
-                    <span>Manajemen Lab</span>
-                </a>
-            </li>  
+                    <!-- Nav Item - Lab -->
+                    <li class="nav-item {{ Request::is('lab*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('lab.index') }}">
+                            <i class="fas fa-network-wired"></i>
+                            <span>Manajemen Lab</span>
+                        </a>
+                    </li>
+                @endif
+            @endauth
 
             <!-- Nav Item - Jadwal Lab -->
             <li class="nav-item {{ Request::is('jadwal_lab*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('jadwal_lab.index') }}">
-                    <i class="fas fa-network-wired"></i>
+                    <i class="fas fa-clipboard-list"></i>
                     <span>Jadwal Lab</span>
                 </a>
-            </li>  
+            </li>
 
             <!-- Nav Item - Riwayat Peminjaman Lab -->
             <li class="nav-item {{ Request::is('peminjaman*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('peminjaman.index') }}">
-                    <i class="fas fa-network-wired"></i>
+                    <i class="fas fa-history"></i>
                     <span>Riwayat Peminjaman</span>
                 </a>
-            </li>  
+            </li>
         </ul>
         <!-- End of Sidebar -->
 
@@ -196,18 +201,18 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-white small">{{ Auth::user()->name }}</span>
-                                <img class="img-profile rounded-circle"
-                                    src="{{ Auth::user()->profile_photo_url }}">
+                                <img class="img-profile rounded-circle" src="{{ Auth::user()->profile_photo_url }}">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item"  href="{{ route('profile.show') }}">
+                                <a class="dropdown-item" href="{{ route('profile.show') }}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-200"></i>
                                     Profile
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="#" data-toggle="modal"
+                                    data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-200"></i>
                                     Logout
                                 </a>
@@ -248,7 +253,8 @@
     </a>
 
     <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg">
                 <!-- Modal Header -->
@@ -264,7 +270,8 @@
                 <!-- Modal Body -->
                 <div class="modal-body text-center">
                     <i class="fas fa-sign-out-alt fa-3x text-primary mb-3"></i>
-                    <p class="mb-4">Apakah Anda yakin ingin logout? Klik "Logout" untuk mengakhiri sesi Anda saat ini.</p>
+                    <p class="mb-4">Apakah Anda yakin ingin logout? Klik "Logout" untuk mengakhiri sesi Anda saat
+                        ini.</p>
                 </div>
 
                 <!-- Modal Footer -->
@@ -284,22 +291,22 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="{{ asset('startbootstrap/vendor/jquery/jquery.min.js')}}"></script>
-    <script src="{{ asset('startbootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ asset('startbootstrap/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('startbootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="{{ asset('startbootstrap/vendor/jquery-easing/jquery.easing.min.js')}}"></script>
+    <script src="{{ asset('startbootstrap/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="{{ asset('startbootstrap/js/sb-admin-2.min.js')}}"></script>
+    <script src="{{ asset('startbootstrap/js/sb-admin-2.min.js') }}"></script>
 
 
     <!-- Page level plugins -->
-    <script src="{{ asset('startbootstrap/vendor/datatables/jquery.dataTables.min.js')}}"></script>
-    <script src="{{ asset('startbootstrap/vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
+    <script src="{{ asset('startbootstrap/vendor/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('startbootstrap/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 
     <!-- Page level custom scripts -->
-    <script src="{{ asset('startbootstrap/js/demo/datatables-demo.js')}}"></script>
+    <script src="{{ asset('startbootstrap/js/demo/datatables-demo.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -309,19 +316,20 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-        $('#dataTableSemua').DataTable();
-        $('#dataTableSenin').DataTable();
-        $('#dataTableSelasa').DataTable();
-        $('#dataTableRabu').DataTable();
-        $('#dataTableKamis').DataTable();
-        $('#dataTablePengajuan').DataTable();
-        $('#dataTableDipinjam').DataTable();
-        $('#dataTableSelesai').DataTable();
-        $('#dataTableDitolak').DataTable();
-    });
+        $(document).ready(function() {
+            $('#dataTableSemua').DataTable();
+            $('#dataTableSenin').DataTable();
+            $('#dataTableSelasa').DataTable();
+            $('#dataTableRabu').DataTable();
+            $('#dataTableKamis').DataTable();
+            $('#dataTablePengajuan').DataTable();
+            $('#dataTableDipinjam').DataTable();
+            $('#dataTableSelesai').DataTable();
+            $('#dataTableDitolak').DataTable();
+            $('#dataTableBermasalah').DataTable();
+        });
     </script>
-    
+
 </body>
 
 </html>
