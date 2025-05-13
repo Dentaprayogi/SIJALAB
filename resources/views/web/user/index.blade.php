@@ -12,9 +12,11 @@
                     <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead class="thead-primary">
                             <tr>
+                                <th><input type="checkbox" id="select-all-users"></th>
                                 <th>No.</th>
                                 <th>Nama</th>
                                 <th>Email</th>
+                                <th>Prodi</th>
                                 <th>Role</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -28,9 +30,20 @@
                             @else
                                 @foreach ($users as $user)
                                     <tr>
+                                        <td> <input type="checkbox" class="select-user" name="selected_users[]"
+                                                value="{{ $user->id }}">
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
+                                        <td>
+                                            @if ($user->mahasiswa)
+                                                {{ $user->mahasiswa->prodi->kode_prodi }}
+                                                ({{ $user->mahasiswa->kelas->nama_kelas }})
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>{{ ucfirst($user->role) }}</td>
                                         <td>
                                             <!-- Toggle Switch Status -->
@@ -87,6 +100,14 @@
                             @endif
                         </tbody>
                     </table>
+                    <form id="bulk-delete-form" action="{{ route('users.bulkDelete') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="selected_ids" id="selected_ids">
+                        <button type="submit" class="btn btn-danger btn-sm" id="bulk-delete-btn">
+                            <i class="fas fa-trash-alt"></i> Hapus Terpilih
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -100,8 +121,7 @@
                     icon: 'success',
                     title: 'Berhasil',
                     text: '{{ session('success') }}',
-                    timer: 3000,
-                    showConfirmButton: false
+                    showConfirmButton: 'Ok'
                 });
             });
         </script>
@@ -214,6 +234,78 @@
                             form.submit();
                         }
                     });
+                });
+            });
+        });
+    </script>
+
+    {{-- Bulk Delete --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = $('#dataTable').DataTable(); // pastikan DataTable sudah ter-inisialisasi
+            const selectAllCheckbox = document.getElementById('select-all-users');
+            const deleteBtn = document.getElementById('bulk-delete-btn');
+            const bulkForm = document.getElementById('bulk-delete-form');
+
+            function toggleDeleteButton() {
+                const checkedCount = $('.select-user:checked').length;
+                deleteBtn.disabled = checkedCount === 0;
+            }
+
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+
+                    // hanya centang checkbox yang terlihat (sudah difilter)
+                    table.rows({
+                        search: 'applied'
+                    }).nodes().to$().find('.select-user').prop('checked', isChecked);
+                    toggleDeleteButton();
+                });
+            }
+
+            // toggle delete button saat checkbox individu berubah
+            $('#dataTable tbody').on('change', '.select-user', function() {
+                toggleDeleteButton();
+            });
+
+            // SweetAlert konfirmasi dan siapkan input hidden sebelum submit
+            bulkForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // hapus input hidden sebelumnya (jika ada)
+                $('#bulk-delete-form input[name="selected_ids[]"]').remove();
+
+                const selectedCheckboxes = $('.select-user:checked');
+
+                // ⚠️ Tambahkan pengecekan minimal 1 data dipilih
+                if (selectedCheckboxes.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih minimal satu data untuk dihapus.', 'warning');
+                    return;
+                }
+
+                // buat input hidden untuk setiap ID yang dicentang
+                selectedCheckboxes.each(function() {
+                    const input = $('<input>').attr('type', 'hidden')
+                        .attr('name', 'selected_ids[]')
+                        .val($(this).val());
+                    $('#bulk-delete-form').append(input);
+                });
+
+                // konfirmasi SweetAlert
+                Swal.fire({
+                    title: 'Yakin ingin menghapus?',
+                    text: 'Data yang dipilih akan dihapus secara permanen!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        bulkForm.submit(); // kirim form setelah konfirmasi
+                    }
                 });
             });
         });

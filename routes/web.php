@@ -44,6 +44,7 @@ Route::middleware([
     // Route khusus untuk teknisi
     Route::group(['middleware' => 'checkRole:teknisi'], function () {
         //Route Manajemen Users
+        Route::delete('/users/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulkDelete');
         Route::resource('users', UserController::class);
         Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
 

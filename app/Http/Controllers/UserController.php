@@ -50,7 +50,7 @@ class UserController extends Controller
 
         // Cek apakah user masih memiliki peminjaman aktif atau bermasalah
         $peminjamanAktif = $user->peminjaman()
-            ->whereIn('status_peminjaman', ['dipinjam', 'bermasalah'])
+            ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam', 'bermasalah'])
             ->exists();
 
         if ($peminjamanAktif) {
@@ -59,5 +59,51 @@ class UserController extends Controller
 
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        // Pastikan request mengandung array selected_ids
+        $ids = $request->input('selected_ids');
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada user yang dipilih untuk dihapus.');
+        }
+
+        // Status peminjaman yang dianggap aktif
+        $statusAktif = ['pengajuan', 'dipinjam', 'bermasalah'];
+
+        // Ambil ID user yang memiliki peminjaman aktif
+        $userDenganPeminjamanAktif = User::whereIn('id', $ids)
+            ->whereHas('peminjaman', function ($query) use ($statusAktif) {
+                $query->whereIn('status_peminjaman', $statusAktif);
+            })
+            ->pluck('id')
+            ->toArray();
+
+        // Filter user yang boleh dihapus:
+        // - role == mahasiswa
+        // - tidak punya peminjaman aktif
+        $userYangBolehDihapus = User::whereIn('id', $ids)
+            ->whereNotIn('id', $userDenganPeminjamanAktif)
+            ->where('role', 'mahasiswa')
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($userYangBolehDihapus)) {
+            return redirect()->back()->with('error', 'Semua user memiliki peminjaman aktif atau bukan berperan sebagai mahasiswa.');
+        }
+
+        // Hapus user yang valid
+        User::whereIn('id', $userYangBolehDihapus)->delete();
+
+        $jumlahGagal = count($ids) - count($userYangBolehDihapus);
+
+        $pesan = 'Beberapa user berhasil dihapus.';
+        if ($jumlahGagal > 0) {
+            $pesan .= " $jumlahGagal user tidak bisa dihapus karena bukan mahasiswa atau masih memiliki peminjaman aktif.";
+        }
+
+        return redirect()->route('users.index')->with('success', $pesan);
     }
 }
