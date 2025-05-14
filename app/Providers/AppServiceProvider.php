@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Peminjaman;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +25,16 @@ class AppServiceProvider extends ServiceProvider
     {
         // Set locale Carbon agar nama hari/bulan dalam Bahasa Indonesia
         Carbon::setLocale('id');
+
+        // Notifikasi
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $notifikasi = Peminjaman::with('user')
+                    ->where('status_peminjaman', 'pengajuan')
+                    ->latest()
+                    ->get();
+                $view->with('notifikasi', $notifikasi);
+            }
+        });
     }
 }

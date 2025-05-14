@@ -20,7 +20,6 @@ class TahunAjaran extends Model
     // Relasi ke Tahun Ajaran (Many to One)
     public function jadwalLab()
     {
-        return $this->hashMany(JadwalLab::class, 'id_tahunAjaran');
+        return $this->hasMany(JadwalLab::class, 'id_tahunAjaran');
     }
-
 }

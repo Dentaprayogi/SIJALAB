@@ -194,6 +194,59 @@
                             </div>
                         </li>
 
+                        <!-- Nav Item - Alerts -->
+                        @auth
+                            @if (Auth::user()->role === 'teknisi')
+                                <li class="nav-item dropdown no-arrow mx-1">
+                                    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                        <i class="fas fa-bell fa-fw text-white"></i>
+                                        @php $jumlah = $notifikasi->count(); @endphp
+                                        @if ($jumlah > 0)
+                                            <span class="badge badge-danger badge-counter"
+                                                style="background-color: red; color: white !important; font-weight: bold;">
+                                                {{ $jumlah > 3 ? '3+' : $jumlah }}
+                                            </span>
+                                        @endif
+                                    </a>
+
+                                    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                        aria-labelledby="alertsDropdown">
+                                        <h6 class="dropdown-header">
+                                            Notifikasi Pengajuan
+                                        </h6>
+
+                                        @forelse ($notifikasi as $item)
+                                            <a class="dropdown-item d-flex align-items-center"
+                                                href="{{ route('peminjaman.show', $item->id_peminjaman) }}">
+                                                <div class="mr-3">
+                                                    <div class="icon-circle bg-warning">
+                                                        <i class="fas fa-exclamation-triangle text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="small text-gray-500">
+                                                        {{ $item->created_at->format('d M Y') }}
+                                                    </div>
+                                                    <span class="font-weight-bold">Pengajuan oleh
+                                                        {{ $item->user->name }}</span>
+                                                </div>
+                                            </a>
+                                        @empty
+                                            <span class="dropdown-item text-center small text-gray-500">Tidak ada pengajuan
+                                                baru</span>
+                                        @endforelse
+
+                                        <a class="dropdown-item text-center small text-gray-500"
+                                            href="{{ route('peminjaman.index') }}">
+                                            Lihat Semua
+                                        </a>
+                                    </div>
+                                </li>
+                            @endif
+                        @endauth
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->

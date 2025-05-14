@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Hari;
 use App\Models\Lab;
-use App\Models\JadwalLab;           // <<< tambahkan ini
+use App\Models\JadwalLab;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use Carbon\Carbon;
@@ -73,8 +73,11 @@ class DashboardController extends Controller
                         ->whereDate('tgl_peminjaman', today())
                 )->exists();
 
+            // Cek apakah lab memiliki jadwal di luar jam sekarang (berarti sedang kosong meskipun ada jadwal hari ini)
             $hasJadwal = JadwalLab::where('id_lab', $lab->id_lab)
                 ->where('id_hari', $hari->id_hari)
+                ->where('jam_mulai', '<=', $currentTime)
+                ->where('jam_selesai', '>=', $currentTime)
                 ->exists();
 
             if ($isDipinjam) {
@@ -87,6 +90,7 @@ class DashboardController extends Controller
                 $lab->status = 'Kosong';
             }
         }
+
 
         return view('web.dashboard.dashboard', compact('labs'));
     }

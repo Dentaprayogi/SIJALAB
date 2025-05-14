@@ -48,9 +48,14 @@ class PeminjamanController extends Controller
 
         $peminjamans = $query->latest()->get();
 
-        return view('web.peminjaman.index', compact('peminjamans'));
-    }
+        // 🔔 Ambil notifikasi peminjaman yang statusnya "pengajuan"
+        $notifikasi = Peminjaman::with('user')
+            ->where('status_peminjaman', 'pengajuan')
+            ->latest()
+            ->get();
 
+        return view('web.peminjaman.index', compact('peminjamans', 'notifikasi'));
+    }
 
     public function create()
     {
