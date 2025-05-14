@@ -243,16 +243,14 @@ class JadwalLabController extends Controller
     {
         $jadwalLab = JadwalLab::findOrFail($id);
 
-        // Cek apakah jadwal lab ini masih digunakan oleh peminjaman aktif
+        // Cek apakah jadwal lab ini masih digunakan oleh peminjaman (semua status)
         $digunakan = DB::table('peminjaman_jadwal')
-            ->join('peminjaman', 'peminjaman_jadwal.id_peminjaman', '=', 'peminjaman.id_peminjaman')
-            ->where('peminjaman_jadwal.id_jadwalLab', $id)
-            ->whereIn('peminjaman.status_peminjaman', ['pengajuan', 'dipinjam', 'bermasalah'])
+            ->where('id_jadwalLab', $id)
             ->exists();
 
         if ($digunakan) {
             return redirect()->back()
-                ->with('error', 'Jadwal Lab tidak dapat dihapus karena masih terhubung oleh peminjaman aktif.');
+                ->with('error', 'Jadwal Lab tidak dapat dihapus karena masih terhubung oleh data peminjaman.');
         }
 
         $jadwalLab->delete();
@@ -260,7 +258,6 @@ class JadwalLabController extends Controller
         return redirect()->route('jadwal_lab.index')
             ->with('success', 'Jadwal Lab berhasil dihapus.');
     }
-
 
     public function getDependentData($prodiId)
     {
@@ -313,18 +310,17 @@ class JadwalLabController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
         }
 
-        // Ambil ID jadwal yang sedang digunakan dalam peminjaman aktif
+        // Ambil semua ID jadwal yang terhubung dengan peminjaman, tanpa mempedulikan status
         $jadwalTerpakai = DB::table('peminjaman_jadwal')
-            ->join('peminjaman', 'peminjaman_jadwal.id_peminjaman', '=', 'peminjaman.id_peminjaman')
-            ->whereIn('peminjaman_jadwal.id_jadwalLab', $ids)
-            ->whereIn('peminjaman.status_peminjaman', ['pengajuan', 'dipinjam', 'bermasalah'])
-            ->pluck('peminjaman_jadwal.id_jadwalLab')
+            ->whereIn('id_jadwalLab', $ids)
+            ->pluck('id_jadwalLab')
+            ->unique()
             ->toArray();
 
         // Jika ada yang terpakai, batalkan penghapusan dan beri tahu user
         if (!empty($jadwalTerpakai)) {
             return redirect()->back()
-                ->with('error', 'Beberapa jadwal lab tidak bisa dihapus karena masih terhubung dengan peminjaman aktif (pengajuan, dipinjam, atau bermasalah).');
+                ->with('error', 'Beberapa jadwal lab tidak bisa dihapus karena masih terhubung dengan data peminjaman.');
         }
 
         // Jika aman, lakukan penghapusan
