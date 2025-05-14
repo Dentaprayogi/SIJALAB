@@ -76,6 +76,7 @@ class DashboardController extends Controller
             // Cek apakah lab memiliki jadwal di luar jam sekarang (berarti sedang kosong meskipun ada jadwal hari ini)
             $hasJadwal = JadwalLab::where('id_lab', $lab->id_lab)
                 ->where('id_hari', $hari->id_hari)
+                ->where('status_jadwalLab', 'aktif') // hanya jadwal aktif
                 ->where('jam_mulai', '<=', $currentTime)
                 ->where('jam_selesai', '>=', $currentTime)
                 ->exists();

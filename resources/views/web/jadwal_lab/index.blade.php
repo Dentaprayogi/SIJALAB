@@ -91,8 +91,7 @@
                 icon: 'error',
                 title: 'Gagal',
                 text: '{{ session('error') }}',
-                timer: 1500,
-                showConfirmButton: false
+                showConfirmButton: 'Ok'
             });
         </script>
     @endif
@@ -144,7 +143,7 @@
                         document.getElementById(`status_jadwalLab_text_${jadwalId}`).textContent =
                             newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
 
-                        fetch(`/jadwal-lab/${jadwalId}/toggle-status`, {
+                        fetch(`/jadwal_lab/${jadwalId}/toggle-status`, {
                                 method: 'PATCH',
                                 headers: {
                                     'Content-Type': 'application/json',

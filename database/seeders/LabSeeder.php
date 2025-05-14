@@ -11,31 +11,31 @@ class LabSeeder extends Seeder
     {
         $dataLab = [
             [
-                'nama_lab' => 'Lab Pemrograman',
+                'nama_lab' => 'Pemrograman',
                 'fasilitas_lab' => 'Komputer dengan software pemrograman terbaru, proyektor, dan kursi nyaman.',
                 'kapasitas_lab' => 30,
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Lab Jaringan',
+                'nama_lab' => 'Jaringan',
                 'fasilitas_lab' => 'Router, switch, kabel jaringan, dan perangkat jaringan lainnya.',
                 'kapasitas_lab' => 25,
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Lab Sistem Operasi',
+                'nama_lab' => 'Sistem Operasi',
                 'fasilitas_lab' => 'Komputer dengan berbagai sistem operasi, proyektor, dan meja kerja.',
                 'kapasitas_lab' => 20,
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Lab Keamanan Jaringan',
+                'nama_lab' => 'Keamanan Jaringan',
                 'fasilitas_lab' => 'Perangkat keamanan jaringan dan alat-alat praktikum keamanan siber.',
                 'kapasitas_lab' => 15,
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Lab Bisnis Digital',
+                'nama_lab' => 'Bisnis Digital',
                 'fasilitas_lab' => 'Komputer dengan software analisis bisnis dan akses internet cepat.',
                 'kapasitas_lab' => 30,
                 'status_lab' => 'aktif',
