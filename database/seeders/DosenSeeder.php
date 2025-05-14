@@ -27,7 +27,7 @@ class DosenSeeder extends Seeder
                 ['nama_dosen' => 'Furiansyah Dipraja, S.T., M.Kom.', 'telepon' => '+6282129916997'],
                 ['nama_dosen' => 'Indra Kurniawan, S.T., M.Eng.', 'telepon' => '+6285293810942'],
             ],
-            'Teknologi Rekayasa Komputer dan Jaringan' => [
+            'Teknologi Rekayasa Komputer dan jaringan' => [
                 ['nama_dosen' => 'Herman Yuliandoko, S.T., M.T.', 'telepon' => '081334436478'],
                 ['nama_dosen' => 'Vivien Arief Wardhany, S.T., M.T.', 'telepon' => '081331068658'],
                 ['nama_dosen' => 'Endi Sailul Haq, S.T., M.Kom.', 'telepon' => '081336851513'],

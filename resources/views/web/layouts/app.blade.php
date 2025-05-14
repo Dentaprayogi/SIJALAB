@@ -61,7 +61,7 @@
             @auth
                 @if (Auth::user()->role === 'teknisi')
                     <!-- Nav Item - Manajemen Users -->
-                    <li class="nav-item {{ Request::is('user') ? 'active' : '' }}">
+                    <li class="nav-item {{ Request::is('user*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('users.index') }}">
                             <i class="fas fa-users-cog"></i>
                             <span>Manajemen User</span>

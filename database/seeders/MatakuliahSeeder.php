@@ -18,7 +18,7 @@ class MatakuliahSeeder extends Seeder
                 'Rekayasa Perangkat Lunak',
                 'Struktur Data',
             ],
-            'Teknologi Rekayasa Komputer dan Jaringan' => [
+            'Teknologi Rekayasa Komputer dan jaringan' => [
                 'Jaringan Komputer',
                 'Keamanan Jaringan',
                 'Sistem Operasi',
