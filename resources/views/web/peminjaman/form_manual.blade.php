@@ -61,10 +61,10 @@
         </div>
     </div>
 
-    {{-- Keterangan --}}
+    {{-- Kegiatan --}}
     <div class="mb-3">
-        <label for="keterangan" class="form-label">Keterangan</label>
-        <textarea name="keterangan" id="keterangan" class="form-control">{{ old('keterangan') }}</textarea>
+        <label for="kegiatan" class="form-label">Kegiatan</label>
+        <textarea name="kegiatan" id="kegiatan" class="form-control">{{ old('kegiatan') }}</textarea>
     </div>
 
     {{-- Peralatan --}}

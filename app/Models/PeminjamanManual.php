@@ -17,7 +17,7 @@ class PeminjamanManual extends Model
         'jam_mulai',
         'jam_selesai',
         'id_lab',
-        'keterangan'
+        'kegiatan'
     ];
 
     // Relasi ke Peminjaman (One to One)

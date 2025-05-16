@@ -11,7 +11,7 @@ class KelasController extends Controller
     public function index()
     {
         $kelas = Kelas::join('prodi', 'kelas.id_prodi', '=', 'prodi.id_prodi')
-            ->orderBy('prodi.kode_prodi', 'asc') // Urut berdasarkan kode_prodi
+            ->orderBy('prodi.singkatan_prodi', 'asc') // Urut berdasarkan singkatan_prodi
             ->orderBy('kelas.nama_kelas', 'asc') // Urut berdasarkan nama_kelas
             ->select('kelas.*') // Pastikan hanya mengambil kolom dari kelas
             ->with('prodi') // Pastikan relasi tetap dipanggil

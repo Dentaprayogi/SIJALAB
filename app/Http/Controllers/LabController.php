@@ -25,14 +25,10 @@ class LabController extends Controller
     {
         $request->validate([
             'nama_lab' => 'required|string|max:255',
-            'fasilitas_lab' => 'required|string',
-            'kapasitas_lab' => 'required|integer',
         ]);
 
         Lab::create([
             'nama_lab' => $request->nama_lab,
-            'fasilitas_lab' => $request->fasilitas_lab,
-            'kapasitas_lab' => $request->kapasitas_lab,
             'status_lab' => 'aktif', // default value
         ]);
 
@@ -49,12 +45,26 @@ class LabController extends Controller
     {
         $request->validate([
             'nama_lab' => 'required|string|max:255',
-            'fasilitas_lab' => 'required|string',
-            'kapasitas_lab' => 'required|integer',
             'status_lab' => 'required|in:aktif,nonaktif',
         ]);
 
         $lab = Lab::findOrFail($id_lab);
+
+        // Cek jika ingin nonaktif, pastikan tidak terhubung dengan jadwal atau peminjaman_manual aktif
+        if ($request->status_lab === 'nonaktif') {
+            $isInJadwal = JadwalLab::where('id_lab', $lab->id_lab)->exists();
+
+            $isInPeminjamanManual = PeminjamanManual::where('id_lab', $lab->id_lab)
+                ->whereHas('peminjaman', function ($query) {
+                    $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
+                })
+                ->exists();
+
+            if ($isInJadwal || $isInPeminjamanManual) {
+                return redirect()->back()->with('error', 'Tidak bisa menonaktifkan lab karena masih terhubung dengan jadwal atau peminjaman yang belum selesai (Pengajuan atau Dipinjam).');
+            }
+        }
+
         $lab->update($request->all());
 
         return redirect()->route('lab.index')->with('success', 'Data lab berhasil diperbarui.');
@@ -68,7 +78,7 @@ class LabController extends Controller
 
         if ($hasJadwalLab || $hasPeminjamanManual) {
             return redirect()->route('lab.index')
-                ->with('error', 'Lab tidak dapat dihapus karena masih terhubung dengan jadwal lab atau peminjaman manual.');
+                ->with('error', 'Lab tidak dapat dihapus karena masih terhubung dengan jadwal lab atau peminjaman manual (Pengajuan atau Dipinjam).');
         }
 
         // Hapus data lab jika tidak terhubung
@@ -84,6 +94,23 @@ class LabController extends Controller
         $status = $request->status_lab;
         if (!in_array($status, ['aktif', 'nonaktif'])) {
             return response()->json(['message' => 'Status tidak valid.'], 422);
+        }
+
+        // Jika ingin menonaktifkan, lakukan validasi keterhubungan
+        if ($status === 'nonaktif') {
+            $isInJadwal = JadwalLab::where('id_lab', $lab->id_lab)->exists();
+
+            $isInPeminjamanManual = PeminjamanManual::where('id_lab', $lab->id_lab)
+                ->whereHas('peminjaman', function ($query) {
+                    $query->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']);
+                })
+                ->exists();
+
+            if ($isInJadwal || $isInPeminjamanManual) {
+                return response()->json([
+                    'message' => 'Tidak bisa menonaktifkan lab karena masih terhubung dengan jadwal atau peminjaman yang belum selesai.'
+                ], 422);
+            }
         }
 
         $lab->status_lab = $status;

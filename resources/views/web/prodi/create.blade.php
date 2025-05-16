@@ -4,7 +4,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTambahProdiLabel">Tambah Prodi</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="location.reload();">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -13,15 +14,17 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="nama_prodi" class="form-label">Nama Prodi</label>
-                        <input type="text" class="form-control @error('nama_prodi') is-invalid @enderror" id="nama_prodi" name="nama_prodi" required>
+                        <input type="text" class="form-control @error('nama_prodi') is-invalid @enderror"
+                            id="nama_prodi" name="nama_prodi" required>
                         @error('nama_prodi')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <label for="kode_prodi" class="form-label">Kode Prodi</label>
-                        <input type="text" class="form-control @error('kode_prodi') is-invalid @enderror" id="kode_prodi" name="kode_prodi" required>
-                        @error('kode_prodi')
+                        <label for="singkatan_prodi" class="form-label">Singkatan Prodi</label>
+                        <input type="text" class="form-control @error('singkatan_prodi') is-invalid @enderror"
+                            id="singkatan_prodi" name="singkatan_prodi" required>
+                        @error('singkatan_prodi')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

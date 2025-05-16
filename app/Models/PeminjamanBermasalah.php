@@ -16,7 +16,7 @@ class PeminjamanBermasalah extends Model
         'id_peminjaman',
         'tgl_pengembalian',
         'jam_dikembalikan',
-        'catatan'
+        'alasan_bermasalah'
     ];
 
     public function peminjaman()

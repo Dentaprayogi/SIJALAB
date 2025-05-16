@@ -25,7 +25,7 @@ class MahasiswaSeeder extends Seeder
                     // Buat user baru
                     $user = User::create([
                         'name' => 'Mahasiswa ' . $prodi->nama_prodi . ' ' . $kelas->nama_kelas . ' - ' . $i,
-                        'email' => 'mhs_' . strtolower(Str::slug($prodi->kode_prodi . $kelas->nama_kelas . $i)) . '@example.com',
+                        'email' => 'mhs_' . strtolower(Str::slug($prodi->singkatan_prodi . '_' . $kelas->nama_kelas . '_' . $i)) . '_' . Str::random(5) . '@example.com',
                         'password' => bcrypt('password'),
                         'role' => 'mahasiswa',
                     ]);

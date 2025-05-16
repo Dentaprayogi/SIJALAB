@@ -16,7 +16,7 @@
                             {{ old('id_jadwalLab') == $jadwal->id_jadwalLab ? 'selected' : '' }}>
                             {{ $jadwal->hari->nama_hari }} / Lab.
                             {{ $jadwal->lab->nama_lab }} /
-                            {{ $jadwal->prodi->kode_prodi }} ({{ $jadwal->kelas->nama_kelas }}) /
+                            {{ $jadwal->prodi->singkatan_prodi }} ({{ $jadwal->kelas->nama_kelas }}) /
                             {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
                             {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
                         </option>
@@ -69,7 +69,7 @@
                         {{ old('id_jadwalLab') == $jadwal->id_jadwalLab ? 'selected' : '' }}>
                         {{ $jadwal->hari->nama_hari }} / Lab.
                         {{ $jadwal->lab->nama_lab }} /
-                        {{ $jadwal->prodi->kode_prodi }} ({{ $jadwal->kelas->nama_kelas }}) /
+                        {{ $jadwal->prodi->singkatan_prodi }} ({{ $jadwal->kelas->nama_kelas }}) /
                         {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
                         {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
                     </option>

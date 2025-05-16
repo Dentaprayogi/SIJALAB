@@ -43,7 +43,7 @@
                     <td>{{ $item->rentang_jam }}</td>
                     <td>{{ $item->mataKuliah->nama_mk }}</td>
                     <td>{{ $item->dosen->nama_dosen }}</td>
-                    <td>{{ $item->prodi->kode_prodi }} ({{ $item->kelas->nama_kelas }})</td>
+                    <td>{{ $item->prodi->singkatan_prodi }} ({{ $item->kelas->nama_kelas }})</td>
                     <td>{{ $item->tahunAjaran->tahun_ajaran }} ({{ ucfirst($item->tahunAjaran->semester) }})</td>
                     <td>
                         @auth

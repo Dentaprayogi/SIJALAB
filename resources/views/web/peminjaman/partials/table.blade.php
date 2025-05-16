@@ -50,17 +50,17 @@
                     </td>
                     <td>{{ $peminjaman->user->name }}</td>
                     <td>{{ $peminjaman->user->mahasiswa->nim }}</td>
-                    <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi }}
+                    <td>{{ $peminjaman->user->mahasiswa->prodi->singkatan_prodi }}
                         ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas }})
                     </td>
                     <td>
                         @php
                             $badgeClass = match ($peminjaman->status_peminjaman) {
                                 'pengajuan' => 'badge-warning',
-                                'ditolak' => 'badge-danger',
+                                'ditolak' => 'badge-secondary',
                                 'dipinjam' => 'badge-primary',
                                 'selesai' => 'badge-success',
-                                default => 'badge-secondary',
+                                'bermasalah' => 'badge-danger',
                             };
                         @endphp
                         <span class="badge-status {{ $badgeClass }}">
@@ -85,7 +85,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger btn-sm btn-delete"
-                                        @if (in_array($peminjaman->status_peminjaman, ['pengajuan', 'dipinjam', 'bermasalah'])) disabled 
+                                        @if (in_array($peminjaman->status_peminjaman, ['pengajuan', 'dipinjam'])) disabled 
                 style="cursor: not-allowed;" @endif>
                                         <i class="fas fa-trash-alt"></i>
                                     </button>

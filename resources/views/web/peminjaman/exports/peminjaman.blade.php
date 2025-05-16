@@ -43,7 +43,7 @@
                 </td>
                 <td>{{ $p->user->name ?? '-' }}</td>
                 <td>{{ $p->user->mahasiswa->nim ?? '-' }}</td>
-                <td>{{ $p->user->mahasiswa->prodi->kode_prodi ?? '-' }}
+                <td>{{ $p->user->mahasiswa->prodi->singkatan_prodi ?? '-' }}
                     ({{ $p->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td>
                 <td>{{ $p->peminjamanJadwal->jadwalLab->mataKuliah->nama_mk ?? '-' }}</td>
                 <td>{{ $p->peminjamanJadwal->jadwalLab->dosen->nama_dosen ?? '-' }}</td>

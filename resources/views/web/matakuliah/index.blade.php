@@ -30,7 +30,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $mk->nama_mk }}</td>
-                                        <td>{{ $mk->prodi->kode_prodi }}</td>
+                                        <td>{{ $mk->prodi->singkatan_prodi }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#modalEditMatakuliah{{ $mk->id_mk }}">

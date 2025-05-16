@@ -36,7 +36,7 @@ class JadwalLabController extends Controller
             'labList' => Lab::where('status_lab', 'aktif')->orderBy('nama_lab', 'asc')->get(),
             'mkList' => Matakuliah::orderBy('nama_mk', 'asc')->get(),
             'dosenList' => Dosen::orderBy('nama_dosen', 'asc')->get(),
-            'prodiList' => Prodi::orderBy('kode_prodi', 'asc')->get(),
+            'prodiList' => Prodi::orderBy('singkatan_prodi', 'asc')->get(),
             'kelasList' => Kelas::orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
         ]);
@@ -142,7 +142,7 @@ class JadwalLabController extends Controller
             'labList' => Lab::where('status_lab', 'aktif')->orderBy('nama_lab', 'asc')->get(),
             'mkList' => Matakuliah::where('id_prodi', $prodiId)->orderBy('nama_mk', 'asc')->get(),
             'dosenList' => Dosen::where('id_prodi', $prodiId)->orderBy('nama_dosen', 'asc')->get(),
-            'prodiList' => Prodi::orderBy('kode_prodi', 'asc')->get(),
+            'prodiList' => Prodi::orderBy('singkatan_prodi', 'asc')->get(),
             'kelasList' => Kelas::where('id_prodi', $prodiId)->orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
             'jadwalLab' => $jadwalLab,

@@ -24,6 +24,7 @@
                                     'Dipinjam' => 'badge-primary',
                                     'Kosong' => 'badge-secondary',
                                     'Pengajuan' => 'badge-warning',
+                                    'Nonaktif' => 'badge-nonaktif',
                                     default => 'light',
                                 };
                             @endphp

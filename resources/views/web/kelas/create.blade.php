@@ -3,7 +3,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Kelas</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="location.reload();">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -17,9 +18,9 @@
                     <div class="mb-3">
                         <label class="form-label">Prodi</label>
                         <select class="form-control" name="id_prodi" required>
-                            <option value="" selected disabled >Pilih Prodi</option> <!-- Opsi default -->
-                            @foreach ($prodi->sortBy('kode_prodi') as $p)
-                                <option value="{{ $p->id_prodi }}">{{ $p->kode_prodi }}</option>
+                            <option value="" selected disabled>Pilih Prodi</option> <!-- Opsi default -->
+                            @foreach ($prodi->sortBy('singkatan_prodi') as $p)
+                                <option value="{{ $p->id_prodi }}">{{ $p->singkatan_prodi }}</option>
                             @endforeach
                         </select>
                     </div>

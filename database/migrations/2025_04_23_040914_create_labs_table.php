@@ -16,8 +16,6 @@ class CreateLabsTable extends Migration
         Schema::create('lab', function (Blueprint $table) {
             $table->id('id_lab');
             $table->string('nama_lab');
-            $table->text('fasilitas_lab');
-            $table->integer('kapasitas_lab');
             $table->enum('status_lab', ['aktif', 'nonaktif']);
             $table->timestamps();
         });

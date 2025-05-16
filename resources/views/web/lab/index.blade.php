@@ -16,8 +16,6 @@
                             <tr>
                                 <th>No.</th>
                                 <th>Nama</th>
-                                <th>Fasilitas</th>
-                                <th>Kapasitas</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -32,8 +30,6 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $labs->nama_lab }}</td>
-                                        <td>{{ $labs->fasilitas_lab }}</td>
-                                        <td>{{ $labs->kapasitas_lab }}</td>
                                         <td>
                                             <div class="form-switch-toggle">
                                                 @php
@@ -160,20 +156,38 @@
                                     status_lab: newStatus
                                 })
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil',
-                                    text: data.message
-                                });
+                            .then(async response => {
+                                const data = await response.json();
+
+                                if (response.ok) {
+                                    // ✅ Jika status 200 (berhasil)
+                                    document.getElementById(`status_lab_text_${labId}`)
+                                        .textContent = newStatus
+                                        .charAt(0).toUpperCase() + newStatus.slice(1);
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil',
+                                        text: data.message
+                                    });
+                                } else {
+                                    // ❌ Jika status bukan 2xx, berarti gagal (contoh: 422 dari validasi Laravel)
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal',
+                                        text: data.message ||
+                                            'Terjadi kesalahan saat mengubah status.'
+                                    });
+                                    // Kembalikan toggle switch ke posisi semula
+                                    switchEl.checked = !isChecked;
+                                }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Gagal',
-                                    text: 'Terjadi kesalahan saat mengubah status.'
+                                    text: 'Terjadi kesalahan koneksi.'
                                 });
                                 switchEl.checked = !isChecked;
                             });

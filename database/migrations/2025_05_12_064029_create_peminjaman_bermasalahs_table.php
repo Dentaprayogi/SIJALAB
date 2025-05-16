@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('id_peminjaman')->constrained('peminjaman', 'id_peminjaman')->onDelete('cascade');
             $table->time('jam_dikembalikan');
             $table->date('tgl_pengembalian');
-            $table->text('catatan')->nullable();
+            $table->text('alasan_bermasalah')->nullable();
             $table->timestamps();
         });
     }

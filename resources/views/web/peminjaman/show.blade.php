@@ -23,7 +23,7 @@
                             </tr>
                             <tr>
                                 <th>Prodi</th>
-                                <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi }}
+                                <td>{{ $peminjaman->user->mahasiswa->prodi->singkatan_prodi }}
                                     ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas }})</td>
                             </tr>
                             <tr>
@@ -174,23 +174,23 @@
         }
     </script>
 
-    {{-- Popup Catatan Peminjaman Bermasalah --}}
+    {{-- Popup Alasan Peminjaman Bermasalah --}}
     <script>
         function showBermasalahModal(id) {
             Swal.fire({
-                title: 'Catatan Peminjaman Bermasalah',
+                title: 'Alasan Peminjaman Bermasalah',
                 input: 'textarea',
-                inputLabel: 'Masukkan catatan masalah',
-                inputPlaceholder: 'Contoh: Lab tidak dikembalikan tepat waktu...',
+                inputLabel: 'Masukkan alasan masalah',
+                inputPlaceholder: 'Contoh: proyektor yang dikembalikan tidak sesuai...',
                 inputAttributes: {
-                    'aria-label': 'Catatan masalah'
+                    'aria-label': 'Alasan masalah'
                 },
                 showCancelButton: true,
                 confirmButtonText: 'Simpan',
                 cancelButtonText: 'Batal',
                 inputValidator: (value) => {
                     if (!value) {
-                        return 'Catatan tidak boleh kosong!';
+                        return 'Alasan tidak boleh kosong!';
                     }
                 }
             }).then((result) => {
@@ -212,11 +212,11 @@
                     method.value = 'PUT';
                     form.appendChild(method);
 
-                    const catatan = document.createElement('input');
-                    catatan.type = 'hidden';
-                    catatan.name = 'catatan';
-                    catatan.value = result.value;
-                    form.appendChild(catatan);
+                    const alasan_bermasalah = document.createElement('input');
+                    alasan_bermasalah.type = 'hidden';
+                    alasan_bermasalah.name = 'alasan_bermasalah';
+                    alasan_bermasalah.value = result.value;
+                    form.appendChild(alasan_bermasalah);
 
                     document.body.appendChild(form);
                     form.submit();
@@ -224,7 +224,6 @@
             });
         }
     </script>
-
 
     @if (session('success'))
         <script>

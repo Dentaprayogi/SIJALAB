@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('prodi', function (Blueprint $table) {
             $table->id('id_prodi');
             $table->string('nama_prodi');
-            $table->string('kode_prodi');
+            $table->string('singkatan_prodi');
             $table->timestamps();
         });
     }

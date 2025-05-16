@@ -59,8 +59,8 @@ class PeminjamanController extends Controller
 
     public function create()
     {
-        $labs = Lab::all();
-        $peralatans = Peralatan::all();
+        $labs = Lab::orderBy('nama_lab', 'asc')->get();
+        $peralatans = Peralatan::orderBy('nama_peralatan', 'asc')->get();
         $activeTab = session('active_tab', 'jadwal');
 
         $now = Carbon::now();
@@ -269,7 +269,7 @@ class PeminjamanController extends Controller
                 'jam_mulai' => $request->jam_mulai,
                 'jam_selesai' => $request->jam_selesai,
                 'id_lab' => $request->id_lab,
-                'keterangan' => $request->keterangan,
+                'kegiatan' => $request->kegiatan,
             ]);
 
             $peminjaman->peralatan()->sync($request->peralatan);
@@ -304,7 +304,8 @@ class PeminjamanController extends Controller
     public function bermasalah(Request $request, $id)
     {
         $request->validate([
-            'catatan' => 'required|string|max:255',
+
+            'alasan_bermasalah' => 'required|string|max:255',
         ]);
 
         $peminjaman = Peminjaman::findOrFail($id);
@@ -319,7 +320,7 @@ class PeminjamanController extends Controller
             'id_peminjaman' => $peminjaman->id_peminjaman,
             'jam_dikembalikan' => now()->format('H:i:s'),
             'tgl_pengembalian' => now()->format('Y-m-d'),
-            'catatan' => $request->catatan,
+            'alasan_bermasalah' => $request->alasan_bermasalah,
         ]);
 
         return redirect()->route('peminjaman.show', $id)->with('success', 'Peminjaman ditandai sebagai bermasalah.');
@@ -376,8 +377,8 @@ class PeminjamanController extends Controller
         // Mengecek apakah user yang login adalah teknisi
         if (Auth::user()->role === 'teknisi') {
             // Teknisi bisa menghapus peminjaman dengan status pengajuan, ditolak, atau selesai
-            if (!in_array($peminjaman->status_peminjaman, ['ditolak', 'selesai'])) {
-                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya ditolak, atau selesai.');
+            if (!in_array($peminjaman->status_peminjaman, ['ditolak', 'bermasalah', 'selesai'])) {
+                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya ditolak, bermasalah, atau selesai.');
             }
         }
 
@@ -398,7 +399,7 @@ class PeminjamanController extends Controller
 
         // Filter hanya peminjaman yang statusnya diizinkan untuk dihapus
         $deletable = Peminjaman::whereIn('id_peminjaman', $ids)
-            ->whereIn('status_peminjaman', ['pengajuan', 'ditolak', 'selesai'])
+            ->whereIn('status_peminjaman', ['ditolak', 'bermasalah', 'selesai'])
             ->pluck('id_peminjaman');
 
         if ($deletable->isEmpty()) {

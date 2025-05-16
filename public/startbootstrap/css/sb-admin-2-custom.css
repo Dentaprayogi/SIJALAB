@@ -27,6 +27,11 @@
     color: #f6c23e !important;
 }
 
+.badge-nonaktif {
+    background-color: #f2f2f2;
+    color: #6c757d !important;
+}
+
 .table .thead-primary th {
     color: #fff;
     background-color: #4e73df;

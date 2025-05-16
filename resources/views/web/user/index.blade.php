@@ -38,7 +38,7 @@
                                         <td>{{ $user->email }}</td>
                                         <td>
                                             @if ($user->mahasiswa)
-                                                {{ $user->mahasiswa->prodi->kode_prodi }}
+                                                {{ $user->mahasiswa->prodi->singkatan_prodi }}
                                                 ({{ $user->mahasiswa->kelas->nama_kelas }})
                                             @else
                                                 -

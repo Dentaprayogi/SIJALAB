@@ -30,7 +30,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $kelass->nama_kelas }}</td>
-                                        <td>{{ $kelass->prodi->kode_prodi }}</td>
+                                        <td>{{ $kelass->prodi->singkatan_prodi }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#modalEditKelas{{ $kelass->id_kelas }}">

@@ -13,8 +13,6 @@ class Lab extends Model
     protected $primaryKey = 'id_lab';  // Menentukan primary key
     protected $fillable = [
         'nama_lab',
-        'fasilitas_lab',
-        'kapasitas_lab',
         'status_lab',
     ];
 

@@ -32,7 +32,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $dosen->nama_dosen }}</td>
                                         <td>{{ $dosen->telepon }}</td>
-                                        <td>{{ $dosen->prodi->kode_prodi }}</td>
+                                        <td>{{ $dosen->prodi->singkatan_prodi }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#modalEditDosen{{ $dosen->id_dosen }}">

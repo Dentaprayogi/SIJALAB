@@ -13,10 +13,10 @@
             @php
                 $badgeClass = match ($peminjaman->status_peminjaman) {
                     'pengajuan' => 'badge-warning',
-                    'ditolak' => 'badge-danger',
+                    'ditolak' => 'badge-secondary',
                     'dipinjam' => 'badge-primary',
                     'selesai' => 'badge-success',
-                    default => 'badge-secondary',
+                    'bermasalah' => 'badge-danger',
                 };
             @endphp
             <span class="badge-status {{ $badgeClass }}">
@@ -32,8 +32,8 @@
                 ({{ \Carbon\Carbon::parse($peminjaman->peminjamanBermasalah->jam_dikembalikan)->format('H:i') }})</td>
         </tr>
         <tr>
-            <th>Catatan</th>
-            <td>{{ $peminjaman->peminjamanBermasalah->catatan ?? '-' }}</td>
+            <th>Alasan Bermasalah</th>
+            <td style="color: #e74a3b !important;">{{ $peminjaman->peminjamanBermasalah->alasan_bermasalah ?? '-' }}</td>
         </tr>
     @endif
 
@@ -57,7 +57,7 @@
     </tr>
     <tr>
         <th>Prodi</th>
-        <td>{{ $peminjaman->user->mahasiswa->prodi->kode_prodi ?? '-' }}
+        <td>{{ $peminjaman->user->mahasiswa->prodi->singkatan_prodi ?? '-' }}
             ({{ $peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td>
     </tr>
     <tr>
@@ -75,7 +75,7 @@
             @endif
     </tr>
     <tr>
-        <th>Keterangan</th>
-        <td>{{ $peminjaman->peminjamanManual->keterangan ?? '-' }}</td>
+        <th>Kegiatan</th>
+        <td>{{ $peminjaman->peminjamanManual->kegiatan ?? '-' }}</td>
     </tr>
 </table>

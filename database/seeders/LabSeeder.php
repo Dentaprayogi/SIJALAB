@@ -11,33 +11,23 @@ class LabSeeder extends Seeder
     {
         $dataLab = [
             [
-                'nama_lab' => 'Pemrograman',
-                'fasilitas_lab' => 'Komputer dengan software pemrograman terbaru, proyektor, dan kursi nyaman.',
-                'kapasitas_lab' => 30,
+                'nama_lab' => 'Pemrograman 1',
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Jaringan',
-                'fasilitas_lab' => 'Router, switch, kabel jaringan, dan perangkat jaringan lainnya.',
-                'kapasitas_lab' => 25,
+                'nama_lab' => 'Pemrograman 2',
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Sistem Operasi',
-                'fasilitas_lab' => 'Komputer dengan berbagai sistem operasi, proyektor, dan meja kerja.',
-                'kapasitas_lab' => 20,
+                'nama_lab' => 'Basis Data',
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Keamanan Jaringan',
-                'fasilitas_lab' => 'Perangkat keamanan jaringan dan alat-alat praktikum keamanan siber.',
-                'kapasitas_lab' => 15,
+                'nama_lab' => 'Hardware',
                 'status_lab' => 'aktif',
             ],
             [
-                'nama_lab' => 'Bisnis Digital',
-                'fasilitas_lab' => 'Komputer dengan software analisis bisnis dan akses internet cepat.',
-                'kapasitas_lab' => 30,
+                'nama_lab' => 'Multimedia',
                 'status_lab' => 'aktif',
             ],
         ];
@@ -45,8 +35,6 @@ class LabSeeder extends Seeder
         foreach ($dataLab as $lab) {
             Lab::create([
                 'nama_lab' => $lab['nama_lab'],
-                'fasilitas_lab' => $lab['fasilitas_lab'],
-                'kapasitas_lab' => $lab['kapasitas_lab'],
                 'status_lab' => $lab['status_lab'],
             ]);
         }

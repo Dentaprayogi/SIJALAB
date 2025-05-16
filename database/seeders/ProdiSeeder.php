@@ -15,15 +15,15 @@ class ProdiSeeder extends Seeder
         $data = [
             [
                 'nama_prodi' => 'Teknologi Rekayasa Perangkat Lunak',
-                'kode_prodi' => 'TRPL',
+                'singkatan_prodi' => 'TRPL',
             ],
             [
                 'nama_prodi' => 'Teknologi Rekayasa Komputer dan jaringan',
-                'kode_prodi' => 'TRK',
+                'singkatan_prodi' => 'TRK',
             ],
             [
                 'nama_prodi' => 'Bisnis Digital',
-                'kode_prodi' => 'BSD',
+                'singkatan_prodi' => 'BSD',
             ],
         ];
 

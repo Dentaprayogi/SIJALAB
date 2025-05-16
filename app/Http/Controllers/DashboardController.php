@@ -23,6 +23,12 @@ class DashboardController extends Controller
         $currentTime = now()->format('H:i:s');
 
         foreach ($labs as $lab) {
+            // Cek jika lab nonaktif terlebih dahulu
+            if ($lab->status_lab === 'nonaktif') {
+                $lab->status = 'Nonaktif';
+                continue; // lewati pengecekan status lain
+            }
+
             $isDipinjam =
                 PeminjamanJadwal::whereHas(
                     'jadwalLab',
@@ -73,10 +79,9 @@ class DashboardController extends Controller
                         ->whereDate('tgl_peminjaman', today())
                 )->exists();
 
-            // Cek apakah lab memiliki jadwal di luar jam sekarang (berarti sedang kosong meskipun ada jadwal hari ini)
             $hasJadwal = JadwalLab::where('id_lab', $lab->id_lab)
                 ->where('id_hari', $hari->id_hari)
-                ->where('status_jadwalLab', 'aktif') // hanya jadwal aktif
+                ->where('status_jadwalLab', 'aktif')
                 ->where('jam_mulai', '<=', $currentTime)
                 ->where('jam_selesai', '>=', $currentTime)
                 ->exists();
@@ -91,8 +96,6 @@ class DashboardController extends Controller
                 $lab->status = 'Kosong';
             }
         }
-
-
-        return view('web.dashboard.dashboard', compact('labs'));
+        return view('web.dashboard.index', compact('labs'));
     }
 }

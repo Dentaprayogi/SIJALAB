@@ -13,7 +13,7 @@ class Prodi extends Model
     protected $primaryKey = 'id_prodi'; // Primary key
     protected $fillable = [
         'nama_prodi',
-        'kode_prodi',
+        'singkatan_prodi',
     ];
 
     //Relasi ke Kelas (Many to One)

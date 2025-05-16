@@ -16,7 +16,7 @@
                             <tr>
                                 <th>No.</th>
                                 <th>Nama Prodi</th>
-                                <th>Kode Prodi</th>
+                                <th>Singkatan Prodi</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -30,7 +30,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $prd->nama_prodi }}</td>
-                                        <td>{{ $prd->kode_prodi }}</td>
+                                        <td>{{ $prd->singkatan_prodi }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#modalEditProdi{{ $prd->id_prodi }}" title="Edit">
