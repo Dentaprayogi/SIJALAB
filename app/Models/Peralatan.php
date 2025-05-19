@@ -21,4 +21,9 @@ class Peralatan extends Model
         return $this->belongsToMany(Peminjaman::class, 'peminjaman_peralatan', 'id_peralatan', 'id_peminjaman');
     }
 
+    //Relasi ke Unit Peralatan (Many to one)
+    public function unitPeralatan()
+    {
+        return $this->hasMany(UnitPeralatan::class, 'id_peralatan');
+    }
 }

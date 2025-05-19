@@ -29,6 +29,13 @@ class Peminjaman extends Model
         return $this->belongsToMany(Peralatan::class, 'peminjaman_peralatan', 'id_peminjaman', 'id_peralatan');
     }
 
+    // Relasi ke Unit Peraalatan (Many to Many melalui tabel pivot peminjaman_unit)
+    public function unitPeralatan()
+    {
+        return $this->belongsToMany(UnitPeralatan::class, 'peminjaman_unit', 'id_peminjaman', 'id_unit');
+    }
+
+
     // Relasi ke Peminjaman Selesai (One to One)
     public function peminjamanSelesai()
     {

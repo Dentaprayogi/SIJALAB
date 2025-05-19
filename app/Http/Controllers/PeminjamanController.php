@@ -12,6 +12,7 @@ use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\PeminjamanSelesai;
 use App\Models\Peralatan;
+use App\Models\UnitPeralatan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -135,6 +136,16 @@ class PeminjamanController extends Controller
         return response()->json($availableLabs);
     }
 
+    public function getUnits($id_peralatan)
+    {
+        $units = UnitPeralatan::with(['peminjaman:id_peminjaman,status_peminjaman'])
+            ->select('id_unit', 'kode_unit', 'status_unit')
+            ->orderBy('kode_unit', 'asc')
+            ->get();
+
+        return response()->json($units);
+    }
+
     public function storeJadwal(Request $request)
     {
         $request->validate([
@@ -171,13 +182,6 @@ class PeminjamanController extends Controller
                 ->with('active_tab', 'jadwal');
         }
 
-        if ($hasUnscheduledBooking) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Lab sedang dalam peminjaman tanpa jadwal.')
-                ->with('active_tab', 'jadwal');
-        }
-
         // Cek apakah jadwal sudah dipinjam
         $isBooked = PeminjamanJadwal::where('id_jadwalLab', $request->id_jadwalLab)
             ->whereHas('peminjaman', function ($query) {
@@ -205,7 +209,22 @@ class PeminjamanController extends Controller
                 'id_jadwalLab' => $request->id_jadwalLab,
             ]);
 
+            // Simpan peralatan ke pivot table peminjaman_peralatan
             $peminjaman->peralatan()->sync($request->peralatan);
+
+            // Simpan unit-unit peralatan ke tabel pivot peminjaman_unit
+            if ($request->has('unit_peralatan')) {
+                foreach ($request->unit_peralatan as $unitList) {
+                    foreach ($unitList as $id_unit) {
+                        DB::table('peminjaman_unit')->insert([
+                            'id_peminjaman' => $peminjaman->id_peminjaman,
+                            'id_unit' => $id_unit,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->route('peminjaman.index')->with('success', 'Peminjaman sesuai jadwal berhasil diajukan.');
@@ -272,7 +291,22 @@ class PeminjamanController extends Controller
                 'kegiatan' => $request->kegiatan,
             ]);
 
+            // Simpan peralatan ke pivot table peminjaman_peralatan
             $peminjaman->peralatan()->sync($request->peralatan);
+
+            // Simpan unit-unit peralatan ke tabel pivot peminjaman_unit
+            if ($request->has('unit_peralatan')) {
+                foreach ($request->unit_peralatan as $unitList) {
+                    foreach ($unitList as $id_unit) {
+                        DB::table('peminjaman_unit')->insert([
+                            'id_peminjaman' => $peminjaman->id_peminjaman,
+                            'id_unit' => $id_unit,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->route('peminjaman.index')->with('success', 'Peminjaman manual berhasil diajukan.');
@@ -283,6 +317,7 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjaman::with([
             'user',
             'peralatan',
+            'unitPeralatan',
             'jadwalLab.hari',
             'jadwalLab.lab',
             'jadwalLab.mataKuliah',

@@ -84,6 +84,14 @@
                         </a>
                     </li>
 
+                    <!-- Nav Item - Unit Peralatan -->
+                    <li class="nav-item {{ Request::is('unit_peralatan*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('unit-peralatan.index') }}">
+                            <i class="fas fa-tools"></i>
+                            <span>Unit</span>
+                        </a>
+                    </li>
+
                     <!-- Nav Item - Prodi -->
                     <li class="nav-item {{ Request::is('prodi*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('prodi.index') }}">
@@ -367,6 +375,107 @@
 
     {{-- Js Select2 --}}
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    {{-- Ambil data unit peralatan yang tersedia dan tidak terhubung di peminjaman aktif --}}
+    <script>
+        $(document).ready(function() {
+            if ($('#peralatan_jadwal').length) {
+                $('#peralatan_jadwal').select2({
+                    placeholder: 'Pilih peralatan',
+                    width: '100%'
+                });
+            }
+
+            if ($('#peralatan_manual').length) {
+                $('#peralatan_manual').select2({
+                    placeholder: 'Pilih peralatan',
+                    width: '100%'
+                });
+            }
+
+            function loadUnits(selectId, containerId) {
+                let selectedIds = $(selectId).val();
+                let container = $(containerId);
+                container.html('');
+
+                if (selectedIds && selectedIds.length > 0) {
+                    selectedIds.forEach(function(id_peralatan) {
+                        $.ajax({
+                            url: `/peminjaman/get-units/${id_peralatan}`,
+                            type: 'GET',
+                            success: function(units) {
+                                if (!Array.isArray(units) || units.length === 0) {
+                                    return;
+                                }
+
+                                const tersediaUnits = units.filter(unit => {
+                                    const sedangDipinjam = Array.isArray(unit
+                                            .peminjaman) &&
+                                        unit.peminjaman.some(p => ['pengajuan',
+                                            'dipinjam'
+                                        ].includes(p.status_peminjaman));
+
+                                    return unit.status_unit === 'tersedia' && !
+                                        sedangDipinjam;
+                                });
+
+                                const tidakAdaTersedia = tersediaUnits.length === 0;
+                                const label = $(`${selectId} option[value="${id_peralatan}"]`)
+                                    .text();
+
+                                let html = `
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        Pilih Kode Unit untuk <strong>${label}</strong>
+                                        ${tidakAdaTersedia ? `<span class="text-danger ms-2">(tidak ada unit peralatan yang tersedia)</span>` : ''}
+                                    </label>
+                                    <div class="d-flex align-items-center border rounded overflow-hidden">
+                                        <span class="bg-primary text-white px-3 py-2 d-flex align-items-center">
+                                            <i class="fas fa-tools"></i>
+                                        </span>
+                                        <select name="unit_peralatan[${id_peralatan}][]" class="form-select border-0 select-unit" required style="width: 100%;">
+                                            <option value="" disabled selected>-- Pilih Kode Unit --</option>
+                            `;
+
+                                tersediaUnits.forEach(function(unit) {
+                                    html +=
+                                        `<option value="${unit.id_unit}">${unit.kode_unit}</option>`;
+                                });
+
+                                html += `
+                                        </select>
+                                    </div>
+                                </div>
+                            `;
+
+                                container.append(html);
+
+                                container.find('select.select-unit').last().select2({
+                                    placeholder: '-- Pilih Kode Unit --',
+                                    width: '100%'
+                                });
+                            },
+                            error: function(xhr) {
+                                console.error('AJAX Error:', xhr);
+                                alert('Gagal memuat unit untuk peralatan ID: ' + id_peralatan);
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Trigger untuk peralatan manual
+            $('#peralatan_manual').on('change', function() {
+                loadUnits('#peralatan_manual', '#unit-peralatan-container-manual');
+            });
+
+            // Trigger untuk peralatan jadwal
+            $('#peralatan_jadwal').on('change', function() {
+                loadUnits('#peralatan_jadwal', '#unit-peralatan-container-jadwal');
+            });
+        });
+    </script>
+
 
     <script>
         $(document).ready(function() {

@@ -12,6 +12,7 @@ use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\TahunAjaranController;
+use App\Http\Controllers\UnitPeralatanController;
 use App\Http\Controllers\UserController;
 use App\Models\Kelas;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,9 @@ Route::middleware([
 
         //Route Peralatan
         Route::resource('peralatan', PeralatanController::class);
+
+        // Route Unit Peralatan
+        Route::resource('unit-peralatan', UnitPeralatanController::class);
 
         //Route Prodi
         Route::resource('prodi', ProdiController::class);
@@ -102,6 +106,7 @@ Route::middleware([
     Route::prefix('peminjaman')->middleware('auth')->group(function () {
         Route::get('/', [PeminjamanController::class, 'index'])->name('peminjaman.index');
         Route::get('/jadwal/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+        Route::get('/get-units/{id_peralatan}', [PeminjamanController::class, 'getUnits']);
         Route::post('/labs/available', [PeminjamanController::class, 'getAvailableLabs'])->name('labs.available');
         Route::post('/jadwal/store', [PeminjamanController::class, 'storeJadwal'])->name('peminjaman.storeJadwal');
         Route::post('/manual/store', [PeminjamanController::class, 'storeManual'])->name('peminjaman.storeManual');

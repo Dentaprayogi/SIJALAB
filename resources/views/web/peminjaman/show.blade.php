@@ -55,19 +55,27 @@
                     @endif
                 </div>
 
-                <div class="mt-4">
-                    <h5>Peralatan yang Dipinjam</h5>
-                    @if ($peminjaman->peralatan->count())
-                        <ul>
-                            @foreach ($peminjaman->peralatan as $alat)
-                                <li>{{ $alat->nama_peralatan }}</li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p><em>Tidak ada peralatan yang dipinjam.</em></p>
-                    @endif
+                <ul>
+                    @foreach ($peminjaman->peralatan as $alat)
+                        @php
+                            $unit = null;
+                            if ($peminjaman->unitPeralatan instanceof \Illuminate\Support\Collection) {
+                                // Cari unit yang punya id_peralatan sama dengan alat ini
+                                $unit = $peminjaman->unitPeralatan->first(function ($u) use ($alat) {
+                                    return $u->id_peralatan == $alat->id_peralatan;
+                                });
+                            }
+                        @endphp
 
-                </div>
+                        <li>
+                            @if ($unit)
+                                {{ $alat->nama_peralatan }} (Kode Unit: {{ $unit->kode_unit }})
+                            @else
+                                {{ $alat->nama_peralatan }}
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
                 @auth
                     @if (Auth::user()->role === 'teknisi')
                         <div class="mt-4 d-flex justify-content-end gap-2">
@@ -247,5 +255,4 @@
             });
         </script>
     @endif
-
 @endsection
