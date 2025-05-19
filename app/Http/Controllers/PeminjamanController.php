@@ -138,8 +138,11 @@ class PeminjamanController extends Controller
 
     public function getUnits($id_peralatan)
     {
-        $units = UnitPeralatan::with(['peminjaman:id_peminjaman,status_peminjaman'])
-            ->select('id_unit', 'kode_unit', 'status_unit')
+        $units = UnitPeralatan::with(['peminjaman' => function ($query) {
+            $query->select('peminjaman.id_peminjaman', 'status_peminjaman');
+        }])
+            ->where('id_peralatan', $id_peralatan)
+            ->select('id_unit', 'kode_unit', 'status_unit', 'id_peralatan')
             ->orderBy('kode_unit', 'asc')
             ->get();
 

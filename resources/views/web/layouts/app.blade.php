@@ -88,7 +88,7 @@
                     <li class="nav-item {{ Request::is('unit_peralatan*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('unit-peralatan.index') }}">
                             <i class="fas fa-tools"></i>
-                            <span>Unit</span>
+                            <span>Unit Peralatan</span>
                         </a>
                     </li>
 
@@ -379,24 +379,16 @@
     {{-- Ambil data unit peralatan yang tersedia dan tidak terhubung di peminjaman aktif --}}
     <script>
         $(document).ready(function() {
-            if ($('#peralatan_jadwal').length) {
-                $('#peralatan_jadwal').select2({
-                    placeholder: 'Pilih peralatan',
-                    width: '100%'
-                });
-            }
-
-            if ($('#peralatan_manual').length) {
-                $('#peralatan_manual').select2({
-                    placeholder: 'Pilih peralatan',
-                    width: '100%'
-                });
-            }
+            // Inisialisasi select2
+            $('#peralatan_manual, #peralatan_jadwal').select2({
+                placeholder: 'Pilih peralatan',
+                width: '100%'
+            });
 
             function loadUnits(selectId, containerId) {
                 let selectedIds = $(selectId).val();
                 let container = $(containerId);
-                container.html('');
+                container.html(''); // Kosongkan container
 
                 if (selectedIds && selectedIds.length > 0) {
                     selectedIds.forEach(function(id_peralatan) {
@@ -404,39 +396,40 @@
                             url: `/peminjaman/get-units/${id_peralatan}`,
                             type: 'GET',
                             success: function(units) {
-                                if (!Array.isArray(units) || units.length === 0) {
-                                    return;
-                                }
+                                // ✅ Jika tidak ada unit sama sekali, tidak usah tampilkan apa-apa
+                                if (!Array.isArray(units) || units.length === 0) return;
 
+                                // Filter unit yang tersedia dan tidak sedang dipinjam
                                 const tersediaUnits = units.filter(unit => {
                                     const sedangDipinjam = Array.isArray(unit
                                             .peminjaman) &&
                                         unit.peminjaman.some(p => ['pengajuan',
                                             'dipinjam'
                                         ].includes(p.status_peminjaman));
-
                                     return unit.status_unit === 'tersedia' && !
                                         sedangDipinjam;
                                 });
 
-                                const tidakAdaTersedia = tersediaUnits.length === 0;
+                                // Ambil label peralatan
                                 const label = $(`${selectId} option[value="${id_peralatan}"]`)
                                     .text();
 
+                                // Buat dropdown HTML
                                 let html = `
                                 <div class="mb-3">
                                     <label class="form-label">
                                         Pilih Kode Unit untuk <strong>${label}</strong>
-                                        ${tidakAdaTersedia ? `<span class="text-danger ms-2">(tidak ada unit peralatan yang tersedia)</span>` : ''}
+                                        ${tersediaUnits.length === 0 ? `<span class="text-danger ms-2">(tidak ada unit peralatan yang tersedia)</span>` : ''}
                                     </label>
                                     <div class="d-flex align-items-center border rounded overflow-hidden">
                                         <span class="bg-primary text-white px-3 py-2 d-flex align-items-center">
                                             <i class="fas fa-tools"></i>
                                         </span>
-                                        <select name="unit_peralatan[${id_peralatan}][]" class="form-select border-0 select-unit" required style="width: 100%;">
+                                        <select name="unit_peralatan[${id_peralatan}][]" class="form-select border-0 select-unit" ${tersediaUnits.length === 0 ? 'disabled' : 'required'} style="width: 100%;">
                                             <option value="" disabled selected>-- Pilih Kode Unit --</option>
                             `;
 
+                                // Tambahkan opsi hanya jika unit tersedia
                                 tersediaUnits.forEach(function(unit) {
                                     html +=
                                         `<option value="${unit.id_unit}">${unit.kode_unit}</option>`;
@@ -448,8 +441,10 @@
                                 </div>
                             `;
 
+                                // Tambahkan ke dalam container
                                 container.append(html);
 
+                                // Inisialisasi Select2 untuk dropdown baru
                                 container.find('select.select-unit').last().select2({
                                     placeholder: '-- Pilih Kode Unit --',
                                     width: '100%'
@@ -464,18 +459,16 @@
                 }
             }
 
-            // Trigger untuk peralatan manual
+            // Event listener untuk perubahan pilihan peralatan
             $('#peralatan_manual').on('change', function() {
                 loadUnits('#peralatan_manual', '#unit-peralatan-container-manual');
             });
 
-            // Trigger untuk peralatan jadwal
             $('#peralatan_jadwal').on('change', function() {
                 loadUnits('#peralatan_jadwal', '#unit-peralatan-container-jadwal');
             });
         });
     </script>
-
 
     <script>
         $(document).ready(function() {
