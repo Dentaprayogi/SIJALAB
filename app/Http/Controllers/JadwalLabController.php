@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\JadwalLabImport;
 use App\Models\Dosen;
 use App\Models\Hari;
 use App\Models\JadwalLab;
@@ -13,6 +14,11 @@ use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\NamedRange;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as WriterXlsx;
 
 class JadwalLabController extends Controller
 {
@@ -40,6 +46,157 @@ class JadwalLabController extends Controller
             'kelasList' => Kelas::orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
         ]);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx'
+        ]);
+
+        try {
+            Excel::import(new JadwalLabImport, $request->file('file'));
+            return redirect()->route('jadwal_lab.index')->with('success', 'Import berhasil!');
+        } catch (ValidationException $e) {
+            return redirect()->route('jadwal_lab.index')
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Throwable $e) {
+            return redirect()->route('jadwal_lab.index')
+                ->with('error', 'Import gagal! ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $templateSheet = $spreadsheet->getActiveSheet();
+        $templateSheet->setTitle('Template');
+
+        // Header kolom yang rapi dan konsisten (huruf kecil, satu spasi)
+        $headers = [
+            'hari',
+            'tahun ajaran',
+            'lab',
+            'jam mulai',
+            'jam selesai',
+            'prodi',
+            'kelas',
+            'mata kuliah',
+            'dosen',
+        ];
+        $templateSheet->fromArray($headers, null, 'A1');
+
+        // Data referensi
+        $references = [
+            'Hari' => [Hari::all(['id_hari', 'nama_hari']), 'id_hari', 'nama_hari'],
+            'Tahun Ajaran' => [TahunAjaran::all(['id_tahunAjaran', 'tahun_ajaran', 'semester']), 'id_tahunAjaran', 'tahun_ajaran', 'semester'],
+            'Lab' => [Lab::all(['id_lab', 'nama_lab']), 'id_lab', 'nama_lab'],
+            'Prodi' => [Prodi::all(['id_prodi', 'nama_prodi', 'singkatan_prodi']), 'id_prodi', 'nama_prodi', 'singkatan_prodi'],
+            'Kelas' => [Kelas::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_kelas', 'nama_kelas', null],
+            'Mata Kuliah' => [MataKuliah::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_mk', 'nama_mk', null],
+            'Dosen' => [Dosen::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_dosen', 'nama_dosen', null],
+        ];
+
+        // Mapping kolom ke huruf kolom di Template
+        $colIndex = [
+            'Hari' => 'A',
+            'Tahun Ajaran' => 'B',
+            'Lab' => 'C',
+            'Prodi' => 'F',
+            'Kelas' => 'G',
+            'Mata Kuliah' => 'H',
+            'Dosen' => 'I',
+        ];
+
+        // Mapping kolom ke named range
+        $namedRangesMap = [
+            'Hari' => 'HariList',
+            'Tahun Ajaran' => 'TahunAjaranList',
+            'Lab' => 'LabList',
+            'Prodi' => 'ProdiList',
+            'Kelas' => 'KelasList',
+            'Mata Kuliah' => 'MKList',
+            'Dosen' => 'DosenList',
+        ];
+
+        $sheetIndex = 1;
+
+        foreach ($references as $sheetName => [$data, $idField, $nameField]) {
+            $sheet = $spreadsheet->createSheet($sheetIndex++);
+            $sheet->setTitle("Referensi $sheetName");
+
+            $sheet->setCellValue('A1', $idField);
+            $sheet->setCellValue('B1', $nameField);
+
+            $row = 2;
+            foreach ($data as $item) {
+                $sheet->setCellValue("A{$row}", $item->$idField);
+
+                switch ($sheetName) {
+                    case 'Tahun Ajaran':
+                        $sheet->setCellValue("B{$row}", "{$item->tahun_ajaran} ({$item->semester})");
+                        break;
+
+                    case 'Prodi':
+                        $sheet->setCellValue("B{$row}", $item->singkatan_prodi);
+                        break;
+
+                    case 'Kelas':
+                        $sheet->setCellValue("B{$row}", "{$item->nama_kelas} ({$item->prodi->singkatan_prodi})");
+                        break;
+
+                    case 'Mata Kuliah':
+                        $sheet->setCellValue("B{$row}", "{$item->nama_mk} ({$item->prodi->singkatan_prodi})");
+                        break;
+
+                    case 'Dosen':
+                        $sheet->setCellValue("B{$row}", "{$item->nama_dosen} ({$item->prodi->singkatan_prodi})");
+                        break;
+
+                    default:
+                        $sheet->setCellValue("B{$row}", $item->$nameField);
+                }
+
+                $row++;
+            }
+
+            $highestRow = $row - 1;
+            $namedRangeName = $namedRangesMap[$sheetName] ?? null;
+
+            if ($namedRangeName) {
+                $spreadsheet->addNamedRange(
+                    new NamedRange(
+                        $namedRangeName,
+                        $sheet,
+                        "\$B\$2:\$B\$$highestRow"
+                    )
+                );
+            }
+        }
+
+        // Dropdown validation dari baris 2-100
+        for ($i = 2; $i <= 100; $i++) {
+            foreach ($colIndex as $columnLabel => $colLetter) {
+                $validation = $templateSheet->getCell("{$colLetter}{$i}")->getDataValidation();
+                $validation->setType(DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(DataValidation::STYLE_STOP);
+                $validation->setAllowBlank(true);
+                $validation->setShowInputMessage(true);
+                $validation->setShowErrorMessage(true);
+                $validation->setShowDropDown(true);
+                $validation->setFormula1("={$namedRangesMap[$columnLabel]}");
+            }
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $writer = new WriterXlsx($spreadsheet);
+        $filename = 'template_jadwal_lab.xlsx';
+        $temp_file = tempnam(sys_get_temp_dir(), $filename);
+        $writer->save($temp_file);
+
+        return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
     }
 
     public function store(Request $request)

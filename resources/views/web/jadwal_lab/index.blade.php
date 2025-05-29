@@ -3,16 +3,22 @@
 @section('content')
     <div class="container-fluid">
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h1 class="h3 mb-2 text-gray-800">Manajemen Jadwal Lab</h1>
                 @auth
                     @if (Auth::user()->role === 'teknisi')
-                        <a href="{{ route('jadwal_lab.create') }}" class="btn btn-primary mb-3">
-                            <i class="fas fa-plus"></i> Tambah Jadwal
-                        </a>
+                        <div>
+                            <a href="{{ route('jadwal_lab.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Tambah Jadwal
+                            </a>
+                            <button class="btn btn-success" data-toggle="modal" data-target="#importModal">
+                                <i class="fas fa-file-import"></i> Import Jadwal
+                            </button>
+                        </div>
                     @endif
                 @endauth
             </div>
+            @include('web.jadwal_lab.import')
             <div class="card-body">
                 <div class="table-responsive">
                     <ul class="nav nav-tabs mb-3" id="jadwalTabs" role="tablist">
@@ -92,6 +98,17 @@
                 title: 'Gagal',
                 text: '{{ session('error') }}',
                 showConfirmButton: 'Ok'
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal menyimpan data!',
+                html: `{!! implode('<br>', $errors->all()) !!}`,
+                confirmButtonText: 'OK'
             });
         </script>
     @endif

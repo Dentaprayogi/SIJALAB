@@ -81,6 +81,15 @@
     margin: 3px 0;
 }
 
+.collapse-item {
+    color: #6c757d; /* Bootstrap's text-muted color */
+}
+
+.collapse-item.active {
+    color: #4e73df !important; /* Warna biru active default SB Admin 2 */
+    font-weight: bold;
+}
+
 .card-header {
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -167,18 +176,6 @@ form.d-flex.align-items-center .fw-bold {
     border-color: #86b7fe;
     outline: none;
     box-shadow: 0 0 5px rgba(13, 110, 253, 0.25);
-}
-
-/* Membuat grafik responsif */
-canvas {
-    width: 100% !important;
-    height: 100px; /* Ukuran tinggi grafik */
-}
-
-/* Membuat grafik tidak terlalu tinggi */
-#reservasiChart,
-#pendapatanChart {
-    width: 100% !important; /* Lebar grafik mengikuti lebar kontainer */
 }
 
 /* Styling untuk filter tahun */

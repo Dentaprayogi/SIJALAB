@@ -78,6 +78,8 @@ Route::middleware([
         Route::resource('lab', LabController::class);
 
         // Route Jadwal Lab
+        Route::post('/jadwal_lab/import', [JadwalLabController::class, 'import'])->name('jadwal_lab.import');
+        Route::get('/template-jadwal-lab', [JadwalLabController::class, 'downloadTemplate'])->name('jadwal_lab.template');
         Route::patch('/jadwal_lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal_lab.toggle-status');
         Route::get('/jadwal_lab/create', [JadwalLabController::class, 'create'])->name('jadwal_lab.create');
         Route::post('/jadwal_lab', [JadwalLabController::class, 'store'])->name('jadwal_lab.store');

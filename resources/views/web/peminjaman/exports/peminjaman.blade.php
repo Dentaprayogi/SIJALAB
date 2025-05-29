@@ -10,12 +10,12 @@
             <th>Prodi</th>
             <th>Mata Kuliah</th>
             <th>Dosen</th>
-            <th>Keteranagan</th>
+            <th>Kegiatan</th>
             <th>Peralatan</th>
             <th>Tanggal Pengembalian</th>
             <th>Jam Dikembalikan</th>
             <th>Alasan Ditolak</th>
-            <th>Catatan</th>
+            <th>Alasan Bermasalah</th>
             <th>Status</th>
 
         </tr>
@@ -47,11 +47,26 @@
                     ({{ $p->user->mahasiswa->kelas->nama_kelas ?? '-' }})</td>
                 <td>{{ $p->peminjamanJadwal->jadwalLab->mataKuliah->nama_mk ?? '-' }}</td>
                 <td>{{ $p->peminjamanJadwal->jadwalLab->dosen->nama_dosen ?? '-' }}</td>
-                <td>{{ $p->peminjamanManual->keterangan ?? '-' }}</td>
+                <td>{{ $p->peminjamanManual->kegiatan ?? '-' }}</td>
                 <td>
                     <ul>
                         @foreach ($p->peralatan as $alat)
-                            <li>{{ $alat->nama_peralatan }}</li>
+                            @php
+                                $unit = null;
+                                if ($p->unitPeralatan instanceof \Illuminate\Support\Collection) {
+                                    // Cari unit yang memiliki id_peralatan sama
+                                    $unit = $p->unitPeralatan->first(function ($u) use ($alat) {
+                                        return $u->id_peralatan == $alat->id_peralatan;
+                                    });
+                                }
+                            @endphp
+
+                            <li>
+                                {{ $alat->nama_peralatan }}
+                                @if ($unit)
+                                    (Kode Unit: {{ $unit->kode_unit }})
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </td>
@@ -77,8 +92,8 @@
                     @endif
                 </td>
                 <td>
-                    @if ($p->peminjamanBermasalah && $p->peminjamanBermasalah->catatan)
-                        {{ $p->peminjamanBermasalah->catatan }}
+                    @if ($p->peminjamanBermasalah && $p->peminjamanBermasalah->alasan_bermasalah)
+                        {{ $p->peminjamanBermasalah->alasan_bermasalah }}
                     @else
                         -
                     @endif

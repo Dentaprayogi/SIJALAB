@@ -76,20 +76,27 @@
                         </a>
                     </li>
 
-                    <!-- Nav Item - Peralatan -->
-                    <li class="nav-item {{ Request::is('peralatan*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('peralatan.index') }}">
+                    <!-- Nav Item - Master Peralatan (Dropdown) -->
+                    <li class="nav-item {{ Request::is('peralatan*') || Request::is('unit-peralatan*') ? 'active' : '' }}">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePeralatan"
+                            aria-expanded="true" aria-controls="collapsePeralatan">
                             <i class="fas fa-tools"></i>
                             <span>Peralatan</span>
                         </a>
-                    </li>
-
-                    <!-- Nav Item - Unit Peralatan -->
-                    <li class="nav-item {{ Request::is('unit_peralatan*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('unit-peralatan.index') }}">
-                            <i class="fas fa-tools"></i>
-                            <span>Unit Peralatan</span>
-                        </a>
+                        <div id="collapsePeralatan"
+                            class="collapse {{ Request::is('peralatan*') || Request::is('unit-peralatan*') ? 'show' : '' }}"
+                            aria-labelledby="headingPeralatan" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <a class="collapse-item {{ Request::is('peralatan*') ? 'active' : 'text-muted' }}"
+                                    href="{{ route('peralatan.index') }}">
+                                    <span>Data Peralatan</span>
+                                </a>
+                                <a class="collapse-item {{ Request::is('unit-peralatan*') ? 'active' : 'text-muted' }}"
+                                    href="{{ route('unit-peralatan.index') }}">
+                                    <span>Unit Peralatan</span>
+                                </a>
+                            </div>
+                        </div>
                     </li>
 
                     <!-- Nav Item - Prodi -->
