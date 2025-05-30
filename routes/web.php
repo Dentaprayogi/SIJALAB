@@ -7,6 +7,7 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\JadwalLabController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LabController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
@@ -18,9 +19,13 @@ use App\Models\Kelas;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
-Route::get('/', function () {
-    return view('auth.login');
-});
+// Route::get('/', function () {
+//     return view('auth.login');
+// });
+
+
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+
 
 Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {
     return response()->json(
