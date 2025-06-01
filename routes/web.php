@@ -7,7 +7,7 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\JadwalLabController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LabController;
-use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
@@ -24,7 +24,7 @@ use Maatwebsite\Excel\Facades\Excel;
 // });
 
 
-Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 
 Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {
@@ -55,7 +55,8 @@ Route::middleware([
         Route::resource('users', UserController::class);
 
         //Route Tahun Ajaran
-        Route::patch('/tahun-ajaran/{id_tahunAjaran}/toggle-status', [TahunAjaranController::class, 'toggleStatus']);
+        Route::patch('/tahun-ajaran/{id_tahunAjaran}/toggle-status', [TahunAjaranController::class, 'toggleStatus'])
+            ->name('tahunajaran.toggleStatus');
         Route::resource('tahunajaran', TahunAjaranController::class)->parameters([
             'tahunajaran' => 'tahunAjaran'
         ]);;
@@ -79,7 +80,7 @@ Route::middleware([
         Route::resource('dosen', DosenController::class);
 
         //Route Manajemen Lab
-        Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus']);
+        Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus'])->name('lab.toggleStatus');
         Route::resource('lab', LabController::class);
 
         // Route Jadwal Lab

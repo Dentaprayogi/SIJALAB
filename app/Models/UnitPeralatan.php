@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UnitPeralatan extends Model
 {
+    use HasFactory;
+
     protected $table = 'unit_peralatan';
     protected $primaryKey = 'id_unit';
 

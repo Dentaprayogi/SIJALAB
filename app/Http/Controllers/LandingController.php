@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
+
 use App\Models\Hari;
 use App\Models\JadwalLab;
+use Illuminate\Http\Request;
 use App\Models\Lab;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
-use Illuminate\Http\Request;
 
-class LandingPageController extends Controller
+class LandingController extends Controller
 {
     public function index()
     {
         $labs = Lab::orderBy('nama_lab', 'asc')->get();
-        $namaHariSekarang = now()->locale('id')->isoFormat('dddd'); // Senin, Selasa, dst
+        $namaHariSekarang = now()->locale('id')->isoFormat('dddd');
 
         $hari = Hari::where('nama_hari', ucfirst($namaHariSekarang))->first()
             ?? abort(404, 'Hari tidak ditemukan');
@@ -22,10 +24,9 @@ class LandingPageController extends Controller
         $currentTime = now()->format('H:i:s');
 
         foreach ($labs as $lab) {
-            // Cek jika lab nonaktif terlebih dahulu
             if ($lab->status_lab === 'nonaktif') {
                 $lab->status = 'Nonaktif';
-                continue; // lewati pengecekan status lain
+                continue;
             }
 
             $isDipinjam =
@@ -42,7 +43,9 @@ class LandingPageController extends Controller
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today())
                 )->exists()
+
                 ||
+
                 PeminjamanManual::where('id_lab', $lab->id_lab)
                 ->whereTime('jam_mulai', '<=', $currentTime)
                 ->whereTime('jam_selesai', '>=', $currentTime)
@@ -67,7 +70,9 @@ class LandingPageController extends Controller
                     $q->where('status_peminjaman', 'pengajuan')
                         ->whereDate('tgl_peminjaman', today())
                 )->exists()
+
                 ||
+
                 PeminjamanManual::where('id_lab', $lab->id_lab)
                 ->whereTime('jam_mulai', '<=', $currentTime)
                 ->whereTime('jam_selesai', '>=', $currentTime)
@@ -95,6 +100,7 @@ class LandingPageController extends Controller
                 $lab->status = 'Kosong';
             }
         }
-        return view('web.landingpage.index', compact('labs'));
+
+        return view('web.landing.index', compact('labs'));
     }
 }

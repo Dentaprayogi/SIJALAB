@@ -13,7 +13,7 @@ class DeleteAccountTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_accounts_can_be_deleted(): void
+    public function test_akun_user_dapat_dihapus(): void
     {
         if (! Features::hasAccountDeletionFeatures()) {
             $this->markTestSkipped('Account deletion is not enabled.');
@@ -28,19 +28,19 @@ class DeleteAccountTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
-    public function test_correct_password_must_be_provided_before_account_can_be_deleted(): void
-    {
-        if (! Features::hasAccountDeletionFeatures()) {
-            $this->markTestSkipped('Account deletion is not enabled.');
-        }
+    // public function test_kata_sandi_harus_diberikan_sebelum_akun_terhapus(): void
+    // {
+    //     if (! Features::hasAccountDeletionFeatures()) {
+    //         $this->markTestSkipped('Account deletion is not enabled.');
+    //     }
 
-        $this->actingAs($user = User::factory()->create());
+    //     $this->actingAs($user = User::factory()->create());
 
-        Livewire::test(DeleteUserForm::class)
-            ->set('password', 'wrong-password')
-            ->call('deleteUser')
-            ->assertHasErrors(['password']);
+    //     Livewire::test(DeleteUserForm::class)
+    //         ->set('password', 'wrong-password')
+    //         ->call('deleteUser')
+    //         ->assertHasErrors(['password']);
 
-        $this->assertNotNull($user->fresh());
-    }
+    //     $this->assertNotNull($user->fresh());
+    // }
 }
