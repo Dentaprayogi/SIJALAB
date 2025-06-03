@@ -2,15 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Models\JadwalLab;
 use App\Models\Matakuliah;
 use App\Models\Prodi;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class MatakuliahControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 
     protected function setUp(): void
     {
@@ -124,20 +132,23 @@ class MatakuliahControllerTest extends TestCase
         $this->assertDatabaseMissing('matakuliah', ['id_mk' => $matakuliah->id_mk]);
     }
 
-    // public function test_hapus_mata_kuliah_yang_terkait_dengan_jadwal_lab_gagal()
-    // {
-    //     $matakuliah = Matakuliah::factory()->create();
+    public function test_hapus_mata_kuliah_yang_terkait_dengan_jadwal_lab_gagal()
+    {
+        $user = User::factory()->create(['role' => 'teknisi']);
 
-    //     // Mock jadwalLab exists to true
-    //     $this->partialMock(\App\Models\Matakuliah::class, function ($mock) use ($matakuliah) {
-    //         $mock->shouldReceive('findOrFail')->andReturn($matakuliah);
-    //         $mock->shouldReceive('jadwalLab->exists')->andReturn(true);
-    //     });
+        // Buat 1 matakuliah
+        $matakuliah = Matakuliah::factory()->create();
 
-    //     // Karena jadwalLab exists true, harus redirect dengan error
-    //     $response = $this->delete(route('matakuliah.destroy', $matakuliah->id_mk));
+        // Buat jadwal lab yang terkait langsung dengan matakuliah
+        JadwalLab::factory()->create([
+            'id_mk' => $matakuliah->id_mk,
+        ]);
 
-    //     $response->assertRedirect(route('matakuliah.index'));
-    //     $response->assertSessionHas('error', 'Mata Kuliah tidak dapat dihapus karena masih memiliki jadwal lab yang terkait.');
-    // }
+        $response = $this->actingAs($user)
+            ->withMiddleware()
+            ->delete(route('matakuliah.destroy', $matakuliah->id_mk));
+
+        $response->assertRedirect(route('matakuliah.index'));
+        $response->assertSessionHas('error', 'Mata Kuliah tidak dapat dihapus karena masih memiliki jadwal lab yang terkait.');
+    }
 }

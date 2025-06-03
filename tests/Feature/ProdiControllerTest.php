@@ -89,22 +89,22 @@ class ProdiControllerTest extends TestCase
         $this->assertDatabaseMissing('prodi', ['id_prodi' => $prodi->id_prodi]);
     }
 
-    // #[Test]
-    // public function destroy_gagal_hapus_prodi_terhubung_dengan_data_lain()
-    // {
-    //     $prodi = Prodi::factory()->create();
+    #[Test]
+    public function destroy_gagal_hapus_prodi_terhubung_dengan_data_lain()
+    {
+        $prodi = Prodi::factory()->create();
 
-    //     // Membuat relasi dummy dengan model terkait
-    //     Kelas::factory()->create(['id_prodi' => $prodi->id_prodi]);
-    //     Mahasiswa::factory()->create(['id_prodi' => $prodi->id_prodi]);
-    //     Dosen::factory()->create(['id_prodi' => $prodi->id_prodi]);
-    //     JadwalLab::factory()->create(['id_prodi' => $prodi->id_prodi]);
+        // Membuat relasi dummy dengan model terkait
+        Kelas::factory()->create(['id_prodi' => $prodi->id_prodi]);
+        Mahasiswa::factory()->create(['id_prodi' => $prodi->id_prodi]);
+        Dosen::factory()->create(['id_prodi' => $prodi->id_prodi]);
+        JadwalLab::factory()->create(['id_prodi' => $prodi->id_prodi]);
 
-    //     $response = $this->delete(route('prodi.destroy', $prodi->id_prodi));
+        $response = $this->delete(route('prodi.destroy', $prodi->id_prodi));
 
-    //     $response->assertRedirect(route('prodi.index'));
-    //     $response->assertSessionHas('error');
+        $response->assertRedirect(route('prodi.index'));
+        $response->assertSessionHas('error');
 
-    //     $this->assertDatabaseHas('prodi', ['id_prodi' => $prodi->id_prodi]);
-    // }
+        $this->assertDatabaseHas('prodi', ['id_prodi' => $prodi->id_prodi]);
+    }
 }

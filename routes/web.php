@@ -91,7 +91,7 @@ Route::middleware([
         Route::post('/jadwal_lab', [JadwalLabController::class, 'store'])->name('jadwal_lab.store');
         Route::get('/jadwal_lab/{id_jadwalLab}/edit', [JadwalLabController::class, 'edit'])->name('jadwal_lab.edit');
         Route::put('/jadwal_lab/{id_jadwalLab}', [JadwalLabController::class, 'update'])->name('jadwal_lab.update');
-        Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData']);
+        Route::get('/get-dependent-data/{id}', [JadwalLabController::class, 'getData'])->name('jadwal_lab.getDependentData');
         Route::delete('/jadwal_lab/bulk-delete', [JadwalLabController::class, 'bulkDelete'])->name('jadwal_lab.bulkDelete');
         Route::delete('/jadwal_lab/{id_jadwalLab}', [JadwalLabController::class, 'destroy'])->name('jadwal_lab.destroy');
 

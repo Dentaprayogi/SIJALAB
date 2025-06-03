@@ -81,19 +81,23 @@ class PeralatanControllerTest extends TestCase
         $this->assertDatabaseMissing('peralatan', ['id_peralatan' => $peralatan->id_peralatan]);
     }
 
-    // #[Test]
-    // public function destroy_gagal_jika_ada_peminjaman_aktif()
-    // {
-    //     $peralatan = Peralatan::factory()->create();
-    //     Peminjaman::factory()->create([
-    //         'id_peralatan' => $peralatan->id_peralatan,
-    //         'status_peminjaman' => 'dipinjam'
-    //     ]);
+    #[Test]
+    public function destroy_gagal_jika_ada_peminjaman_aktif()
+    {
+        $peralatan = Peralatan::factory()->create();
 
-    //     $response = $this->delete(route('peralatan.destroy', $peralatan->id_peralatan));
+        // Buat peminjaman tanpa id_peralatan
+        $peminjaman = Peminjaman::factory()->create([
+            'status_peminjaman' => 'dipinjam'
+        ]);
 
-    //     $response->assertRedirect(route('peralatan.index'));
-    //     $response->assertSessionHas('error');
-    //     $this->assertDatabaseHas('peralatan', ['id_peralatan' => $peralatan->id_peralatan]);
-    // }
+        // Hubungkan peminjaman dengan peralatan via tabel pivot
+        $peminjaman->peralatan()->attach($peralatan->id_peralatan);
+
+        $response = $this->delete(route('peralatan.destroy', $peralatan->id_peralatan));
+
+        $response->assertRedirect(route('peralatan.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('peralatan', ['id_peralatan' => $peralatan->id_peralatan]);
+    }
 }

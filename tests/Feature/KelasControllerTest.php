@@ -143,18 +143,18 @@ class KelasControllerTest extends TestCase
         $this->assertDatabaseMissing('kelas', ['id_kelas' => $kelas->id_kelas]);
     }
 
-    // #[Test]
-    // public function destroy_gagal_hapus_kelas_terhubung_dengan_mahasiswa_atau_jadwal()
-    // {
-    //     $kelas = Kelas::factory()->create();
+    #[Test]
+    public function destroy_gagal_hapus_kelas_terhubung_dengan_mahasiswa_atau_jadwal()
+    {
+        $kelas = Kelas::factory()->create();
 
-    //     Mahasiswa::factory()->create(['id_kelas' => $kelas->id_kelas]);
-    //     JadwalLab::factory()->create(['id_kelas' => $kelas->id_kelas]);
+        Mahasiswa::factory()->create(['id_kelas' => $kelas->id_kelas]);
+        JadwalLab::factory()->create(['id_kelas' => $kelas->id_kelas]);
 
-    //     $response = $this->delete(route('kelas.destroy', $kelas->id_kelas));
+        $response = $this->delete(route('kelas.destroy', $kelas->id_kelas));
 
-    //     $response->assertRedirect(route('kelas.index'));
-    //     $response->assertSessionHas('error');
-    //     $this->assertDatabaseHas('kelas', ['id_kelas' => $kelas->id_kelas]);
-    // }
+        $response->assertRedirect(route('kelas.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('kelas', ['id_kelas' => $kelas->id_kelas]);
+    }
 }

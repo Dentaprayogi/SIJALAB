@@ -283,12 +283,6 @@ class JadwalLabController extends Controller
             ->with('success', 'Jadwal Lab berhasil ditambahkan.');
     }
 
-    public function show($id)
-    {
-        $jadwalLab = JadwalLab::findOrFail($id);
-        return view('web.jadwal_lab.show', compact('jadwalLab'));
-    }
-
     public function edit($id)
     {
         $jadwalLab = JadwalLab::findOrFail($id);

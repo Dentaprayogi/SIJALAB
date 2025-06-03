@@ -109,22 +109,22 @@ class TahunAjaranTest extends TestCase
         ]);
     }
 
-    // public function test_hapus_tahun_ajaran_gagal_jika_terkait_dengan_jadwal()
-    // {
-    //     $user = User::factory()->create();
-    //     $this->actingAs($user);
+    public function test_hapus_tahun_ajaran_gagal_jika_terkait_dengan_jadwal()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
-    //     $tahun = TahunAjaran::factory()->create();
-    //     JadwalLab::factory()->create(['id_tahunAjaran' => $tahun->id_tahunAjaran]);
+        $tahun = TahunAjaran::factory()->create();
+        JadwalLab::factory()->create(['id_tahunAjaran' => $tahun->id_tahunAjaran]);
 
-    //     $response = $this->delete(route('tahunajaran.destroy', $tahun->id_tahunAjaran));
+        $response = $this->delete(route('tahunajaran.destroy', $tahun->id_tahunAjaran));
 
-    //     $response->assertRedirect(route('tahunajaran.index'));
-    //     $response->assertSessionHas('error');
-    //     $this->assertDatabaseHas('tahun_ajaran', [
-    //         'id_tahunAjaran' => $tahun->id_tahunAjaran
-    //     ]);
-    // }
+        $response->assertRedirect(route('tahunajaran.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('tahun_ajaran', [
+            'id_tahunAjaran' => $tahun->id_tahunAjaran
+        ]);
+    }
 
     public function test_toggle_status_berhasil_mengubah_status()
     {
