@@ -90,12 +90,68 @@ class JadwalLabController extends Controller
         // Data referensi
         $references = [
             'Hari' => [Hari::all(['id_hari', 'nama_hari']), 'id_hari', 'nama_hari'],
-            'Tahun Ajaran' => [TahunAjaran::all(['id_tahunAjaran', 'tahun_ajaran', 'semester']), 'id_tahunAjaran', 'tahun_ajaran', 'semester'],
-            'Lab' => [Lab::all(['id_lab', 'nama_lab']), 'id_lab', 'nama_lab'],
-            'Prodi' => [Prodi::all(['id_prodi', 'nama_prodi', 'singkatan_prodi']), 'id_prodi', 'nama_prodi', 'singkatan_prodi'],
-            'Kelas' => [Kelas::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_kelas', 'nama_kelas', null],
-            'Mata Kuliah' => [MataKuliah::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_mk', 'nama_mk', null],
-            'Dosen' => [Dosen::with('prodi:id_prodi,singkatan_prodi')->get(), 'id_dosen', 'nama_dosen', null],
+
+            'Tahun Ajaran' => [
+                TahunAjaran::where('status_tahunAjaran', 'aktif')
+                    ->orderBy('tahun_ajaran')
+                    ->orderBy('semester')
+                    ->get(['id_tahunAjaran', 'tahun_ajaran', 'semester']),
+                'id_tahunAjaran',
+                'tahun_ajaran',
+                'semester'
+            ],
+
+            'Lab' => [
+                Lab::where('status_lab', 'aktif')
+                    ->orderBy('nama_lab', 'asc')
+                    ->get(['id_lab', 'nama_lab']),
+                'id_lab',
+                'nama_lab'
+            ],
+
+            'Prodi' => [
+                Prodi::orderBy('singkatan_prodi', 'asc')
+                    ->get(['id_prodi', 'nama_prodi', 'singkatan_prodi']),
+                'id_prodi',
+                'nama_prodi',
+                'singkatan_prodi'
+            ],
+
+            'Kelas' => [
+                Kelas::with('prodi:id_prodi,singkatan_prodi')
+                    ->join('prodi', 'kelas.id_prodi', '=', 'prodi.id_prodi')
+                    ->orderBy('prodi.singkatan_prodi')
+                    ->orderBy('kelas.nama_kelas')
+                    ->select('kelas.*') // Hindari ambil kolom dari join jika tidak diperlukan
+                    ->get(),
+                'id_kelas',
+                'nama_kelas',
+                null
+            ],
+
+            'Mata Kuliah' => [
+                MataKuliah::with('prodi:id_prodi,singkatan_prodi')
+                    ->join('prodi', 'matakuliah.id_prodi', '=', 'prodi.id_prodi')
+                    ->orderBy('prodi.singkatan_prodi')
+                    ->orderBy('matakuliah.nama_mk')
+                    ->select('matakuliah.*')
+                    ->get(),
+                'id_mk',
+                'nama_mk',
+                null
+            ],
+
+            'Dosen' => [
+                Dosen::with('prodi:id_prodi,singkatan_prodi')
+                    ->join('prodi', 'dosen.id_prodi', '=', 'prodi.id_prodi')
+                    ->orderBy('prodi.singkatan_prodi')
+                    ->orderBy('dosen.nama_dosen')
+                    ->select('dosen.*')
+                    ->get(),
+                'id_dosen',
+                'nama_dosen',
+                null
+            ],
         ];
 
         // Mapping kolom ke huruf kolom di Template

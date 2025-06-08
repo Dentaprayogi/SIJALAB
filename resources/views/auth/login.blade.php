@@ -12,8 +12,17 @@
     <link rel="stylesheet" href="{{ asset('login-form/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('login-form/css/custom.css') }}">
+    <link href="{{ asset('startbootstrap/css/sb-admin-2-custom.css') }}" rel="stylesheet">
 
     <title>Login | Sistem Peminjaman lab Komputer Jurusan Bisnis dan Informatika</title>
+
+    <style>
+        .nav-link.active {
+            font-weight: bold;
+            color: #ffffff !important;
+            border-bottom: 2px solid #ffffff;
+        }
+    </style>
 </head>
 
 <body class="custom-bg">
@@ -23,7 +32,7 @@
         <div class="container-fluid px-4">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/') }}">Beranda</a>
+                    <a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a>
                 </li>
             </ul>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
@@ -33,10 +42,12 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">Login</a>
+                        <a class="nav-link {{ Request::is('login') ? 'active' : '' }}"
+                            href="{{ route('login') }}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('register') }}">Register</a>
+                        <a class="nav-link {{ Request::is('register') ? 'active' : '' }}"
+                            href="{{ route('register') }}">Register</a>
                     </li>
                 </ul>
             </div>

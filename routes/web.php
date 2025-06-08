@@ -25,7 +25,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
-
+Route::get('/jadwal-lab/hari-ini/{id_lab}', [LandingController::class, 'getJadwalLabHariIni']);
 
 Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {
     return response()->json(

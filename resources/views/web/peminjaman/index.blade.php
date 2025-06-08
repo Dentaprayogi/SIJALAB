@@ -83,14 +83,18 @@
                             </div>
                         @endforeach
                     </div>
-                    <form id="bulk-delete-form" method="POST" action="{{ route('peminjaman.bulkDelete') }}">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="selected_ids" id="selected-ids">
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> Hapus Terpilih
-                        </button>
-                    </form>
+                    @auth
+                        @if (Auth::user()->role === 'teknisi')
+                            <form id="bulk-delete-form" method="POST" action="{{ route('peminjaman.bulkDelete') }}">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="selected_ids" id="selected-ids">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Hapus Terpilih
+                                </button>
+                            </form>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>
@@ -206,6 +210,8 @@
                 text: 'Data yang dihapus tidak dapat dikembalikan!',
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {

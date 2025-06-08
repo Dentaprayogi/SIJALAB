@@ -448,8 +448,12 @@
                                 </div>
                             `;
 
-                                // Tambahkan ke dalam container
-                                container.append(html);
+                                // Cek apakah field untuk peralatan ini sudah ada
+                                if (container.find(`[data-id-peralatan="${id_peralatan}"]`)
+                                    .length === 0) {
+                                    container.append($(html).attr('data-id-peralatan',
+                                        id_peralatan));
+                                }
 
                                 // Inisialisasi Select2 untuk dropdown baru
                                 container.find('select.select-unit').last().select2({

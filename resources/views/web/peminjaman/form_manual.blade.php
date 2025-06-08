@@ -73,7 +73,7 @@
     </div>
 
     {{-- Peralatan --}}
-    <div class="mb-3">
+    <div class="mb-3" data-id-peralatan="${id_peralatan}">
         <label for="peralatan" class="form-label">Peralatan</label>
         <div class="d-flex align-items-center border rounded overflow-hidden">
             <span class="bg-primary text-white px-3 py-2 d-flex align-items-center">

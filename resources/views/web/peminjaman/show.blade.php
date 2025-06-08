@@ -85,7 +85,11 @@
                                         class="d-inline">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-primary">Setujui</button>
+                                        {{-- <button type="submit" class="btn btn-primary">Setujui</button> --}}
+                                        <button type="button" class="btn btn-primary"
+                                            onclick="confirmSetujui({{ $peminjaman->id_peminjaman }})">
+                                            Setujui
+                                        </button>
                                     </form>
 
                                     <button type="button" class="btn btn-danger"
@@ -103,7 +107,11 @@
                                         class="d-inline">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-success">Selesai</button>
+                                        {{-- <button type="submit" class="btn btn-success">Selesai</button> --}}
+                                        <button type="button" class="btn btn-success"
+                                            onclick="confirmSelesai({{ $peminjaman->id_peminjaman }})">
+                                            Selesai
+                                        </button>
                                     </form>
                                 </div>
                             @elseif ($peminjaman->status_peminjaman === 'bermasalah')
@@ -137,6 +145,8 @@
                     'aria-label': 'Alasan penolakan'
                 },
                 showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
                 confirmButtonText: 'Tolak',
                 cancelButtonText: 'Batal',
                 inputValidator: (value) => {
@@ -194,6 +204,8 @@
                     'aria-label': 'Alasan masalah'
                 },
                 showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
                 confirmButtonText: 'Simpan',
                 cancelButtonText: 'Batal',
                 inputValidator: (value) => {
@@ -255,4 +267,75 @@
             });
         </script>
     @endif
+
+    <script>
+        function confirmSetujui(id) {
+            Swal.fire({
+                title: 'Konfirmasi Persetujuan',
+                text: "Yakin ingin menyetujui peminjaman ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Setujui!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form dengan method PUT
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `{{ route('peminjaman.setujui', ':id') }}`.replace(':id', id);
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'PUT';
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function confirmSelesai(id) {
+            Swal.fire({
+                title: 'Konfirmasi Penyelesaian',
+                text: "Yakin peminjaman sudah selesai?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Selesai!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `{{ route('peminjaman.selesai', ':id') }}`.replace(':id', id);
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'PUT';
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
 @endsection

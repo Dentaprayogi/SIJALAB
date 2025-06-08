@@ -10,7 +10,7 @@ body.custom-bg {
 }
 
 .custom-navbar {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: #0062ff;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     font-family: "Figtree", sans-serif;
@@ -26,12 +26,12 @@ body.custom-bg {
 }
 
 .custom-navbar .nav-link {
-    color: #007bff;
+    color: rgb(196, 196, 196);
     font-weight: 500;
 }
 
 .custom-navbar .nav-link:hover {
-    color: #0056b3;
+    color: white;
 }
 
 body.custom-bg {

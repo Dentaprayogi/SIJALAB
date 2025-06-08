@@ -65,7 +65,7 @@
             dateFormat: "H:i",
             time_24hr: true,
             locale: "id",
-            clickOpens: false // ⛔ Mencegah user membuka time picker
+            clickOpens: false
         });
 
         flatpickr("#jam_selesai", {

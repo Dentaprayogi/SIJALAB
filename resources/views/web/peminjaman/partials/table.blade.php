@@ -1,7 +1,11 @@
 <table class="table table-striped table-bordered" id="{{ $tableId }}" width="100%" cellspacing="0">
     <thead class="thead-primary">
         <tr>
-            <th><input type="checkbox" id="select-all"></th>
+            @auth
+                @if (Auth::user()->role === 'teknisi')
+                    <th><input type="checkbox" id="select-all"></th>
+                @endif
+            @endauth
             <th>No.</th>
             <th>Tanggal</th>
             <th>Lab</th>
@@ -22,7 +26,11 @@
         @else
             @foreach ($data as $peminjaman)
                 <tr>
-                    <td><input type="checkbox" class="select-item" value="{{ $peminjaman->id_peminjaman }}"></td>
+                    @auth
+                        @if (Auth::user()->role === 'teknisi')
+                            <td><input type="checkbox" class="select-item" value="{{ $peminjaman->id_peminjaman }}"></td>
+                        @endif
+                    @endauth
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $peminjaman->tgl_peminjaman }}</td>
                     <td>
