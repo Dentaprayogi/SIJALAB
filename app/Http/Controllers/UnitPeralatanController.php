@@ -55,6 +55,8 @@ class UnitPeralatanController extends Controller
             'id_peralatan' => 'required|exists:peralatan,id_peralatan',
             'kode_unit' => 'required|unique:unit_peralatan,kode_unit,' . $id . ',id_unit',
             'status_unit' => 'required|in:tersedia,dipinjam,rusak',
+        ], [
+            'kode_unit.unique' => 'Kode unit sudah ada, silakan gunakan kode lain.',
         ]);
 
         $unit->update($request->all());
@@ -65,8 +67,20 @@ class UnitPeralatanController extends Controller
     public function destroy($id)
     {
         $unit = UnitPeralatan::findOrFail($id);
+
+        // Cek apakah unit terhubung dengan peminjaman aktif
+        $isUsedInPeminjaman = $unit->peminjaman()
+            ->whereIn('status_peminjaman', ['dipinjam', 'pengajuan', 'bermasalah'])
+            ->exists();
+
+        if ($isUsedInPeminjaman) {
+            return redirect()->route('unit-peralatan.index')
+                ->with('error', 'Unit tidak dapat dihapus karena masih terhubung dengan peminjaman yang aktif.');
+        }
+
         $unit->delete();
 
-        return redirect()->route('unit-peralatan.index')->with('success', 'Unit berhasil dihapus.');
+        return redirect()->route('unit-peralatan.index')
+            ->with('success', 'Unit berhasil dihapus.');
     }
 }

@@ -173,9 +173,6 @@
                         cancelButtonText: 'Batal',
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            document.getElementById(`status_text_${userId}`).textContent =
-                                newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-
                             fetch(`/users/${userId}/toggle-status`, {
                                     method: 'PATCH',
                                     headers: {
@@ -186,8 +183,21 @@
                                         status_user: newStatus
                                     })
                                 })
-                                .then(response => response.json())
-                                .then(data => {
+                                .then(async (response) => {
+                                    const data = await response.json();
+
+                                    if (!response.ok) {
+                                        // Jika status bukan 2xx (error dari server)
+                                        throw new Error(data.message ||
+                                            'Gagal mengubah status.');
+                                    }
+
+                                    // Jika berhasil, update teks status dan tampilkan alert sukses
+                                    document.getElementById(`status_text_${userId}`)
+                                        .textContent =
+                                        newStatus.charAt(0).toUpperCase() +
+                                        newStatus.slice(1);
+
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Berhasil',
@@ -195,15 +205,20 @@
                                     });
                                 })
                                 .catch(error => {
-                                    console.error('Error:', error);
+                                    console.error('Error:', error.message);
+
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Gagal',
-                                        text: 'Terjadi kesalahan saat mengubah status.'
+                                        text: error.message ||
+                                            'Terjadi kesalahan saat mengubah status.'
                                     });
+
+                                    // Kembalikan toggle ke posisi sebelumnya
                                     switchEl.checked = !isChecked;
                                 });
                         } else {
+                            // Jika batal, toggle dikembalikan
                             switchEl.checked = !isChecked;
                         }
                     });

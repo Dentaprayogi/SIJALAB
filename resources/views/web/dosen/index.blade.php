@@ -68,7 +68,7 @@
                 icon: 'error',
                 title: 'Gagal',
                 text: '{{ session('error') }}',
-                showConfirmButton: 'Ok'
+                showConfirmButton: true,
             });
         </script>
     @endif
@@ -140,8 +140,9 @@
 
     <script>
         document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function() {
-                const fasilitasId = this.getAttribute('data-id');
+            button.addEventListener('click', function(e) {
+                e.preventDefault(); // <--- Cegah form langsung submit
+
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Dosen yang dihapus tidak bisa dikembalikan!",
@@ -155,7 +156,7 @@
                     if (result.isConfirmed) {
                         this.closest('form').submit();
                     }
-                })
+                });
             });
         });
     </script>

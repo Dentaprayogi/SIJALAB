@@ -55,9 +55,9 @@
                                 <option value="tersedia"
                                     {{ old('status_unit', $unit->status_unit) == 'tersedia' ? 'selected' : '' }}>
                                     Tersedia</option>
-                                <option value="dipinjam"
+                                {{-- <option value="dipinjam"
                                     {{ old('status_unit', $unit->status_unit) == 'dipinjam' ? 'selected' : '' }}>
-                                    Dipinjam</option>
+                                    Dipinjam</option> --}}
                                 <option value="rusak"
                                     {{ old('status_unit', $unit->status_unit) == 'rusak' ? 'selected' : '' }}>
                                     Rusak</option>

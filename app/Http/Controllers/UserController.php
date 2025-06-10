@@ -34,6 +34,17 @@ class UserController extends Controller
             return response()->json(['message' => 'Status tidak valid.'], 422);
         }
 
+        // Cek apakah user masih memiliki peminjaman aktif saat ingin dinonaktifkan
+        if ($status === 'nonaktif') {
+            $peminjamanAktif = $user->peminjaman()
+                ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
+                ->exists();
+
+            if ($peminjamanAktif) {
+                return response()->json(['message' => 'User tidak dapat dinonaktifkan karena masih memiliki peminjaman yang aktif.'], 403);
+            }
+        }
+
         $user->status_user = $status;
         $user->save();
 
@@ -50,11 +61,11 @@ class UserController extends Controller
 
         // Cek apakah user masih memiliki peminjaman aktif atau bermasalah
         $peminjamanAktif = $user->peminjaman()
-            ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam', 'bermasalah'])
+            ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
             ->exists();
 
         if ($peminjamanAktif) {
-            return redirect()->back()->with('error', 'User tidak dapat dihapus karena masih memiliki peminjaman yang aktif atau bermasalah.');
+            return redirect()->back()->with('error', 'User tidak dapat dihapus karena masih memiliki peminjaman yang aktif.');
         }
 
         $user->delete();
@@ -71,7 +82,7 @@ class UserController extends Controller
         }
 
         // Status peminjaman yang dianggap aktif
-        $statusAktif = ['pengajuan', 'dipinjam', 'bermasalah'];
+        $statusAktif = ['pengajuan', 'dipinjam'];
 
         // Ambil ID user yang memiliki peminjaman aktif
         $userDenganPeminjamanAktif = User::whereIn('id', $ids)
