@@ -24,11 +24,13 @@ class JadwalLabController extends Controller
 {
     public function index()
     {
-        $jadwalLabs = JadwalLab::whereHas('tahunAjaran', function ($query) {
-            $query->where('status_tahunAjaran', 'aktif');
-        })
+        $jadwalLabs = JadwalLab::select('jadwal_lab.*')
+            ->join('lab', 'jadwal_lab.id_lab', '=', 'lab.id_lab')
+            ->whereHas('tahunAjaran', function ($query) {
+                $query->where('status_tahunAjaran', 'aktif');
+            })
             ->orderBy('id_hari', 'asc')
-            ->orderBy('id_lab', 'asc')
+            ->orderBy('lab.nama_lab', 'asc')
             ->orderBy('jam_mulai', 'asc')
             ->get();
 
