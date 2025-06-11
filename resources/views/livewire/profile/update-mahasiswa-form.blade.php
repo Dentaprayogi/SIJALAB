@@ -8,15 +8,6 @@
     </x-slot>
 
     <x-slot name="form">
-        <!-- NIM -->
-        <div class="col-span-6 sm:col-span-4">
-            <x-label for="nim" value="NIM" />
-            <x-input id="nim" type="text" class="mt-1 block w-full" wire:model.defer="nim" />
-            @error('nim') 
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
         <!-- Telepon -->
         <div class="col-span-6 sm:col-span-4">
             <x-label for="telepon" value="Telepon" />
@@ -24,12 +15,27 @@
             <x-input-error for="telepon" class="mt-2" />
         </div>
 
+        <!-- NIM -->
+        <div class="col-span-6 sm:col-span-4">
+            <div class="flex items-center justify-between">
+                <x-label for="nim" value="NIM" />
+                <span class="text-sm text-gray-500">Mahasiswa tidak dapat merubah NIM</span>
+            </div>
+            <x-input id="nim" type="text" class="mt-1 block w-full" wire:model.defer="nim" disabled />
+            @error('nim')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
         <!-- Prodi -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="id_prodi" value="Program Studi" />
-            <select wire:model="id_prodi" id="id_prodi" class="form-select block w-full mt-1">
+            <div class="flex items-center justify-between">
+                <x-label for="id_prodi" value="Program Studi" />
+                <span class="text-sm text-gray-500">Mahasiswa tidak dapat merubah prodi</span>
+            </div>
+            <select wire:model="id_prodi" id="id_prodi" class="form-select block w-full mt-1" disabled>
                 <option value="">-- Pilih Prodi --</option>
-                @foreach($prodiList as $prodi)
+                @foreach ($prodiList as $prodi)
                     <option value="{{ $prodi->id_prodi }}">{{ $prodi->nama_prodi }}</option>
                 @endforeach
             </select>
@@ -38,27 +44,28 @@
 
         <!-- Kelas -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="id_kelas" value="Kelas" />
+            <div class="flex items-center justify-between">
+                <x-label for="id_kelas" value="Kelas" />
+                <span class="text-sm text-gray-500">Minta akses ke teknisi untuk merubah kelas</span>
+            </div>
             <div class="flex gap-2 items-center">
-                <select wire:model="id_kelas" id="id_kelas" class="form-select block w-full mt-1">
+                <select wire:model="id_kelas" id="id_kelas" class="form-select block w-full mt-1"
+                    {{ $canEditKelas ? '' : 'disabled' }}>
                     <option value="">-- Pilih Kelas --</option>
-                    @foreach($kelasList as $kelas)
+                    @foreach ($kelasList as $kelas)
                         <option value="{{ $kelas->id_kelas }}">{{ $kelas->nama_kelas }}</option>
                     @endforeach
                 </select>
 
                 {{-- Tombol reset selalu tampil --}}
-                <button type="button" style="background-color:red"
-                        wire:click="resetKelas"
-                        class="text-sm text-white px-3 py-1 rounded mt-1 visibility-visible opacity-100">
+                {{-- <button type="button" style="background-color:red" wire:click="resetKelas"
+                    class="text-sm text-white px-3 py-1 rounded mt-1 visibility-visible opacity-100">
                     Reset
-                </button>
+                </button> --}}
 
             </div>
             <x-input-error for="id_kelas" class="mt-2" />
         </div>
-
-
 
         <!-- Upload Foto KTM -->
         <div class="col-span-6 sm:col-span-4">

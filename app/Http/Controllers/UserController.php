@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kelas;
+use App\Models\Mahasiswa;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -11,7 +14,9 @@ class UserController extends Controller
     public function index()
     {
         $users = User::orderBy('name', 'asc')->get();
-        return view('web.user.index', compact('users'));
+        $prodiList = Prodi::all();
+        $kelasList = Kelas::all();
+        return view('web.user.index', compact('users', 'prodiList', 'kelasList'));
     }
 
     public function show($id)
@@ -49,6 +54,58 @@ class UserController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Status user berhasil diubah']);
+    }
+
+    public function toggleAksesUbahKelas(Request $request)
+    {
+        $aksi = $request->input('aksi');
+
+        if ($aksi === 'beri') {
+            // Berikan akses ubah kelas
+            User::where('role', 'mahasiswa')->update(['akses_ubah_kelas' => true]);
+            return back()->with('success', 'Akses ubah kelas diberikan ke semua mahasiswa.');
+        } elseif ($aksi === 'cabut') {
+            // Cabut akses ubah kelas
+            User::where('role', 'mahasiswa')->update(['akses_ubah_kelas' => false]);
+            return back()->with('success', 'Akses ubah kelas dicabut dari semua mahasiswa.');
+        }
+
+        return back()->with('error', 'Aksi tidak valid.');
+    }
+
+    public function updateFromAdmin(Request $request)
+    {
+        // Validasi standar
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'nim' => 'required|string|max:20|unique:mahasiswa,nim,' . $request->id . ',id',
+            'id_prodi' => 'required|exists:prodi,id_prodi',
+            'id_kelas' => 'required|exists:kelas,id_kelas',
+        ], [
+            'nim.unique' => 'NIM sudah digunakan oleh mahasiswa lain.',
+            'nim.required' => 'NIM wajib diisi.',
+            'id_prodi.required' => 'Prodi wajib dipilih.',
+            'id_kelas.required' => 'Kelas wajib dipilih.',
+        ]);
+
+        // Ambil kelas berdasarkan ID
+        $kelas = \App\Models\Kelas::find($request->id_kelas);
+
+        // Cek apakah id_prodi pada kelas sesuai dengan yang dipilih
+        if ($kelas->id_prodi != $request->id_prodi) {
+            return redirect()->back()->withErrors(['id_kelas' => 'Kelas tidak sesuai dengan prodi yang dipilih.'])->withInput();
+        }
+
+        // Update data mahasiswa
+        $mahasiswa = Mahasiswa::where('id', $request->id)->firstOrFail();
+
+        $mahasiswa->update([
+            'nim' => $request->nim,
+            'id_prodi' => $request->id_prodi,
+            'id_kelas' => $request->id_kelas,
+        ]);
+
+        return redirect()->back()->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
 
     public function destroy($id)

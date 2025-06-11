@@ -24,12 +24,16 @@ class UpdateMahasiswaForm extends Component
 
     public $prodiList = [];
     public $kelasList = [];
-    
+
+    public $disableNim = false;
+    public $disableProdi = false;
+    public $canEditKelas = false;
+
     public function updatedIdProdi($value)
     {
         $this->kelasList = Kelas::where('id_prodi', $value)->get();
         $this->id_kelas = null; // reset pilihan kelas agar user disuruh pilih lagi
-    }    
+    }
 
     public function resetKelas()
     {
@@ -40,8 +44,17 @@ class UpdateMahasiswaForm extends Component
     public function mount()
     {
         $user = Auth::user();
-        $mahasiswa = Mahasiswa::where('id', $user->id)->first();
 
+        // Set default: mahasiswa tidak bisa edit NIM & Prodi
+        if ($user->role === 'mahasiswa') {
+            $this->disableNim = true;
+            $this->disableProdi = true;
+
+            // Cek apakah mahasiswa punya hak akses ubah kelas
+            $this->canEditKelas = $user->akses_ubah_kelas;
+        }
+
+        $mahasiswa = Mahasiswa::where('id', $user->id)->first();
         $this->prodiList = Prodi::all();
 
         if ($mahasiswa) {
@@ -53,33 +66,46 @@ class UpdateMahasiswaForm extends Component
 
             $this->kelasList = Kelas::where('id_prodi', $mahasiswa->id_prodi)->get();
         } else {
-            $this->kelasList = collect(); // kosongkan jika belum ada prodi
+            $this->kelasList = collect();
         }
     }
 
     public function updateMahasiswa()
     {
-        $this->validate([
-            'nim' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('mahasiswa', 'nim')->ignore(Auth::id(), 'id'),
-            ],
+        $user = Auth::user();
+
+        // Ambil mahasiswa yang sedang login
+        $mahasiswa = Mahasiswa::where('id', $user->id)->first();
+
+        $rules = [
             'telepon' => 'required|string|max:20',
-            'id_prodi' => 'required|exists:prodi,id_prodi',
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'foto_ktm' => 'nullable|image|max:5120',
-        ]);
+        ];
 
-        $mahasiswa = Mahasiswa::where('id', Auth::id())->first();
+        // Tetapkan NIM dan Prodi dari data lama jika mahasiswa
+        if ($user->role === 'mahasiswa') {
+            $this->nim = $mahasiswa->nim;
+            $this->id_prodi = $mahasiswa->id_prodi;
+
+            // Jika tidak punya akses ubah kelas, pakai data lama
+            if (!$user->akses_ubah_kelas) {
+                $this->id_kelas = $mahasiswa->id_kelas;
+            }
+        }
+
+        $this->validate($rules);
+
+        // Tetapkan NIM dan Prodi dari data lama jika mahasiswa
+        if ($user->role === 'mahasiswa') {
+            $this->nim = $mahasiswa->nim;
+            $this->id_prodi = $mahasiswa->id_prodi;
+        }
 
         if ($this->foto_ktm) {
-            // Hapus foto lama jika ada
             if ($mahasiswa && $mahasiswa->foto_ktm) {
                 Storage::disk('public')->delete($mahasiswa->foto_ktm);
             }
-
             $path = $this->foto_ktm->store('uploads/ktm', 'public');
         } else {
             $path = $mahasiswa->foto_ktm ?? null;
@@ -95,9 +121,7 @@ class UpdateMahasiswaForm extends Component
 
         $mahasiswa->save();
 
-        // Trigger event
         $this->dispatch('saved');
-
         session()->flash('message', 'Data mahasiswa berhasil diperbarui.');
     }
 
@@ -105,5 +129,4 @@ class UpdateMahasiswaForm extends Component
     {
         return view('livewire.profile.update-mahasiswa-form');
     }
-
 }

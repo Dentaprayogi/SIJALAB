@@ -4,8 +4,26 @@
     <div class="container-fluid">
         <!-- Page Heading -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between">
+            @php
+                // Cek apakah mahasiswa saat ini sudah memiliki akses ubah kelas
+                $mahasiswaWithAccess = \App\Models\User::where('role', 'mahasiswa')
+                    ->where('akses_ubah_kelas', true)
+                    ->count();
+                $aksi = $mahasiswaWithAccess > 0 ? 'cabut' : 'beri';
+            @endphp
+
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h1 class="h3 mb-2 text-gray-800">Daftar Users</h1>
+
+                <form action="{{ route('users.toggleAksesUbahKelas') }}" method="POST" id="formToggleAkses">
+                    @csrf
+                    <input type="hidden" name="aksi" id="aksi_ubah_kelas" value="{{ $aksi }}">
+                    <button type="button" class="btn {{ $aksi == 'beri' ? 'btn-primary' : 'btn-danger' }}"
+                        id="btnToggleAkses">
+                        <i class="fas fa-user-cog"></i>
+                        {{ $aksi == 'beri' ? 'Beri Akses Ubah Kelas Mahasiswa' : 'Cabut Akses Ubah Kelas Mahasiswa' }}
+                    </button>
+                </form>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -76,6 +94,16 @@
                                                 title="Lihat Detail">
                                                 <i class="fas fa-eye"></i> <!-- Icon Detail -->
                                             </a>
+
+                                            <!-- Tombol Edit -->
+                                            <button type="button" class="btn btn-warning btn-edit-mahasiswa"
+                                                data-bs-toggle="modal" data-bs-target="#editMahasiswaModal"
+                                                data-id="{{ $user->id }}" data-nim="{{ $user->mahasiswa->nim ?? '' }}"
+                                                data-id_prodi="{{ $user->mahasiswa->id_prodi ?? '' }}"
+                                                data-id_kelas="{{ $user->mahasiswa->id_kelas ?? '' }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
                                             @if ($user->role === 'teknisi')
                                                 <!-- Tombol Hapus (non-aktif) -->
                                                 <button class="btn btn-secondary" type="button" title="Tidak bisa dihapus"
@@ -112,6 +140,7 @@
             </div>
         </div>
     </div>
+    @include('web.user.edit')
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if (session('success'))
@@ -121,7 +150,20 @@
                     icon: 'success',
                     title: 'Berhasil',
                     text: '{{ session('success') }}',
-                    showConfirmButton: 'Ok'
+                    showConfirmButton: false,
+                });
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    confirmButtonText: 'Ok'
                 });
             });
         </script>
@@ -137,6 +179,41 @@
             });
         </script>
     @endif
+
+    {{-- Alert konfirmasi hak akses ubah kelas --}}
+    <script>
+        document.getElementById('btnToggleAkses').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const aksi = document.getElementById('aksi_ubah_kelas').value;
+            const form = document.getElementById('formToggleAkses');
+
+            let title = '';
+            let confirmButtonText = '';
+
+            if (aksi === 'beri') {
+                title = 'Apakah Anda yakin ingin memberikan hak akses ubah kelas ke semua mahasiswa?';
+                confirmButtonText = 'Ya, beri akses!';
+            } else {
+                title = 'Apakah Anda yakin ingin mencabut hak akses ubah kelas dari semua mahasiswa?';
+                confirmButtonText = 'Ya, cabut akses!';
+            }
+
+            Swal.fire({
+                title: title,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -325,5 +402,57 @@
             });
         });
     </script>
+
+    {{-- ambil kelas list berdasarkan prodi --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButtons = document.querySelectorAll('.btn-edit-mahasiswa');
+
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    const nim = this.getAttribute('data-nim');
+                    const idProdi = this.getAttribute('data-id_prodi');
+                    const idKelas = this.getAttribute('data-id_kelas');
+
+                    // Set nilai awal
+                    document.getElementById('editUserId').value = userId;
+                    document.getElementById('editNim').value = nim;
+                    document.getElementById('editProdi').value = idProdi;
+
+                    // Panggil data kelas sesuai prodi
+                    loadKelas(idProdi, idKelas);
+
+                    // Saat prodi diganti manual
+                    document.getElementById('editProdi').onchange = function() {
+                        loadKelas(this.value, null); // null = tidak ada yang dipilih
+                    };
+                });
+            });
+
+            function loadKelas(prodiId, selectedKelasId = null) {
+                fetch(`/get-kelas/${prodiId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const kelasSelect = document.getElementById('editKelas');
+                        kelasSelect.innerHTML = `<option value="">-- Pilih Kelas --</option>`;
+                        data.forEach(kelas => {
+                            const option = document.createElement('option');
+                            option.value = kelas.id_kelas;
+                            option.text = kelas.nama_kelas;
+                            if (selectedKelasId && kelas.id_kelas == selectedKelasId) {
+                                option.selected = true;
+                            }
+                            kelasSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Gagal memuat data kelas:', error);
+                    });
+            }
+        });
+    </script>
+
+
 
 @endsection

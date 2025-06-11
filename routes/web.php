@@ -50,7 +50,12 @@ Route::middleware([
     // Route khusus untuk teknisi
     Route::group(['middleware' => 'checkRole:teknisi'], function () {
         //Route Manajemen Users
+        Route::post('/users/toggle-akses-ubah-kelas', [UserController::class, 'toggleAksesUbahKelas'])->name('users.toggleAksesUbahKelas');
         Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+        Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {
+            return \App\Models\Kelas::where('id_prodi', $id_prodi)->get();
+        });
+        Route::put('/admin/update-mahasiswa', [UserController::class, 'updateFromAdmin'])->name('mahasiswa.update.fromAdmin');
         Route::delete('/users/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulkDelete');
         Route::resource('users', UserController::class);
 
