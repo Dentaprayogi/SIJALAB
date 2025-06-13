@@ -68,11 +68,18 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
-                <!-- Email Input -->
+                {{-- <!-- Email Input -->
                 <div class="form-group mb-3">
                     <label for="email">Email</label>
                     <input type="email" class="form-control" id="email" name="email"
                         placeholder="your-email@gmail.com" value="{{ old('email') }}" required autofocus>
+                </div> --}}
+
+                <!-- Username Input -->
+                <div class="form-group mb-3">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username"
+                        placeholder="Masukkan username" value="{{ old('username') }}" required autofocus>
                 </div>
 
                 <!-- Password Input -->

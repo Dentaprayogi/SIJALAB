@@ -174,7 +174,7 @@
                 kelasSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas --</option>';
 
                 if (idProdi) {
-                    fetch(`/get-kelas/${idProdi}`)
+                    fetch(`/get_kelas/${idProdi}`)
                         .then(response => response.json())
                         .then(data => {
                             data.forEach(kelas => {

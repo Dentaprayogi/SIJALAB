@@ -84,4 +84,10 @@ class KelasController extends Controller
         $kelas->delete();
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus!');
     }
+
+    public function getByProdi($id_prodi)
+    {
+        $kelasList = Kelas::where('id_prodi', $id_prodi)->get(['id_kelas', 'nama_kelas']);
+        return response()->json($kelasList);
+    }
 }

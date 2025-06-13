@@ -23,15 +23,22 @@ use Maatwebsite\Excel\Facades\Excel;
 //     return view('auth.login');
 // });
 
-
-Route::get('/', [LandingController::class, 'index'])->name('landing');
-Route::get('/jadwal-lab/hari-ini/{id_lab}', [LandingController::class, 'getJadwalLabHariIni']);
+Route::get('/get_kelas/{id_prodi}', function ($id_prodi) {
+    return response()->json(
+        Kelas::where('id_prodi', $id_prodi)->get()
+    );
+});
 
 Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {
     return response()->json(
         Kelas::where('id_prodi', $id_prodi)->get()
     );
 });
+
+
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/jadwal-lab/hari-ini/{id_lab}', [LandingController::class, 'getJadwalLabHariIni']);
+
 
 Route::get('/register', [CustomRegisterController::class, 'create'])->name('register');
 
