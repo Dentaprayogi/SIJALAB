@@ -13,7 +13,8 @@
         <div class="row">
             @foreach ($labs as $lab)
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm text-center">
+                    <div class="card shadow-sm text-center" data-toggle="modal" data-target="#modalLab{{ $lab->id_lab }}"
+                        style="cursor: pointer;">
                         <img src="{{ asset('assets/img/lab.jpg') }}" class="mx-auto d-block" style="max-width: 300px;"
                             alt="Foto Lab">
                         <div class="card-body">
@@ -32,6 +33,7 @@
                         </div>
                     </div>
                 </div>
+                @include('web.dashboard.informasi_peminjam')
             @endforeach
         </div>
     </div>
