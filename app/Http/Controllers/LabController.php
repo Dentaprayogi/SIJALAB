@@ -98,7 +98,10 @@ class LabController extends Controller
 
         // Jika ingin menonaktifkan, lakukan validasi keterhubungan
         if ($status === 'nonaktif') {
-            $isInJadwal = JadwalLab::where('id_lab', $lab->id_lab)->exists();
+            // Cek apakah ada jadwal lab dengan status aktif
+            $isInJadwal = JadwalLab::where('id_lab', $lab->id_lab)
+                ->where('status_jadwalLab', 'aktif')
+                ->exists();
 
             $isInPeminjamanManual = PeminjamanManual::where('id_lab', $lab->id_lab)
                 ->whereHas('peminjaman', function ($query) {
@@ -108,7 +111,7 @@ class LabController extends Controller
 
             if ($isInJadwal || $isInPeminjamanManual) {
                 return response()->json([
-                    'message' => 'Tidak bisa menonaktifkan lab karena masih terhubung dengan jadwal atau peminjaman yang belum selesai.'
+                    'message' => 'Tidak bisa menonaktifkan lab karena masih terhubung dengan jadwal aktif atau peminjaman yang belum selesai.'
                 ], 422);
             }
         }
