@@ -24,7 +24,9 @@ class LabController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_lab' => 'required|string|max:255',
+            'nama_lab' => 'required|string|max:255|unique:lab,nama_lab',
+        ], [
+            'nama_lab.unique' => 'Nama lab sudah terdaftar.',
         ]);
 
         Lab::create([
@@ -44,8 +46,10 @@ class LabController extends Controller
     public function update(Request $request, $id_lab)
     {
         $request->validate([
-            'nama_lab' => 'required|string|max:255',
+            'nama_lab' => 'required|string|max:255|unique:lab,nama_lab',
             'status_lab' => 'required|in:aktif,nonaktif',
+        ], [
+            'nama_lab.unique' => 'Nama lab sudah terdaftar.',
         ]);
 
         $lab = Lab::findOrFail($id_lab);

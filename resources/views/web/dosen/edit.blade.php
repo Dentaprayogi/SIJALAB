@@ -30,7 +30,7 @@
                                 @foreach ($prodi->sortBy('singkatani') as $p)
                                     <option value="{{ $p->id_prodi }}"
                                         {{ $dosen->id_prodi == $p->id_prodi ? 'selected' : '' }}>
-                                        {{ $p->singkatani }}
+                                        {{ $p->singkatan_prodi }}
                                     </option>
                                 @endforeach
                             </select>
