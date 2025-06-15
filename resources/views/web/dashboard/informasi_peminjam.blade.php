@@ -9,7 +9,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                @if ($lab->peminjamanAktif->isEmpty() && $lab->peminjamanManualAktif->isEmpty())
+                @if (($lab->peminjamanAktif ?? collect())->isEmpty() && ($lab->peminjamanManualAktif ?? collect())->isEmpty())
                     <p class="text-center">Tidak ada peminjaman aktif.</p>
                 @else
                     <div class="table-responsive">
@@ -26,7 +26,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($lab->peminjamanAktif as $pj)
+                                @foreach ($lab->peminjamanAktif ?? [] as $pj)
                                     <tr>
                                         <td>{{ $pj->peminjaman->user->name }}</td>
                                         <td>{{ $pj->peminjaman->user->mahasiswa->nim ?? '-' }}</td>
@@ -40,7 +40,7 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                                @foreach ($lab->peminjamanManualAktif as $pm)
+                                @foreach ($lab->peminjamanManualAktif ?? [] as $pm)
                                     <tr>
                                         <td>{{ $pm->peminjaman->user->name }}</td>
                                         <td>{{ $pm->peminjaman->user->mahasiswa->nim ?? '-' }}</td>

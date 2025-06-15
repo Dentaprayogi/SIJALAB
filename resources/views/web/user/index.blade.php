@@ -96,13 +96,21 @@
                                             </a>
 
                                             <!-- Tombol Edit -->
-                                            <button type="button" class="btn btn-warning btn-edit-mahasiswa"
-                                                data-bs-toggle="modal" data-bs-target="#editMahasiswaModal"
-                                                data-id="{{ $user->id }}" data-nim="{{ $user->mahasiswa->nim ?? '' }}"
-                                                data-id_prodi="{{ $user->mahasiswa->id_prodi ?? '' }}"
-                                                data-id_kelas="{{ $user->mahasiswa->id_kelas ?? '' }}">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            @if ($user->role === 'teknisi')
+                                                <button type="button" class="btn btn-secondary btn-edit-mahasiswa"
+                                                    style="cursor: not-allowed;" data-bs-toggle="modal" disabled>
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-warning btn-edit-mahasiswa"
+                                                    data-bs-toggle="modal" data-bs-target="#editMahasiswaModal"
+                                                    data-id="{{ $user->id }}"
+                                                    data-nim="{{ $user->mahasiswa->nim ?? '' }}"
+                                                    data-id_prodi="{{ $user->mahasiswa->id_prodi ?? '' }}"
+                                                    data-id_kelas="{{ $user->mahasiswa->id_kelas ?? '' }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @endif
 
                                             @if ($user->role === 'teknisi')
                                                 <!-- Tombol Hapus (non-aktif) -->
