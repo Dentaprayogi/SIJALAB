@@ -15,31 +15,51 @@ class ProdiController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_prodi' => 'required|string|max:255|unique:prodi,nama_prodi',
+        // Validasi input
+        $validated = $request->validate([
+            'nama_prodi'      => 'required|string|max:255|unique:prodi,nama_prodi',
+            'kode_prodi'      => 'required|string|max:255|unique:prodi,kode_prodi',
             'singkatan_prodi' => 'required|string|max:10|unique:prodi,singkatan_prodi',
         ], [
-            'nama_prodi.unique' => 'Nama prodi sudah ada, silakan gunakan nama lain.',
-            'singkatan_prodi.unique' => 'singkatan prodi sudah ada, silakan gunakan singkatan lain.',
+            'nama_prodi.unique'      => 'Nama prodi sudah ada, silakan gunakan nama lain.',
+            'kode_prodi.unique'      => 'Kode prodi sudah ada, silakan gunakan kode lain.',
+            'singkatan_prodi.unique' => 'Singkatan prodi sudah ada, silakan gunakan singkatan lain.',
         ]);
 
-        Prodi::create($request->all());
+        // Format input sesuai kebutuhan
+        $validated['nama_prodi']      = ucwords(strtolower($validated['nama_prodi']));
+        $validated['kode_prodi']      = strtoupper($validated['kode_prodi']);
+        $validated['singkatan_prodi'] = strtoupper($validated['singkatan_prodi']);
+
+        // Simpan ke database
+        Prodi::create($validated);
+
         return redirect()->route('prodi.index')->with('success', 'Prodi berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
     {
         $prodi = Prodi::findOrFail($id);
-        $request->validate([
-            'nama_prodi' => 'required|string|max:255|unique:prodi,nama_prodi,' . $id . ',id_prodi',
+
+        // Validasi data
+        $validated = $request->validate([
+            'nama_prodi'      => 'required|string|max:255|unique:prodi,nama_prodi,' . $id . ',id_prodi',
+            'kode_prodi'      => 'required|string|max:255|unique:prodi,kode_prodi,' . $id . ',id_prodi',
             'singkatan_prodi' => 'required|string|max:10|unique:prodi,singkatan_prodi,' . $id . ',id_prodi',
         ], [
-            'nama_prodi.unique' => 'Nama prodi sudah ada, silakan gunakan nama lain.',
-            'singkatan_prodi.unique' => 'singkatan prodi sudah ada, silakan gunakan singkatan lain.',
+            'nama_prodi.unique'      => 'Nama prodi sudah ada, silakan gunakan nama lain.',
+            'kode_prodi.unique'      => 'Kode prodi sudah ada, silakan gunakan kode lain.',
+            'singkatan_prodi.unique' => 'Singkatan prodi sudah ada, silakan gunakan singkatan lain.',
         ]);
 
-        $prodi = Prodi::findOrFail($id);
-        $prodi->update($request->all());
+        // Format input
+        $validated['nama_prodi']      = ucwords(strtolower($validated['nama_prodi']));
+        $validated['kode_prodi']      = strtoupper($validated['kode_prodi']);
+        $validated['singkatan_prodi'] = strtoupper($validated['singkatan_prodi']);
+
+        // Update data
+        $prodi->update($validated);
+
         return redirect()->route('prodi.index')->with('success', 'Prodi berhasil diperbarui.');
     }
 

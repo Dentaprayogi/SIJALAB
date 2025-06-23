@@ -14,6 +14,7 @@ class Matakuliah extends Model
 
     protected $fillable = [
         'nama_mk',
+        'kode_mk',
         'id_prodi',
     ];
 

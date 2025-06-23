@@ -117,7 +117,41 @@
                     });
             @endif
         });
+    </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Fungsi untuk menghapus error di dalam modal
+            function bersihkanError(modal) {
+                modal.querySelectorAll('.is-invalid').forEach(input => {
+                    input.classList.remove('is-invalid');
+                });
+
+                modal.querySelectorAll('.invalid-feedback').forEach(error => {
+                    error.style.display = 'none'; // Sembunyikan pesan error tanpa menghapusnya
+                });
+            }
+
+            // Event listener saat modal ditutup -> Hapus error
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    bersihkanError(this);
+                });
+
+                // Event listener saat modal dibuka -> Pastikan error hanya tampil di modal yang sesuai
+                modal.addEventListener('show.bs.modal', function() {
+                    // Hapus error di semua modal lain sebelum modal yang baru ditampilkan
+                    document.querySelectorAll('.modal').forEach(otherModal => {
+                        if (otherModal !== this) {
+                            bersihkanError(otherModal);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <script>
         document.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');

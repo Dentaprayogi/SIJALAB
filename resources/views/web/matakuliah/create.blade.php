@@ -12,10 +12,18 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nama Matakuliah</label>
+                        <label class="form-label">Nama Mata Kuliah</label>
                         <input type="text" class="form-control @error('nama_mk') is-invalid @enderror" name="nama_mk"
                             value="{{ old('nama_mk') }}" required>
                         @error('nama_mk')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control @error('kode_mk') is-invalid @enderror" name="kode_mk"
+                            value="{{ old('kode_mk') }}" required>
+                        @error('kode_mk')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

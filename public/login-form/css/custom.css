@@ -1,5 +1,6 @@
 body.custom-bg {
-    background-image: url("../images/poliwangi 2.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url("../images/poliwangi 2.jpg");
     background-size: cover;
     background-position: center;
     height: 100vh;

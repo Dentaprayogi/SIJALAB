@@ -14,7 +14,8 @@
     <link href="{{ asset('startbootstrap/css/sb-admin-2-custom.css') }}" rel="stylesheet">
     <style>
         body {
-            background-image: url('{{ asset('assets/img/poliwangi 2.jpg') }}');
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('{{ asset('assets/img/poliwangi 2.jpg') }}');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;

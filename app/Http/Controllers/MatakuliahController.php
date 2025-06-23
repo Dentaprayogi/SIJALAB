@@ -24,55 +24,92 @@ class MatakuliahController extends Controller
     {
         $request->validate([
             'id_prodi' => 'required|exists:prodi,id_prodi',
-            'nama_mk' => 'required|string|max:255',
+            'nama_mk'  => 'required|string|max:255',
+            'kode_mk'  => 'required|string|max:50',
         ]);
 
-        // Cek apakah matakuliah dengan nama yang sama sudah ada dalam prodi yang dipilih
-        $cekMatakuliah = Matakuliah::where('id_prodi', $request->id_prodi)
-            ->where('nama_mk', $request->nama_mk)
+        // Ubah nama matakuliah menjadi Title Case
+        $nama_mk = ucwords(strtolower($request->nama_mk));
+        $kode_mk = strtoupper($request->kode_mk);
+
+        // Cek duplikat nama dalam prodi yang sama
+        $cekNama = Matakuliah::where('id_prodi', $request->id_prodi)
+            ->where('nama_mk', $nama_mk)
             ->exists();
 
-        if ($cekMatakuliah) {
-            return redirect()->route('matakuliah.index')->with('error', 'Matakuliah dengan nama yang sama sudah ada dalam prodi ini!');
+        if ($cekNama) {
+            return redirect()->route('matakuliah.index')
+                ->withInput()
+                ->with('error', 'Mata kuliah dengan nama tersebut sudah ada dalam prodi ini!');
         }
 
+        // Cek duplikat kode MK
+        $cekKode = Matakuliah::where('kode_mk', $kode_mk)->exists();
+
+        if ($cekKode) {
+            return redirect()->route('matakuliah.index')
+                ->withInput()
+                ->with('error', 'Kode mata kuliah sudah digunakan!');
+        }
+
+        // Simpan data
         Matakuliah::create([
             'id_prodi' => $request->id_prodi,
-            'nama_mk' => $request->nama_mk,
+            'nama_mk'  => $nama_mk,
+            'kode_mk'  => $kode_mk,
         ]);
 
-        return redirect()->route('matakuliah.index')->with('success', 'Matakuliah berhasil ditambahkan!');
+        return redirect()->route('matakuliah.index')
+            ->with('success', 'Mata kuliah berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id_mk)
     {
         $request->validate([
             'id_prodi' => 'required|exists:prodi,id_prodi',
-            'nama_mk' => 'required|string|max:255',
+            'nama_mk'  => 'required|string|max:255',
+            'kode_mk'  => 'required|string|max:50',
         ]);
 
-        // Ambil data matakuliah berdasarkan ID
         $mk = Matakuliah::findOrFail($id_mk);
 
-        // Cek apakah sudah ada matkul dengan nama dan prodi yang sama, tapi bukan diri sendiri
-        $cekMatakuliah = Matakuliah::where('id_prodi', $request->id_prodi)
-            ->where('nama_mk', $request->nama_mk)
+        // Format nilai input
+        $nama_mk = ucwords(strtolower($request->nama_mk)); // Title Case
+        $kode_mk = strtoupper($request->kode_mk);          // UPPERCASE
+
+        // Cek apakah ada matkul dengan nama sama di prodi yg sama, kecuali dirinya sendiri
+        $cekNama = Matakuliah::where('id_prodi', $request->id_prodi)
+            ->where('nama_mk', $nama_mk)
             ->where('id_mk', '!=', $mk->id_mk)
             ->exists();
 
-        if ($cekMatakuliah) {
-            return redirect()->route('matakuliah.index')->withInput()->with('error', 'Mata Kuliah yang sama sudah ada dalam prodi ini!');
+        if ($cekNama) {
+            return redirect()->route('matakuliah.index')
+                ->withInput()
+                ->with('error', 'Mata kuliah dengan nama tersebut sudah ada dalam prodi ini!');
+        }
+
+        // Cek apakah kode mk sudah digunakan oleh matkul lain
+        $cekKode = Matakuliah::where('kode_mk', $kode_mk)
+            ->where('id_mk', '!=', $mk->id_mk)
+            ->exists();
+
+        if ($cekKode) {
+            return redirect()->route('matakuliah.index')
+                ->withInput()
+                ->with('error', 'Kode mata kuliah sudah digunakan!');
         }
 
         // Update data
         $mk->update([
             'id_prodi' => $request->id_prodi,
-            'nama_mk' => $request->nama_mk,
+            'nama_mk'  => $nama_mk,
+            'kode_mk'  => $kode_mk,
         ]);
 
-        return redirect()->route('matakuliah.index')->with('success', 'Mata Kuliah berhasil diperbarui!');
+        return redirect()->route('matakuliah.index')
+            ->with('success', 'Mata kuliah berhasil diperbarui!');
     }
-
 
     public function destroy($id_mk)
     {

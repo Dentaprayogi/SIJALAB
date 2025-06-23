@@ -19,6 +19,10 @@
                             <input type="text" name="nama_mk" class="form-control" value="{{ $mk->nama_mk }}">
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Kode Mata Kuliah</label>
+                            <input type="text" name="kode_mk" class="form-control" value="{{ $mk->kode_mk }}">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label"">Prodi</label>
                             <select class="form-control" name="id_prodi" required>
                                 @foreach ($prodi->sortBy('singkatan_prodi') as $p)

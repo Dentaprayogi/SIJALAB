@@ -17,14 +17,17 @@
 
                     <div class="modal-body">
 
+                        {{-- Nama Peralatan --}}
                         <div class="mb-3">
                             <label for="id_peralatan_{{ $unit->id_unit }}" class="form-label">Nama Peralatan</label>
                             <select name="id_peralatan" id="id_peralatan_{{ $unit->id_unit }}"
-                                class="form-control  @error('id_peralatan') is-invalid @enderror" required>
+                                class="form-control @error('id_peralatan') is-invalid @enderror" required>
                                 <option value="">-- Pilih Peralatan --</option>
                                 @foreach ($peralatans as $peralatan)
                                     <option value="{{ $peralatan->id_peralatan }}"
-                                        {{ old('id_peralatan', $unit->id_peralatan) == $peralatan->id_peralatan ? 'selected' : '' }}>
+                                        @if (old('id_unit') == $unit->id_unit) {{ old('id_peralatan') == $peralatan->id_peralatan ? 'selected' : '' }}
+                                        @else
+                                            {{ $unit->id_peralatan == $peralatan->id_peralatan ? 'selected' : '' }} @endif>
                                         {{ $peralatan->nama_peralatan }}
                                     </option>
                                 @endforeach
@@ -36,11 +39,13 @@
                             @endif
                         </div>
 
+                        {{-- Kode Unit --}}
                         <div class="mb-3">
                             <label for="kode_unit_{{ $unit->id_unit }}" class="form-label">Kode Unit</label>
                             <input type="text" name="kode_unit" id="kode_unit_{{ $unit->id_unit }}"
                                 class="form-control @error('kode_unit') is-invalid @enderror"
-                                value="{{ old('kode_unit', $unit->kode_unit) }}" required>
+                                value="{{ old('id_unit') == $unit->id_unit ? old('kode_unit') : $unit->kode_unit }}"
+                                required>
                             @if (old('id_unit') == $unit->id_unit)
                                 @error('kode_unit')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -48,18 +53,16 @@
                             @endif
                         </div>
 
+                        {{-- Status Unit --}}
                         <div class="mb-3">
                             <label for="status_unit_{{ $unit->id_unit }}" class="form-label">Status Unit</label>
                             <select name="status_unit" id="status_unit_{{ $unit->id_unit }}"
                                 class="form-control @error('status_unit') is-invalid @enderror" required>
                                 <option value="tersedia"
-                                    {{ old('status_unit', $unit->status_unit) == 'tersedia' ? 'selected' : '' }}>
+                                    {{ old('id_unit') == $unit->id_unit ? (old('status_unit') == 'tersedia' ? 'selected' : '') : ($unit->status_unit == 'tersedia' ? 'selected' : '') }}>
                                     Tersedia</option>
-                                {{-- <option value="dipinjam"
-                                    {{ old('status_unit', $unit->status_unit) == 'dipinjam' ? 'selected' : '' }}>
-                                    Dipinjam</option> --}}
                                 <option value="rusak"
-                                    {{ old('status_unit', $unit->status_unit) == 'rusak' ? 'selected' : '' }}>
+                                    {{ old('id_unit') == $unit->id_unit ? (old('status_unit') == 'rusak' ? 'selected' : '') : ($unit->status_unit == 'rusak' ? 'selected' : '') }}>
                                     Rusak</option>
                             </select>
                             @if (old('id_unit') == $unit->id_unit)
@@ -70,6 +73,7 @@
                         </div>
 
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
                             onclick="location.reload();">

@@ -49,7 +49,7 @@ class PeminjamanController extends Controller
 
         $peminjamans = $query->latest()->get();
 
-        // 🔔 Ambil notifikasi peminjaman yang statusnya "pengajuan"
+        // Ambil notifikasi peminjaman yang statusnya "pengajuan"
         $notifikasi = Peminjaman::with('user')
             ->where('status_peminjaman', 'pengajuan')
             ->latest()

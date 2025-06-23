@@ -15,26 +15,47 @@ class PeralatanController extends Controller
 
     public function store(Request $request)
     {
+        // Ubah terlebih dahulu sebelum validasi
+        $request->merge([
+            'nama_peralatan' => ucwords(strtolower($request->nama_peralatan))
+        ]);
+
         $request->validate([
             'nama_peralatan' => 'required|string|max:255|unique:peralatan,nama_peralatan',
         ], [
             'nama_peralatan.unique' => 'Nama peralatan sudah ada, silakan gunakan nama lain.',
         ]);
 
-        Peralatan::create($request->all());
+        Peralatan::create([
+            'nama_peralatan' => $request->nama_peralatan,
+        ]);
+
         return redirect()->route('peralatan.index')->with('success', 'Peralatan berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
+        // Ubah nama_peralatan ke Title Case lebih dulu
+        $namaTitleCase = ucwords(strtolower($request->nama_peralatan));
+
+        // Ganti nama_peralatan di request agar validasi pakai yang sudah dibersihkan
+        $request->merge([
+            'nama_peralatan' => $namaTitleCase,
+        ]);
+
+        // Validasi input
         $request->validate([
             'nama_peralatan' => 'required|string|max:255|unique:peralatan,nama_peralatan,' . $id . ',id_peralatan',
         ], [
             'nama_peralatan.unique' => 'Nama peralatan sudah ada, silakan gunakan nama lain.',
         ]);
 
+        // Ambil data dan update
         $peralatan = Peralatan::findOrFail($id);
-        $peralatan->update($request->all());
+        $peralatan->update([
+            'nama_peralatan' => $namaTitleCase,
+        ]);
+
         return redirect()->route('peralatan.index')->with('success', 'Peralatan berhasil diperbarui.');
     }
 

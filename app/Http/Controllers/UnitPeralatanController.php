@@ -30,36 +30,46 @@ class UnitPeralatanController extends Controller
 
     public function store(Request $request)
     {
+        // Ubah ke uppercase dulu
+        $request->merge([
+            'kode_unit' => strtoupper($request->kode_unit),
+        ]);
+
+        // Validasi input setelah diubah
         $request->validate([
             'id_peralatan' => 'required|exists:peralatan,id_peralatan',
             'kode_unit' => 'required|unique:unit_peralatan,kode_unit',
         ]);
 
+        // Simpan ke database
         UnitPeralatan::create($request->all());
 
         return redirect()->route('unit-peralatan.index')->with('success', 'Unit berhasil ditambahkan.');
-    }
-
-    public function edit($id)
-    {
-        $unit = UnitPeralatan::findOrFail($id);
-        $peralatans = Peralatan::all();
-        return view('web.unit_peralatan.edit', compact('unit', 'peralatans'));
     }
 
     public function update(Request $request, $id)
     {
         $unit = UnitPeralatan::findOrFail($id);
 
+        // Ubah kode_unit menjadi huruf besar
+        $request->merge([
+            'kode_unit' => strtoupper($request->kode_unit),
+        ]);
+
         $request->validate([
             'id_peralatan' => 'required|exists:peralatan,id_peralatan',
-            'kode_unit' => 'required|unique:unit_peralatan,kode_unit,' . $id . ',id_unit',
+            'kode_unit' => 'required|string|max:255|unique:unit_peralatan,kode_unit,' . $id . ',id_unit',
             'status_unit' => 'required|in:tersedia,dipinjam,rusak',
         ], [
             'kode_unit.unique' => 'Kode unit sudah ada, silakan gunakan kode lain.',
         ]);
 
-        $unit->update($request->all());
+        // Update data unit
+        $unit->update([
+            'id_peralatan' => $request->id_peralatan,
+            'kode_unit' => $request->kode_unit,
+            'status_unit' => $request->status_unit,
+        ]);
 
         return redirect()->route('unit-peralatan.index')->with('success', 'Unit berhasil diperbarui.');
     }

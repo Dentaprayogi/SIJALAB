@@ -21,6 +21,14 @@
                         @enderror
                     </div>
                     <div class="mb-3">
+                        <label for="kode_prodi" class="form-label">Kode Prodi</label>
+                        <input type="text" class="form-control @error('kode_prodi') is-invalid @enderror"
+                            id="kode_prodi" name="kode_prodi" required>
+                        @error('kode_prodi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
                         <label for="singkatan_prodi" class="form-label">Singkatan Prodi</label>
                         <input type="text" class="form-control @error('singkatan_prodi') is-invalid @enderror"
                             id="singkatan_prodi" name="singkatan_prodi" required>

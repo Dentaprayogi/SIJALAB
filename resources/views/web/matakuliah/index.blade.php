@@ -15,7 +15,8 @@
                         <thead class="thead-primary">
                             <tr>
                                 <th>No</th>
-                                <th>Nama Matakuliah</th>
+                                <th>Nama Mata Kuliah</th>
+                                <th>Kode Mata Kuliah</th>
                                 <th>Prodi</th>
                                 <th>Aksi</th>
                             </tr>
@@ -30,6 +31,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $mk->nama_mk }}</td>
+                                        <td>{{ $mk->kode_mk }}</td>
                                         <td>{{ $mk->prodi->singkatan_prodi }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
