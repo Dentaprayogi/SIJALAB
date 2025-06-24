@@ -24,6 +24,17 @@ class JadwalLabController extends Controller
 {
     public function index()
     {
+        // Auto aktifkan kembali jadwal yang sudah melewati waktu nonaktif
+        \App\Models\JadwalLab::where('status_jadwalLab', 'nonaktif')
+            ->whereNotNull('waktu_akhir_nonaktif')
+            ->where('waktu_akhir_nonaktif', '<=', now())
+            ->update([
+                'status_jadwalLab' => 'aktif',
+                'waktu_mulai_nonaktif' => null,
+                'waktu_akhir_nonaktif' => null,
+            ]);
+
+        // Ambil semua jadwal aktif berdasarkan tahun ajaran aktif
         $jadwalLabs = JadwalLab::select('jadwal_lab.*')
             ->join('lab', 'jadwal_lab.id_lab', '=', 'lab.id_lab')
             ->whereHas('tahunAjaran', function ($query) {
@@ -483,14 +494,25 @@ class JadwalLabController extends Controller
 
     public function toggleStatus(Request $request, $id_jadwalLab)
     {
-        $jadwal = JadwalLab::where('id_jadwalLab', $id_jadwalLab)->firstOrFail();
+        $jadwal = JadwalLab::findOrFail($id_jadwalLab);
 
         $status = $request->status_jadwalLab;
+
         if (!in_array($status, ['aktif', 'nonaktif'])) {
             return response()->json(['message' => 'Status tidak valid.'], 422);
         }
 
         $jadwal->status_jadwalLab = $status;
+
+        if ($status === 'nonaktif') {
+            $jadwal->waktu_mulai_nonaktif = $request->waktu_mulai_nonaktif;
+            $jadwal->waktu_akhir_nonaktif = $request->waktu_akhir_nonaktif;
+        } else {
+            // Jika user aktifkan secara manual, bersihkan waktu nonaktif
+            $jadwal->waktu_mulai_nonaktif = null;
+            $jadwal->waktu_akhir_nonaktif = null;
+        }
+
         $jadwal->save();
 
         return response()->json(['message' => 'Status jadwal lab berhasil diubah']);

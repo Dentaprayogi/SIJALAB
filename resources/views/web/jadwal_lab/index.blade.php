@@ -58,7 +58,6 @@
                                 ])
                             </div>
                         @endforeach
-
                     </div>
                     @auth
                         @if (Auth::user()->role === 'teknisi')
@@ -76,6 +75,7 @@
             </div>
         </div>
     </div>
+    @include('web.jadwal_lab.input_waktu')
 
     {{-- SweetAlert untuk success dan error --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -137,63 +137,158 @@
 
     {{-- Toggle switch status jadwal lab --}}
     <script>
-        const jadwalToggles = document.querySelectorAll('.jadwalLab-toggle');
+        document.addEventListener("DOMContentLoaded", function() {
+            const jadwalToggles = document.querySelectorAll('.jadwalLab-toggle');
+            let pendingToggle = null; // Simpan elemen toggle yang terakhir diklik
 
-        jadwalToggles.forEach(function(toggle) {
-            toggle.addEventListener('change', function(e) {
-                const jadwalId = this.dataset.id;
-                const isChecked = this.checked;
-                const newStatus = isChecked ? 'aktif' : 'nonaktif';
-                const switchEl = this;
+            jadwalToggles.forEach(function(toggle) {
+                toggle.addEventListener('change', function() {
+                    const jadwalId = this.dataset.id;
+                    const isChecked = this.checked;
+                    const newStatus = isChecked ? 'aktif' : 'nonaktif';
+                    const switchEl = this;
 
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: `Status jadwal lab akan diubah menjadi ${newStatus.toUpperCase()}`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, ubah!',
-                    cancelButtonColor: '#d33',
-                    cancelButtonText: 'Batal',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`status_jadwalLab_text_${jadwalId}`).textContent =
-                            newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: `Status jadwal lab akan diubah menjadi ${newStatus.toUpperCase()}`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, ubah!',
+                        cancelButtonColor: '#d33',
+                        cancelButtonText: 'Batal',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (newStatus === 'nonaktif') {
+                                // Simpan elemen toggle dan ID
+                                pendingToggle = switchEl;
+                                document.getElementById('jadwalIdInput').value = jadwalId;
 
-                        fetch(`/jadwal_lab/${jadwalId}/toggle-status`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                },
-                                body: JSON.stringify({
-                                    status_jadwalLab: newStatus
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil',
-                                    text: data.message
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal',
-                                    text: 'Terjadi kesalahan saat mengubah status.'
-                                });
-                                switchEl.checked = !isChecked;
-                            });
-                    } else {
-                        switchEl.checked = !isChecked;
-                    }
+                                // Tampilkan modal input waktu
+                                var modal = new bootstrap.Modal(document.getElementById(
+                                    'modalRentangNonaktif'));
+                                modal.show();
+                            } else {
+                                // Jika aktif, langsung kirim tanpa waktu
+                                updateStatusJadwal(jadwalId, 'aktif');
+                            }
+                        } else {
+                            switchEl.checked = !isChecked;
+                        }
+                    });
                 });
+            });
+
+            // Submit form modal rentang waktu
+            const formRentang = document.getElementById('formRentangNonaktif');
+            formRentang.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const jadwalId = document.getElementById('jadwalIdInput').value;
+                const waktuMulai = document.getElementById('start_nonaktif').value;
+                const waktuAkhir = document.getElementById('end_nonaktif').value;
+
+                if (new Date(waktuMulai) >= new Date(waktuAkhir)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Waktu akhir harus lebih besar dari waktu mulai!'
+                    });
+                    return;
+                }
+
+                updateStatusJadwal(jadwalId, 'nonaktif', waktuMulai, waktuAkhir);
+                var modal = bootstrap.Modal.getInstance(document.getElementById('modalRentangNonaktif'));
+                modal.hide();
+            });
+
+            // Fungsi kirim data ke server
+            function updateStatusJadwal(jadwalId, status, mulai = null, akhir = null) {
+                fetch(`/jadwal_lab/${jadwalId}/toggle-status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({
+                            status_jadwalLab: status,
+                            waktu_mulai_nonaktif: mulai,
+                            waktu_akhir_nonaktif: akhir,
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById(`status_jadwalLab_text_${jadwalId}`).textContent =
+                            status.charAt(0).toUpperCase() + status.slice(1);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: data.message
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat mengubah status.'
+                        });
+
+                        // Kembalikan toggle ke status sebelumnya
+                        if (pendingToggle) {
+                            pendingToggle.checked = (status === 'aktif') ? false : true;
+                        }
+                    });
+            }
+        });
+    </script>
+
+    {{-- set input mulai nonaktif menggunakan waktu yang berlaku --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalEl = document.getElementById('modalRentangNonaktif');
+            const startInput = document.getElementById('start_nonaktif');
+
+            modalEl.addEventListener('show.bs.modal', function() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+
+                // Format value untuk input datetime-local: "YYYY-MM-DDTHH:MM"
+                const formatted = `${year}-${month}-${day}T${hour}:${minute}`;
+                startInput.value = formatted;
             });
         });
     </script>
+
+    {{-- set batas minimumn tanggal dan waktu ke waktu sekarang --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const endInput = document.getElementById('end_nonaktif');
+
+            function setMinEndTime() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                endInput.min = minDateTime;
+            }
+
+            // Set saat halaman dimuat
+            setMinEndTime();
+
+            // Optionally, perbarui setiap kali modal dibuka
+            const modalElement = document.getElementById('modalRentangNonaktif');
+            modalElement.addEventListener('show.bs.modal', setMinEndTime);
+        });
+    </script>
+
 
     {{-- Bulk Delete --}}
     <script>

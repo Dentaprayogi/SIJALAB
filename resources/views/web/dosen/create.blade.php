@@ -16,6 +16,10 @@
                         <input type="text" class="form-control" name="nama_dosen" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">NIP/NIPPPK</label>
+                        <input type="text" class="form-control" name="nip" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Telepon</label>
                         <input type="text" class="form-control" name="telepon" required>
                     </div>

@@ -23,13 +23,15 @@ class JadwalLab extends Model
         'id_kelas',
         'id_tahunAjaran',
         'status_jadwalLab',
+        'waktu_mulai_nonaktif',
+        'waktu_akhir_nonaktif',
     ];
 
     // format jam mulai dan jam berakhir H:i
     public function getRentangJamAttribute()
     {
         return \Carbon\Carbon::parse($this->jam_mulai)->format('H:i') . ' - ' . \Carbon\Carbon::parse($this->jam_selesai)->format('H:i');
-    }    
+    }
 
     // Relasi ke Hari (One to Many)
     public function hari()

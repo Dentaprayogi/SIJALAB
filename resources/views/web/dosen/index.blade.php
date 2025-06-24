@@ -16,6 +16,7 @@
                             <tr>
                                 <th>No.</th>
                                 <th>Nama Dosen</th>
+                                <th>NIP/NIPPPK</th>
                                 <th>Telepon</th>
                                 <th>Prodi</th>
                                 <th>Aksi</th>
@@ -31,6 +32,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $dosen->nama_dosen }}</td>
+                                        <td>{{ $dosen->nip }}</td>
                                         <td>{{ $dosen->telepon }}</td>
                                         <td>{{ $dosen->prodi->singkatan_prodi }}</td>
                                         <td>
