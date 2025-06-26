@@ -61,19 +61,12 @@
         <div class="auth-box">
             <h5 class="text-center text-primary-custom mb-3" style="padding-top: 10px"><strong>Sistem Peminjaman Lab
                     Komputer Jurusan Bisnis dan Informatika</strong></h5>
-            <p class="text-center mb-4 text-secondary">Silakan login dengan memasukkan alamat email dan kata sandi Anda.
+            <p class="text-center mb-4 text-secondary">Silakan login dengan memasukkan username dan password anda.
             </p>
 
             <!-- Form Login -->
             <form method="POST" action="{{ route('login') }}">
                 @csrf
-
-                {{-- <!-- Email Input -->
-                <div class="form-group mb-3">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email"
-                        placeholder="your-email@gmail.com" value="{{ old('email') }}" required autofocus>
-                </div> --}}
 
                 <!-- Username Input -->
                 <div class="form-group mb-3">

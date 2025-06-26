@@ -141,6 +141,14 @@
                 @endif
             @endauth
 
+            <!-- Nav Item - Sesi Jam -->
+            <li class="nav-item {{ Request::is('sesi-jam*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('sesi-jam.index') }}">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>Sesi Jam</span>
+                </a>
+            </li>
+
             <!-- Nav Item - Jadwal Lab -->
             <li class="nav-item {{ Request::is('jadwal_lab*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('jadwal_lab.index') }}">

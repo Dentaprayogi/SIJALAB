@@ -12,6 +12,7 @@ use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
+use App\Http\Controllers\SesiJamController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\UnitPeralatanController;
 use App\Http\Controllers\UserController;
@@ -94,6 +95,9 @@ Route::middleware([
         //Route Manajemen Lab
         Route::patch('/lab/{id_lab}/toggle-status', [LabController::class, 'toggleStatus'])->name('lab.toggleStatus');
         Route::resource('lab', LabController::class);
+
+        // Route Sesi Jam
+        Route::resource('sesi-jam', SesiJamController::class);
 
         // Route Jadwal Lab
         Route::post('/jadwal_lab/import', [JadwalLabController::class, 'import'])->name('jadwal_lab.import');

@@ -85,4 +85,9 @@ class JadwalLab extends Model
     {
         return $this->hasMany(Peminjaman::class, 'id_jadwalLab');
     }
+
+    public function sesiJam()
+    {
+        return $this->belongsToMany(SesiJam::class, 'jadwal_lab_sesi_jam', 'id_jadwalLab', 'id_sesi_jam');
+    }
 }
