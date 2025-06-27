@@ -10,6 +10,7 @@ use App\Models\Kelas;
 use App\Models\Lab;
 use App\Models\Matakuliah;
 use App\Models\Prodi;
+use App\Models\SesiJam;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,7 @@ class JadwalLabController extends Controller
             'prodiList' => Prodi::orderBy('singkatan_prodi', 'asc')->get(),
             'kelasList' => Kelas::orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
+            'sesiJamList' => SesiJam::orderBy('jam_mulai')->get(),
         ]);
     }
 
@@ -86,7 +88,7 @@ class JadwalLabController extends Controller
         $templateSheet = $spreadsheet->getActiveSheet();
         $templateSheet->setTitle('Template');
 
-        // Header kolom yang rapi dan konsisten (huruf kecil, satu spasi)
+        // Header kolom
         $headers = [
             'hari',
             'tahun ajaran',
@@ -96,38 +98,45 @@ class JadwalLabController extends Controller
             'prodi',
             'kelas',
             'mata kuliah',
-            'dosen',
+            'dosen'
         ];
         $templateSheet->fromArray($headers, null, 'A1');
 
-        // Data referensi
+        // Data referensi dan logika pengisian
         $references = [
             'Hari' => [Hari::all(['id_hari', 'nama_hari']), 'id_hari', 'nama_hari'],
 
             'Tahun Ajaran' => [
                 TahunAjaran::where('status_tahunAjaran', 'aktif')
-                    ->orderBy('tahun_ajaran')
-                    ->orderBy('semester')
+                    ->orderBy('tahun_ajaran')->orderBy('semester')
                     ->get(['id_tahunAjaran', 'tahun_ajaran', 'semester']),
                 'id_tahunAjaran',
-                'tahun_ajaran',
-                'semester'
+                fn($item) => "{$item->tahun_ajaran} ({$item->semester})"
             ],
 
             'Lab' => [
                 Lab::where('status_lab', 'aktif')
-                    ->orderBy('nama_lab', 'asc')
-                    ->get(['id_lab', 'nama_lab']),
+                    ->orderBy('nama_lab')->get(['id_lab', 'nama_lab']),
                 'id_lab',
-                'nama_lab'
+                fn($item) => $item->nama_lab
+            ],
+
+            'Jam Mulai' => [
+                SesiJam::orderBy('jam_mulai')->pluck('jam_mulai')->unique()->map(fn($val) => ['value' => $val]),
+                'value',
+                fn($item) => $item['value']
+            ],
+
+            'Jam Selesai' => [
+                SesiJam::orderBy('jam_selesai')->pluck('jam_selesai')->unique()->map(fn($val) => ['value' => $val]),
+                'value',
+                fn($item) => $item['value']
             ],
 
             'Prodi' => [
-                Prodi::orderBy('singkatan_prodi', 'asc')
-                    ->get(['id_prodi', 'nama_prodi', 'singkatan_prodi']),
+                Prodi::orderBy('singkatan_prodi')->get(['id_prodi', 'singkatan_prodi']),
                 'id_prodi',
-                'nama_prodi',
-                'singkatan_prodi'
+                fn($item) => $item->singkatan_prodi
             ],
 
             'Kelas' => [
@@ -135,11 +144,9 @@ class JadwalLabController extends Controller
                     ->join('prodi', 'kelas.id_prodi', '=', 'prodi.id_prodi')
                     ->orderBy('prodi.singkatan_prodi')
                     ->orderBy('kelas.nama_kelas')
-                    ->select('kelas.*') // Hindari ambil kolom dari join jika tidak diperlukan
-                    ->get(),
+                    ->select('kelas.*')->get(),
                 'id_kelas',
-                'nama_kelas',
-                null
+                fn($item) => "{$item->nama_kelas} ({$item->prodi->singkatan_prodi})"
             ],
 
             'Mata Kuliah' => [
@@ -147,11 +154,9 @@ class JadwalLabController extends Controller
                     ->join('prodi', 'matakuliah.id_prodi', '=', 'prodi.id_prodi')
                     ->orderBy('prodi.singkatan_prodi')
                     ->orderBy('matakuliah.nama_mk')
-                    ->select('matakuliah.*')
-                    ->get(),
+                    ->select('matakuliah.*')->get(),
                 'id_mk',
-                'nama_mk',
-                null
+                fn($item) => "{$item->nama_mk} ({$item->prodi->singkatan_prodi})"
             ],
 
             'Dosen' => [
@@ -159,102 +164,76 @@ class JadwalLabController extends Controller
                     ->join('prodi', 'dosen.id_prodi', '=', 'prodi.id_prodi')
                     ->orderBy('prodi.singkatan_prodi')
                     ->orderBy('dosen.nama_dosen')
-                    ->select('dosen.*')
-                    ->get(),
+                    ->select('dosen.*')->get(),
                 'id_dosen',
-                'nama_dosen',
-                null
+                fn($item) => "{$item->nama_dosen} ({$item->prodi->singkatan_prodi})"
             ],
         ];
 
-        // Mapping kolom ke huruf kolom di Template
+        // Mapping kolom di template (A1 sampai I1)
         $colIndex = [
-            'Hari' => 'A',
-            'Tahun Ajaran' => 'B',
-            'Lab' => 'C',
-            'Prodi' => 'F',
-            'Kelas' => 'G',
-            'Mata Kuliah' => 'H',
-            'Dosen' => 'I',
+            'Hari'          => 'A',
+            'Tahun Ajaran'  => 'B',
+            'Lab'           => 'C',
+            'Jam Mulai'     => 'D',
+            'Jam Selesai'   => 'E',
+            'Prodi'         => 'F',
+            'Kelas'         => 'G',
+            'Mata Kuliah'   => 'H',
+            'Dosen'         => 'I',
         ];
 
-        // Mapping kolom ke named range
+        // Named range map
         $namedRangesMap = [
-            'Hari' => 'HariList',
-            'Tahun Ajaran' => 'TahunAjaranList',
-            'Lab' => 'LabList',
-            'Prodi' => 'ProdiList',
-            'Kelas' => 'KelasList',
-            'Mata Kuliah' => 'MKList',
-            'Dosen' => 'DosenList',
+            'Hari'          => 'HariList',
+            'Tahun Ajaran'  => 'TahunAjaranList',
+            'Lab'           => 'LabList',
+            'Jam Mulai'     => 'JamMulaiList',
+            'Jam Selesai'   => 'JamSelesaiList',
+            'Prodi'         => 'ProdiList',
+            'Kelas'         => 'KelasList',
+            'Mata Kuliah'   => 'MKList',
+            'Dosen'         => 'DosenList',
         ];
 
+        // Buat semua sheet referensi
         $sheetIndex = 1;
-
-        foreach ($references as $sheetName => [$data, $idField, $nameField]) {
+        foreach ($references as $sheetName => [$data, $idField, $nameFieldFn]) {
             $sheet = $spreadsheet->createSheet($sheetIndex++);
-            $sheet->setTitle("Referensi $sheetName");
-
+            $sheet->setTitle("Ref $sheetName");
             $sheet->setCellValue('A1', $idField);
-            $sheet->setCellValue('B1', $nameField);
+            $sheet->setCellValue('B1', 'Label');
 
             $row = 2;
             foreach ($data as $item) {
-                $sheet->setCellValue("A{$row}", $item->$idField);
+                $idVal = is_array($item) ? $item[$idField] : $item->$idField;
+                $label = is_callable($nameFieldFn) ? $nameFieldFn($item) : $item->$nameFieldFn;
 
-                switch ($sheetName) {
-                    case 'Tahun Ajaran':
-                        $sheet->setCellValue("B{$row}", "{$item->tahun_ajaran} ({$item->semester})");
-                        break;
-
-                    case 'Prodi':
-                        $sheet->setCellValue("B{$row}", $item->singkatan_prodi);
-                        break;
-
-                    case 'Kelas':
-                        $sheet->setCellValue("B{$row}", "{$item->nama_kelas} ({$item->prodi->singkatan_prodi})");
-                        break;
-
-                    case 'Mata Kuliah':
-                        $sheet->setCellValue("B{$row}", "{$item->nama_mk} ({$item->prodi->singkatan_prodi})");
-                        break;
-
-                    case 'Dosen':
-                        $sheet->setCellValue("B{$row}", "{$item->nama_dosen} ({$item->prodi->singkatan_prodi})");
-                        break;
-
-                    default:
-                        $sheet->setCellValue("B{$row}", $item->$nameField);
-                }
-
+                $sheet->setCellValue("A$row", $idVal);
+                $sheet->setCellValue("B$row", $label);
                 $row++;
             }
 
-            $highestRow = $row - 1;
-            $namedRangeName = $namedRangesMap[$sheetName] ?? null;
-
-            if ($namedRangeName) {
-                $spreadsheet->addNamedRange(
-                    new NamedRange(
-                        $namedRangeName,
-                        $sheet,
-                        "\$B\$2:\$B\$$highestRow"
-                    )
-                );
-            }
+            $spreadsheet->addNamedRange(
+                new NamedRange(
+                    $namedRangesMap[$sheetName],
+                    $sheet,
+                    '$B$2:$B$' . ($row - 1)
+                )
+            );
         }
 
-        // Dropdown validation dari baris 2-100
+        // Tambahkan validasi dropdown ke baris 2-100 di sheet Template
         for ($i = 2; $i <= 100; $i++) {
-            foreach ($colIndex as $columnLabel => $colLetter) {
+            foreach ($colIndex as $refKey => $colLetter) {
                 $validation = $templateSheet->getCell("{$colLetter}{$i}")->getDataValidation();
-                $validation->setType(DataValidation::TYPE_LIST);
-                $validation->setErrorStyle(DataValidation::STYLE_STOP);
-                $validation->setAllowBlank(true);
-                $validation->setShowInputMessage(true);
-                $validation->setShowErrorMessage(true);
-                $validation->setShowDropDown(true);
-                $validation->setFormula1("={$namedRangesMap[$columnLabel]}");
+                $validation->setType(DataValidation::TYPE_LIST)
+                    ->setErrorStyle(DataValidation::STYLE_STOP)
+                    ->setAllowBlank(true)
+                    ->setShowInputMessage(true)
+                    ->setShowErrorMessage(true)
+                    ->setShowDropDown(true)
+                    ->setFormula1("={$namedRangesMap[$refKey]}");
             }
         }
 
@@ -262,39 +241,53 @@ class JadwalLabController extends Controller
 
         $writer = new WriterXlsx($spreadsheet);
         $filename = 'template_jadwal_lab.xlsx';
-        $temp_file = tempnam(sys_get_temp_dir(), $filename);
-        $writer->save($temp_file);
+        $tempPath = tempnam(sys_get_temp_dir(), $filename);
+        $writer->save($tempPath);
 
-        return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'id_hari'          => 'required',
-            'id_lab'           => 'required',
-            'jam_mulai'        => 'required|date_format:H:i',
-            'jam_selesai'      => 'required|date_format:H:i|after:jam_mulai',
-            'id_mk'            => 'required',
-            'id_dosen'         => 'required',
-            'id_prodi'         => 'required',
-            'id_kelas'         => 'required',
-            'id_tahunAjaran'   => 'required',
+            'id_hari'          => 'required|exists:hari,id_hari',
+            'id_lab'           => 'required|exists:lab,id_lab',
+            'id_sesi_mulai'    => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_sesi_selesai'  => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_mk'            => 'required|exists:matakuliah,id_mk',
+            'id_dosen'         => 'required|exists:dosen,id_dosen',
+            'id_prodi'         => 'required|exists:prodi,id_prodi',
+            'id_kelas'         => 'required|exists:kelas,id_kelas',
+            'id_tahunAjaran'   => 'required|exists:tahun_ajaran,id_tahunAjaran',
         ]);
 
+        // Ambil data sesi mulai dan selesai
+        $sesiMulai = SesiJam::findOrFail($request->id_sesi_mulai);
+        $sesiSelesai = SesiJam::findOrFail($request->id_sesi_selesai);
+
+        // Validasi manual bahwa jam mulai harus lebih awal dari jam selesai
+        if ($sesiMulai->jam_mulai >= $sesiSelesai->jam_mulai) {
+            return redirect()->back()->withInput()->withErrors([
+                'id_sesi_mulai' => 'Jam mulai harus lebih awal dari jam selesai.',
+            ]);
+        }
+
+        // Rentang sesi jam
+        $jamMulai = $sesiMulai->jam_mulai;
+        $jamSelesai = $sesiSelesai->jam_selesai;
+
+        // Ambil data request
         $year = $request->id_tahunAjaran;
         $day  = $request->id_hari;
         $lab  = $request->id_lab;
-        $start = $request->jam_mulai;
-        $end   = $request->jam_selesai;
 
         // Fungsi bantu untuk cek overlap
-        $overlap = function ($query) use ($start, $end) {
-            $query->whereBetween('jam_mulai', [$start, $end])
-                ->orWhereBetween('jam_selesai', [$start, $end])
-                ->orWhere(function ($q) use ($start, $end) {
-                    $q->where('jam_mulai', '<=', $start)
-                        ->where('jam_selesai', '>=', $end);
+        $overlap = function ($query) use ($jamMulai, $jamSelesai) {
+            $query->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
+                ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                ->orWhere(function ($q) use ($jamMulai, $jamSelesai) {
+                    $q->where('jam_mulai', '<=', $jamMulai)
+                        ->where('jam_selesai', '>=', $jamSelesai);
                 });
         };
 
@@ -306,7 +299,7 @@ class JadwalLabController extends Controller
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'jam_mulai' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut (tahun ajaran sama).'],
+                'id_lab' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut.'],
             ]);
         }
 
@@ -318,11 +311,11 @@ class JadwalLabController extends Controller
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id_dosen' => ['Dosen sudah memiliki jadwal mengajar di rentang waktu tersebut (tahun ajaran sama).'],
+                'id_dosen' => ['Dosen sudah memiliki jadwal di waktu tersebut.'],
             ]);
         }
 
-        //  3) Cek bentrok Kelas
+        // 3) Cek bentrok Kelas
         if (JadwalLab::where('id_hari', $day)
             ->where('id_kelas', $request->id_kelas)
             ->where('id_tahunAjaran', $year)
@@ -330,16 +323,16 @@ class JadwalLabController extends Controller
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id_kelas' => ['Kelas sudah terjadwal di rentang waktu tersebut (tahun ajaran sama).'],
+                'id_kelas' => ['Kelas sudah memiliki jadwal di waktu tersebut.'],
             ]);
         }
 
-        // Jika semua lolos, simpan
-        JadwalLab::create([
+        // Simpan jadwal lab
+        $jadwal = JadwalLab::create([
             'id_hari'         => $day,
             'id_lab'          => $lab,
-            'jam_mulai'       => $start,
-            'jam_selesai'     => $end,
+            'jam_mulai'       => $jamMulai,
+            'jam_selesai'     => $jamSelesai,
             'id_mk'           => $request->id_mk,
             'id_dosen'        => $request->id_dosen,
             'id_prodi'        => $request->id_prodi,
@@ -348,8 +341,15 @@ class JadwalLabController extends Controller
             'status_jadwalLab' => 'aktif',
         ]);
 
-        return redirect()->route('jadwal_lab.index')
-            ->with('success', 'Jadwal Lab berhasil ditambahkan.');
+        // Ambil semua sesi yang berada dalam rentang sesi mulai dan selesai
+        $sesiDipilih = SesiJam::where('jam_mulai', '>=', $jamMulai)
+            ->where('jam_selesai', '<=', $jamSelesai)
+            ->pluck('id_sesi_jam');
+
+        // Simpan relasi many-to-many ke pivot
+        $jadwal->sesiJam()->attach($sesiDipilih);
+
+        return redirect()->route('jadwal_lab.index')->with('success', 'Jadwal Lab berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -366,33 +366,43 @@ class JadwalLabController extends Controller
             'kelasList' => Kelas::where('id_prodi', $prodiId)->orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
             'jadwalLab' => $jadwalLab,
+            'sesiJamList' => SesiJam::orderBy('jam_mulai')->get(),
         ]);
     }
+
     public function update(Request $request, $id)
     {
         $request->validate([
-            'id_hari'          => 'required',
-            'id_lab'           => 'required',
-            'jam_mulai'        => 'required|date_format:H:i',
-            'jam_selesai'      => 'required|date_format:H:i|after:jam_mulai',
-            'id_mk'            => 'required',
-            'id_dosen'         => 'required',
-            'id_prodi'         => 'required',
-            'id_kelas'         => 'required',
-            'id_tahunAjaran'   => 'required',
+            'id_hari' => 'required',
+            'id_lab' => 'required',
+            'id_sesi_mulai' => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_mk' => 'required',
+            'id_dosen' => 'required',
+            'id_prodi' => 'required',
+            'id_kelas' => 'required',
+            'id_tahunAjaran' => 'required',
             'status_jadwalLab' => 'required',
         ]);
 
+        $sesiMulai = SesiJam::find($request->id_sesi_mulai);
+        $sesiSelesai = SesiJam::find($request->id_sesi_selesai);
+
+        // Validasi urutan waktu
+        if ($sesiMulai->jam_mulai >= $sesiSelesai->jam_mulai) {
+            return back()->withInput()->withErrors([
+                'id_sesi_selesai' => 'Jam mulai harus lebih awal dari jam selesai.',
+            ]);
+        }
+
+        $start = $sesiMulai->jam_mulai;
+        $end = $sesiSelesai->jam_selesai;
+
         $jadwalLab = JadwalLab::findOrFail($id);
+        $year = $request->id_tahunAjaran;
+        $day = $request->id_hari;
+        $lab = $request->id_lab;
 
-        // Ambil input
-        $year  = $request->id_tahunAjaran;
-        $day   = $request->id_hari;
-        $lab   = $request->id_lab;
-        $start = $request->jam_mulai;
-        $end   = $request->jam_selesai;
-
-        // Closure untuk cek overlap
         $overlap = function ($query) use ($start, $end) {
             $query->whereBetween('jam_mulai', [$start, $end])
                 ->orWhereBetween('jam_selesai', [$start, $end])
@@ -402,61 +412,41 @@ class JadwalLabController extends Controller
                 });
         };
 
-        // 1) Lab bentrok?
-        if (JadwalLab::where('id_hari', $day)
-            ->where('id_lab', $lab)
+        // Validasi bentrok
+        $conflictBase = JadwalLab::where('id_hari', $day)
             ->where('id_tahunAjaran', $year)
-            ->where($overlap)
-            ->where('id_jadwalLab', '!=', $jadwalLab->id_jadwalLab)
-            ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'jam_mulai' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut.'],
-            ]);
+            ->where('id_jadwalLab', '!=', $jadwalLab->id_jadwalLab);
+
+        if ($conflictBase->clone()->where('id_lab', $lab)->where($overlap)->exists()) {
+            return back()->withInput()->withErrors(['id_lab' => 'Jadwal untuk lab ini bentrok.']);
         }
 
-        // 2) Dosen bentrok?
-        if (JadwalLab::where('id_hari', $day)
-            ->where('id_dosen', $request->id_dosen)
-            ->where('id_tahunAjaran', $year)
-            ->where($overlap)
-            ->where('id_jadwalLab', '!=', $jadwalLab->id_jadwalLab)
-            ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'id_dosen' => ['Dosen sudah memiliki jadwal di rentang waktu tersebut.'],
-            ]);
+        if ($conflictBase->clone()->where('id_dosen', $request->id_dosen)->where($overlap)->exists()) {
+            return back()->withInput()->withErrors(['id_dosen' => 'Dosen sudah memiliki jadwal di waktu tersebut.']);
         }
 
-        // 3) Kelas bentrok?
-        if (JadwalLab::where('id_hari', $day)
-            ->where('id_kelas', $request->id_kelas)
-            ->where('id_tahunAjaran', $year)
-            ->where($overlap)
-            ->where('id_jadwalLab', '!=', $jadwalLab->id_jadwalLab)
-            ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'id_kelas' => ['Kelas sudah terjadwal di rentang waktu tersebut.'],
-            ]);
+        if ($conflictBase->clone()->where('id_kelas', $request->id_kelas)->where($overlap)->exists()) {
+            return back()->withInput()->withErrors(['id_kelas' => 'Kelas sudah terjadwal di waktu tersebut.']);
         }
 
-        // Semua aman, update data
+        // Update data
         $jadwalLab->update([
-            'id_hari'         => $day,
-            'id_lab'          => $lab,
-            'jam_mulai'       => $start,
-            'jam_selesai'     => $end,
-            'id_mk'           => $request->id_mk,
-            'id_dosen'        => $request->id_dosen,
-            'id_prodi'        => $request->id_prodi,
-            'id_kelas'        => $request->id_kelas,
-            'id_tahunAjaran'  => $year,
+            'id_hari' => $day,
+            'id_lab' => $lab,
+            'jam_mulai' => $start,
+            'jam_selesai' => $end,
+            'id_mk' => $request->id_mk,
+            'id_dosen' => $request->id_dosen,
+            'id_prodi' => $request->id_prodi,
+            'id_kelas' => $request->id_kelas,
+            'id_tahunAjaran' => $year,
             'status_jadwalLab' => $request->status_jadwalLab,
         ]);
 
-        return redirect()->route('jadwal_lab.index')
-            ->with('success', 'Jadwal Lab berhasil diperbarui.');
+        // Update sesi_jam di pivot
+        $jadwalLab->sesiJam()->sync([$sesiMulai->id_sesi_jam, $sesiSelesai->id_sesi_jam]);
+
+        return redirect()->route('jadwal_lab.index')->with('success', 'Jadwal Lab berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -479,16 +469,24 @@ class JadwalLabController extends Controller
             ->with('success', 'Jadwal Lab berhasil dihapus.');
     }
 
-    public function getDependentData($prodiId)
+    public function getDependentData($id_prodi)
     {
-        $kelas = Kelas::where('id_prodi', $prodiId)->get();
-        $mk = MataKuliah::where('id_prodi', $prodiId)->get();
-        $dosen = Dosen::where('id_prodi', $prodiId)->get();
+        $kelas = Kelas::where('id_prodi', $id_prodi)
+            ->orderBy('nama_kelas', 'asc')
+            ->get();
+
+        $mk = Matakuliah::where('id_prodi', $id_prodi)
+            ->orderBy('nama_mk', 'asc')
+            ->get();
+
+        $dosen = Dosen::where('id_prodi', $id_prodi)
+            ->orderBy('nama_dosen', 'asc')
+            ->get();
 
         return response()->json([
             'kelas' => $kelas,
             'mk' => $mk,
-            'dosen' => $dosen
+            'dosen' => $dosen,
         ]);
     }
 

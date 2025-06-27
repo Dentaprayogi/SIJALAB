@@ -91,27 +91,41 @@
 
                             {{-- Jam Mulai --}}
                             <div class="mb-3">
-                                <label for="jam_mulai" class="form-label">Jam Mulai</label>
+                                <label for="id_sesi_mulai" class="form-label">Jam Mulai</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-clock"></i>
                                     </span>
-                                    <input type="text" name="jam_mulai" id="jam_mulai" class="form-control"
-                                        value="{{ $jadwalLab->jam_mulai }}" required>
-                                    <div class="invalid-feedback">Jam mulai wajib diisi.</div>
+                                    <select name="id_sesi_mulai" id="id_sesi_mulai" class="form-control" required>
+                                        <option value="">-- Pilih Jam Mulai --</option>
+                                        @foreach ($sesiJamList as $sesi)
+                                            <option value="{{ $sesi->id_sesi_jam }}"
+                                                {{ old('id_sesi_mulai', $jadwalLab->sesiJam->first()->id_sesi_jam ?? '') == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                                                {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
+                                                {{ $sesi->jam_selesai }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 
                             {{-- Jam Selesai --}}
                             <div class="mb-3">
-                                <label for="jam_selesai" class="form-label">Jam Selesai</label>
+                                <label for="id_sesi_selesai" class="form-label">Jam Selesai</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-clock"></i>
                                     </span>
-                                    <input type="text" name="jam_selesai" id="jam_selesai" class="form-control"
-                                        value="{{ $jadwalLab->jam_selesai }}" required>
-                                    <div class="invalid-feedback">Jam selesai wajib diisi.</div>
+                                    <select name="id_sesi_selesai" id="id_sesi_selesai" class="form-control" required>
+                                        <option value="">-- Pilih Jam Selesai --</option>
+                                        @foreach ($sesiJamList as $sesi)
+                                            <option value="{{ $sesi->id_sesi_jam }}"
+                                                {{ old('id_sesi_selesai', $jadwalLab->sesiJam->last()->id_sesi_jam ?? '') == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                                                {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
+                                                {{ $sesi->jam_selesai }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -241,28 +255,6 @@
         </script>
     @endif
 
-    <!-- library Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-    <script>
-        flatpickr("#jam_mulai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            locale: "id"
-        });
-
-        flatpickr("#jam_selesai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            locale: "id"
-        });
-    </script>
-
     {{-- Dynamic dependent selects --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -291,21 +283,21 @@
                             $.each(data.kelas, function(key, item) {
                                 $('#id_kelas').append(
                                     `<option value="${item.id_kelas}">${item.nama_kelas}</option>`
-                                    );
+                                );
                             });
 
                             // Tambahkan data mata kuliah
                             $.each(data.mk, function(key, item) {
                                 $('#id_mk').append(
                                     `<option value="${item.id_mk}">${item.nama_mk}</option>`
-                                    );
+                                );
                             });
 
                             // Tambahkan data dosen
                             $.each(data.dosen, function(key, item) {
                                 $('#id_dosen').append(
                                     `<option value="${item.id_dosen}">${item.nama_dosen}</option>`
-                                    );
+                                );
                             });
 
                             // Refresh select2 setelah update

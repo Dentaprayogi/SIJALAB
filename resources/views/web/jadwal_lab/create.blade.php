@@ -96,9 +96,16 @@
                                         <span class="input-group-text bg-primary text-white">
                                             <i class="fas fa-clock"></i>
                                         </span>
-                                        <input type="text" name="jam_mulai" id="jam_mulai" class="form-control"
-                                            value="{{ old('jam_mulai') }}" required>
-                                        <div class="invalid-feedback">Jam mulai wajib diisi.</div>
+                                        <select name="id_sesi_mulai" id="id_sesi_mulai" class="form-control" required>
+                                            <option value="">-- Pilih Jam Mulai --</option>
+                                            @foreach ($sesiJamList as $sesi)
+                                                <option value="{{ $sesi->id_sesi_jam }}"
+                                                    {{ old('id_sesi_mulai') == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                                                    {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
+                                                    {{ $sesi->jam_selesai }})
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
@@ -109,9 +116,16 @@
                                         <span class="input-group-text bg-primary text-white">
                                             <i class="fas fa-clock"></i>
                                         </span>
-                                        <input type="text" name="jam_selesai" id="jam_selesai" class="form-control"
-                                            value="{{ old('jam_selesai') }}" required>
-                                        <div class="invalid-feedback">Jam selesai wajib diisi.</div>
+                                        <select name="id_sesi_selesai" id="id_sesi_selesai" class="form-control" required>
+                                            <option value="">-- Pilih Jam Selesai --</option>
+                                            @foreach ($sesiJamList as $sesi)
+                                                <option value="{{ $sesi->id_sesi_jam }}"
+                                                    {{ old('id_sesi_selesai') == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                                                    {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
+                                                    {{ $sesi->jam_selesai }})
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -239,32 +253,8 @@
         </script>
     @endif
 
-    <!-- library Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-    {{-- formta jam 24 jam --}}
-    <script>
-        flatpickr("#jam_mulai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i", // 24 jam format
-            time_24hr: true,
-            locale: "id"
-        });
-
-        flatpickr("#jam_selesai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i", // 24 jam format
-            time_24hr: true,
-            locale: "id"
-        });
-    </script>
-
-    {{-- Load data kelas, mata kuliah, dan dosen secara dinamis sesuai prodi --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    {{-- Load data kelas, mata kuliah, dan dosen secara dinamis sesuai prodi --}}
     <script>
         $(document).ready(function() {
             $('#id_prodi').on('change', function() {
