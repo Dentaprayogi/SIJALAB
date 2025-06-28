@@ -14,6 +14,8 @@ class PeminjamanManual extends Model
     public $incrementing = false;
     protected $fillable = [
         'id_peminjaman',
+        'id_sesi_mulai',
+        'id_sesi_selesai',
         'jam_mulai',
         'jam_selesai',
         'id_lab',
@@ -30,5 +32,20 @@ class PeminjamanManual extends Model
     public function lab()
     {
         return $this->belongsTo(Lab::class, 'id_lab');
+    }
+
+    public function sesiMulai()
+    {
+        return $this->belongsTo(SesiJam::class, 'id_sesi_mulai');
+    }
+    public function sesiSelesai()
+    {
+        return $this->belongsTo(SesiJam::class, 'id_sesi_selesai');
+    }
+
+    /* accessor rentang jam (H:i–H:i) */
+    public function getRentangJamAttribute()
+    {
+        return $this->sesiMulai->jam_mulai . ' - ' . $this->sesiSelesai->jam_selesai;
     }
 }

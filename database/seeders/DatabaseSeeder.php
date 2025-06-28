@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             TeknisiSeeder::class,
             TahunAjaranSeeder::class,
             PeralatanSeeder::class,
+            UnitPeralatanSeeder::class,
             ProdiSeeder::class,
             KelasSeeder::class,
             MatakuliahSeeder::class,

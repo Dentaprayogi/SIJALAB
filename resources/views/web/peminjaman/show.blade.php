@@ -107,7 +107,6 @@
                                         class="d-inline">
                                         @csrf
                                         @method('PUT')
-                                        {{-- <button type="submit" class="btn btn-success">Selesai</button> --}}
                                         <button type="button" class="btn btn-success"
                                             onclick="confirmSelesai({{ $peminjaman->id_peminjaman }})">
                                             Selesai
@@ -120,7 +119,10 @@
                                         class="d-inline">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="btn btn-success">Selesai</button>
+                                        <button type="button" class="btn btn-success"
+                                            onclick="confirmSelesai({{ $peminjaman->id_peminjaman }})">
+                                            Selesai
+                                        </button>
                                     </form>
                                 </div>
                             @endif

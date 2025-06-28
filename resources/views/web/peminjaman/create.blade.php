@@ -47,37 +47,6 @@
         </div>
     </div>
 
-    <!-- library Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-
-    <script>
-        const jamMulaiInput = document.getElementById('jam_mulai');
-        const now = new Date();
-        const pad = num => String(num).padStart(2, '0');
-        const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        jamMulaiInput.value = currentTime;
-
-        flatpickr("#jam_mulai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            locale: "id",
-            clickOpens: false
-        });
-
-        flatpickr("#jam_selesai", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            locale: "id"
-        });
-    </script>
-
-
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if (session('error'))
@@ -104,45 +73,45 @@
 
     {{-- Script getAvailableLabs --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const jamMulaiInput = document.getElementById('jam_mulai');
-            const jamSelesaiInput = document.getElementById('jam_selesai');
-            const labSelect = document.getElementById('id_lab');
+        document.addEventListener('DOMContentLoaded', () => {
 
-            const errorJamMulai = document.getElementById('error-jam_mulai');
-            const errorJamSelesai = document.getElementById('error-jam_selesai');
-            const errorLab = document.getElementById('error-lab');
+            const ddlMulai = document.getElementById('id_sesi_mulai');
+            const ddlSelesai = document.getElementById('id_sesi_selesai');
+            const ddlLab = document.getElementById('id_lab');
 
-            // 🕒 Atur jam mulai otomatis sesuai waktu saat ini
-            const now = new Date();
-            const pad = num => String(num).padStart(2, '0');
-            const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-            jamMulaiInput.value = currentTime;
+            /* elemen pesan error */
+            const errMulai = document.getElementById('error-id_sesi_mulai');
+            const errSelesai = document.getElementById('error-id_sesi_selesai');
+            const errLab = document.getElementById('error-lab');
 
-            function resetErrorMessages() {
-                errorJamMulai.innerText = '';
-                errorJamSelesai.innerText = '';
-                errorLab.innerText = '';
+            function resetErrors() {
+                errMulai.textContent = '';
+                errSelesai.textContent = '';
+                errLab.textContent = '';
             }
 
-            function fetchAvailableLabs() {
-                resetErrorMessages();
-                labSelect.innerHTML = '<option value="">-- Pilih Lab --</option>';
+            function fetchLabs() {
+                resetErrors();
+                ddlLab.innerHTML = '<option value="">-- Pilih Lab --</option>';
 
-                const jamMulai = jamMulaiInput.value;
-                const jamSelesai = jamSelesaiInput.value;
+                const mulaiOpt = ddlMulai.options[ddlMulai.selectedIndex];
+                const selesaiOpt = ddlSelesai.options[ddlSelesai.selectedIndex];
 
-                if (!jamMulai || !jamSelesai) {
-                    errorLab.innerText = 'Silakan isi jam selesai terlebih dahulu.';
+                if (!mulaiOpt.value || !selesaiOpt.value) {
+                    errLab.textContent = 'Pilih sesi mulai & sesi selesai dahulu.';
                     return;
                 }
 
-                if (jamSelesai <= jamMulai) {
-                    errorJamSelesai.innerText = 'Jam selesai harus lebih besar dari jam mulai.';
+                /* pastikan urutan sesi benar (bandingkan jam_mulai via data‑attribute) */
+                const startMulai = mulaiOpt.dataset.start; // string "07:00:00"
+                const startSelesai = selesaiOpt.dataset.start; // string "09:30:00"
+
+                if (startMulai >= startSelesai) {
+                    errSelesai.textContent = 'Sesi selesai harus setelah sesi mulai.';
                     return;
                 }
 
-                // Kirim permintaan ke server
+                /* kirim ke server */
                 fetch("{{ route('labs.available') }}", {
                         method: "POST",
                         headers: {
@@ -150,31 +119,30 @@
                             "X-CSRF-TOKEN": "{{ csrf_token() }}"
                         },
                         body: JSON.stringify({
-                            jam_mulai: jamMulai,
-                            jam_selesai: jamSelesai
+                            id_sesi_mulai: mulaiOpt.value,
+                            id_sesi_selesai: selesaiOpt.value
                         })
                     })
-                    .then(response => response.json())
+                    .then(res => res.json())
                     .then(data => {
                         if (data.length === 0) {
-                            errorLab.innerText = 'Tidak ada lab tersedia di waktu tersebut.';
+                            errLab.textContent = 'Tidak ada lab tersedia di rentang sesi tersebut.';
                             return;
                         }
-
                         data.forEach(lab => {
-                            const option = document.createElement('option');
-                            option.value = lab.id_lab;
-                            option.textContent = lab.nama_lab;
-                            labSelect.appendChild(option);
+                            const opt = document.createElement('option');
+                            opt.value = lab.id_lab;
+                            opt.textContent = lab.nama_lab;
+                            ddlLab.appendChild(opt);
                         });
                     })
-                    .catch(error => {
-                        console.error('Error fetching labs:', error);
-                        errorLab.innerText = 'Gagal mengambil data lab.';
-                    });
+                    .catch(() => errLab.textContent = 'Gagal mengambil data lab.');
             }
 
-            jamSelesaiInput.addEventListener('change', fetchAvailableLabs);
+            /* trigger saat sesi selesai diubah (atau sesi mulai) */
+            ddlMulai.addEventListener('change', fetchLabs);
+            ddlSelesai.addEventListener('change', fetchLabs);
+
         });
     </script>
 @endsection

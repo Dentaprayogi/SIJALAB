@@ -7,34 +7,55 @@
     @csrf
     <input type="hidden" name="_form_type" value="manual">
 
+    @php
+        $oldMulai = old('id_sesi_mulai');
+        $oldSelesai = old('id_sesi_selesai');
+    @endphp
+
     <div class="row">
-        {{-- Jam Mulai --}}
+        {{-- Sesi Mulai --}}
         <div class="col-md-6 mb-3">
-            <label for="jam_mulai" class="form-label">
+            <label for="id_sesi_mulai" class="form-label">
                 Jam Mulai
-                <span id="error-jam_mulai" class="text-danger small ms-2"></span>
+                <span id="error-id_sesi_mulai" class="text-danger small ms-2"></span>
             </label>
             <div class="input-group">
                 <span class="input-group-text bg-primary text-white">
                     <i class="fas fa-clock"></i>
                 </span>
-                <input type="text" name="jam_mulai" id="jam_mulai" class="form-control"
-                    value="{{ old('jam_mulai') }}" readonly>
+                <select name="id_sesi_mulai" id="id_sesi_mulai" class="form-control" required>
+                    <option value="">-- Pilih Jam Mulai --</option>
+                    @foreach ($sesiJam as $sesi)
+                        <option value="{{ $sesi->id_sesi_jam }}"
+                            data-start="{{ \Carbon\Carbon::parse($sesi->jam_mulai)->format('H:i') }}"
+                            {{ $oldMulai == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                            {{ $sesi->nama_sesi }} ({{ \Carbon\Carbon::parse($sesi->jam_mulai)->format('H:i') }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
 
-        {{-- Jam Selesai --}}
+        {{-- Sesi Selesai --}}
         <div class="col-md-6 mb-3">
-            <label for="jam_selesai" class="form-label">
+            <label for="id_sesi_selesai" class="form-label">
                 Jam Selesai
-                <span id="error-jam_selesai" class="text-danger small ms-2"></span>
+                <span id="error-id_sesi_selesai" class="text-danger small ms-2"></span>
             </label>
             <div class="input-group">
                 <span class="input-group-text bg-primary text-white">
                     <i class="fas fa-clock"></i>
                 </span>
-                <input type="text" name="jam_selesai" id="jam_selesai" class="form-control"
-                    value="{{ old('jam_selesai') }}" required>
+                <select name="id_sesi_selesai" id="id_sesi_selesai" class="form-control" required>
+                    <option value="">-- Pilih Jam Selesai --</option>
+                    @foreach ($sesiJam as $sesi)
+                        <option value="{{ $sesi->id_sesi_jam }}"
+                            data-start="{{ \Carbon\Carbon::parse($sesi->jam_mulai)->format('H:i') }}"
+                            {{ $oldSelesai == $sesi->id_sesi_jam ? 'selected' : '' }}>
+                            {{ $sesi->nama_sesi }} ({{ \Carbon\Carbon::parse($sesi->jam_selesai)->format('H:i') }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
     </div>

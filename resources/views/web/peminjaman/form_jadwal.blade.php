@@ -28,6 +28,9 @@
             </select>
             <div class="invalid-feedback">Jadwal wajib dipilih.</div>
         </div>
+        <small class="form-text text-muted mt-1">
+            Jadwal hanya akan muncul jika waktu sekarang kurang dari 1 jam sebelum sesi dimulai sampai selesai.
+        </small>
     </div>
 
     {{-- Peralatan --}}

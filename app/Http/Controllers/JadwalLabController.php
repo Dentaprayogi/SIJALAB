@@ -282,28 +282,24 @@ class JadwalLabController extends Controller
         $lab  = $request->id_lab;
 
         // Fungsi bantu untuk cek overlap
-        $overlap = function ($query) use ($jamMulai, $jamSelesai) {
-            $query->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                ->orWhere(function ($q) use ($jamMulai, $jamSelesai) {
-                    $q->where('jam_mulai', '<=', $jamMulai)
-                        ->where('jam_selesai', '>=', $jamSelesai);
-                });
+        $overlap = function ($q) use ($jamMulai, $jamSelesai) {
+            $q->where('jam_mulai', '<',  $jamSelesai)   // existing start  < new end
+                ->where('jam_selesai', '>', $jamMulai);   // existing end    > new start
         };
 
-        // 1) Cek bentrok Lab
+        // 1) Lab bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_lab', $lab)
             ->where('id_tahunAjaran', $year)
-            ->where($overlap)
+            ->where($overlap)           // ← pakai definisi baru
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id_lab' => ['Jadwal untuk lab ini sudah ada di rentang waktu tersebut.'],
+                'id_lab' => ['Jadwal lab bentrok dengan rentang sesi yang dipilih.'],
             ]);
         }
 
-        // 2) Cek bentrok Dosen
+        // 2) Dosen bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_dosen', $request->id_dosen)
             ->where('id_tahunAjaran', $year)
@@ -311,11 +307,11 @@ class JadwalLabController extends Controller
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id_dosen' => ['Dosen sudah memiliki jadwal di waktu tersebut.'],
+                'id_dosen' => ['Dosen sudah mengajar pada rentang sesi tersebut.'],
             ]);
         }
 
-        // 3) Cek bentrok Kelas
+        // 3) Kelas bentrok?
         if (JadwalLab::where('id_hari', $day)
             ->where('id_kelas', $request->id_kelas)
             ->where('id_tahunAjaran', $year)
@@ -323,7 +319,7 @@ class JadwalLabController extends Controller
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id_kelas' => ['Kelas sudah memiliki jadwal di waktu tersebut.'],
+                'id_kelas' => ['Kelas telah terjadwal pada rentang sesi tersebut.'],
             ]);
         }
 
@@ -372,82 +368,90 @@ class JadwalLabController extends Controller
 
     public function update(Request $request, $id)
     {
+        // VALIDASI DASAR
         $request->validate([
-            'id_hari' => 'required',
-            'id_lab' => 'required',
-            'id_sesi_mulai' => 'required|exists:sesi_jam,id_sesi_jam',
-            'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam',
-            'id_mk' => 'required',
-            'id_dosen' => 'required',
-            'id_prodi' => 'required',
-            'id_kelas' => 'required',
-            'id_tahunAjaran' => 'required',
+            'id_hari'          => 'required|exists:hari,id_hari',
+            'id_lab'           => 'required|exists:lab,id_lab',
+            'id_sesi_mulai'    => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_sesi_selesai'  => 'required|exists:sesi_jam,id_sesi_jam|gt:id_sesi_mulai',
+            'id_mk'            => 'required|exists:matakuliah,id_mk',
+            'id_dosen'         => 'required|exists:dosen,id_dosen',
+            'id_prodi'         => 'required|exists:prodi,id_prodi',
+            'id_kelas'         => 'required|exists:kelas,id_kelas',
+            'id_tahunAjaran'   => 'required|exists:tahun_ajaran,id_tahunAjaran',
             'status_jadwalLab' => 'required',
         ]);
 
-        $sesiMulai = SesiJam::find($request->id_sesi_mulai);
+        // DAPATKAN SESI & CEK URUTAN
+        $sesiMulai   = SesiJam::find($request->id_sesi_mulai);
         $sesiSelesai = SesiJam::find($request->id_sesi_selesai);
 
-        // Validasi urutan waktu
-        if ($sesiMulai->jam_mulai >= $sesiSelesai->jam_mulai) {
+        if (!$sesiMulai || !$sesiSelesai || $sesiMulai->jam_mulai >= $sesiSelesai->jam_mulai) {
             return back()->withInput()->withErrors([
                 'id_sesi_selesai' => 'Jam mulai harus lebih awal dari jam selesai.',
             ]);
         }
 
-        $start = $sesiMulai->jam_mulai;
-        $end = $sesiSelesai->jam_selesai;
+        $start = $sesiMulai->jam_mulai;   // string H:i:s
+        $end   = $sesiSelesai->jam_selesai;
 
+        // AMBIL JADWAL YANG DI‑EDIT
         $jadwalLab = JadwalLab::findOrFail($id);
-        $year = $request->id_tahunAjaran;
-        $day = $request->id_hari;
-        $lab = $request->id_lab;
 
-        $overlap = function ($query) use ($start, $end) {
-            $query->whereBetween('jam_mulai', [$start, $end])
-                ->orWhereBetween('jam_selesai', [$start, $end])
-                ->orWhere(function ($q) use ($start, $end) {
-                    $q->where('jam_mulai', '<=', $start)
-                        ->where('jam_selesai', '>=', $end);
-                });
+        $year = $request->id_tahunAjaran;
+        $day  = $request->id_hari;
+        $lab  = $request->id_lab;
+
+        // DEFINISI OVERLAP STRICT (bukan bersentuhan)
+        $strictOverlap = function ($q) use ($start, $end) {
+            $q->where('jam_mulai', '<',  $end)   // existing start < new end
+                ->where('jam_selesai', '>', $start); // existing end   > new start
         };
 
-        // Validasi bentrok
-        $conflictBase = JadwalLab::where('id_hari', $day)
+        // BANGUN BASIS QUERY KONFLIK (semua jadwal lain di hari & thn ajaran)
+        $base = JadwalLab::where('id_hari', $day)
             ->where('id_tahunAjaran', $year)
             ->where('id_jadwalLab', '!=', $jadwalLab->id_jadwalLab);
 
-        if ($conflictBase->clone()->where('id_lab', $lab)->where($overlap)->exists()) {
-            return back()->withInput()->withErrors(['id_lab' => 'Jadwal untuk lab ini bentrok.']);
+        /* LAB bentrok? */
+        if ($base->clone()->where('id_lab', $lab)->where($strictOverlap)->exists()) {
+            return back()->withInput()->withErrors(['id_lab' => 'Jadwal lab bentrok.']);
+        }
+        /* DOSEN bentrok? */
+        if ($base->clone()->where('id_dosen', $request->id_dosen)->where($strictOverlap)->exists()) {
+            return back()->withInput()->withErrors(['id_dosen' => 'Dosen bentrok di rentang sesi tersebut.']);
+        }
+        /* KELAS bentrok? */
+        if ($base->clone()->where('id_kelas', $request->id_kelas)->where($strictOverlap)->exists()) {
+            return back()->withInput()->withErrors(['id_kelas' => 'Kelas bentrok di rentang sesi tersebut.']);
         }
 
-        if ($conflictBase->clone()->where('id_dosen', $request->id_dosen)->where($overlap)->exists()) {
-            return back()->withInput()->withErrors(['id_dosen' => 'Dosen sudah memiliki jadwal di waktu tersebut.']);
-        }
-
-        if ($conflictBase->clone()->where('id_kelas', $request->id_kelas)->where($overlap)->exists()) {
-            return back()->withInput()->withErrors(['id_kelas' => 'Kelas sudah terjadwal di waktu tersebut.']);
-        }
-
-        // Update data
+        // UPDATE DATA JADWA
         $jadwalLab->update([
-            'id_hari' => $day,
-            'id_lab' => $lab,
-            'jam_mulai' => $start,
-            'jam_selesai' => $end,
-            'id_mk' => $request->id_mk,
-            'id_dosen' => $request->id_dosen,
-            'id_prodi' => $request->id_prodi,
-            'id_kelas' => $request->id_kelas,
-            'id_tahunAjaran' => $year,
+            'id_hari'         => $day,
+            'id_lab'          => $lab,
+            'jam_mulai'       => $start,
+            'jam_selesai'     => $end,
+            'id_mk'           => $request->id_mk,
+            'id_dosen'        => $request->id_dosen,
+            'id_prodi'        => $request->id_prodi,
+            'id_kelas'        => $request->id_kelas,
+            'id_tahunAjaran'  => $year,
             'status_jadwalLab' => $request->status_jadwalLab,
         ]);
 
-        // Update sesi_jam di pivot
-        $jadwalLab->sesiJam()->sync([$sesiMulai->id_sesi_jam, $sesiSelesai->id_sesi_jam]);
+        // SYNC SESI DI PIVOT
+        $sesiRentang = SesiJam::whereBetween('id_sesi_jam', [
+            $sesiMulai->id_sesi_jam,
+            $sesiSelesai->id_sesi_jam,
+        ])->pluck('id_sesi_jam');
 
-        return redirect()->route('jadwal_lab.index')->with('success', 'Jadwal Lab berhasil diperbarui.');
+        $jadwalLab->sesiJam()->sync($sesiRentang);
+
+        return redirect()->route('jadwal_lab.index')
+            ->with('success', 'Jadwal Lab berhasil diperbarui.');
     }
+
 
     public function destroy($id)
     {

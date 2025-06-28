@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('peminjaman_manual', function (Blueprint $table) {
             $table->foreignId('id_peminjaman')->constrained('peminjaman', 'id_peminjaman')->onDelete('cascade');
-            $table->time('jam_mulai');
-            $table->time('jam_selesai');
+            $table->foreignId('id_sesi_mulai')->constrained('sesi_jam', 'id_sesi_jam')->onDelete('cascade');
+            $table->foreignId('id_sesi_selesai')->constrained('sesi_jam', 'id_sesi_jam')->onDelete('cascade');
+            $table->time('jam_mulai')->nullable();
+            $table->time('jam_selesai')->nullable();
             $table->foreignId('id_lab')->constrained('lab', 'id_lab')->onDelete('cascade');
             $table->string('kegiatan');
             $table->timestamps();

@@ -41,17 +41,21 @@
                         @endif
                     </td>
                     <td>
+                        {{-- Peminjaman berdasarkan jadwal tetap --}}
                         @if ($peminjaman->peminjamanJadwal && $peminjaman->peminjamanJadwal->jadwalLab)
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }}
+                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') }}
                             -
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') ?? '-' }}
-                        @elseif (
-                            $peminjaman->peminjamanManual &&
-                                $peminjaman->peminjamanManual->jam_mulai &&
-                                $peminjaman->peminjamanManual->jam_selesai)
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }}
-                            -
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') }}
+
+                            {{-- Peminjaman manual berbasis sesi --}}
+                        @elseif ($pm = $peminjaman->peminjamanManual)
+                            @if ($pm->sesiMulai && $pm->sesiSelesai)
+                                {{ \Carbon\Carbon::parse($pm->sesiMulai->jam_mulai)->format('H:i') }}
+                                -
+                                {{ \Carbon\Carbon::parse($pm->sesiSelesai->jam_selesai)->format('H:i') }}
+                            @else
+                                -
+                            @endif
                         @else
                             -
                         @endif

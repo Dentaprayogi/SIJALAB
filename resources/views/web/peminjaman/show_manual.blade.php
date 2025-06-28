@@ -63,19 +63,18 @@
     <tr>
         <th>Jam</th>
         <td>
-            @if (
-                $peminjaman->peminjamanManual &&
-                    $peminjaman->peminjamanManual->jam_mulai &&
-                    $peminjaman->peminjamanManual->jam_selesai)
-                {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }}
+            @php  $manual = $peminjaman->peminjamanManual;  @endphp
+
+            @if ($manual && $manual->sesiMulai && $manual->sesiSelesai)
+                {{ \Carbon\Carbon::parse($manual->sesiMulai->jam_mulai)->format('H:i') }}
                 -
-                {{ \Carbon\Carbon::parse($peminjaman->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+                {{ \Carbon\Carbon::parse($manual->sesiSelesai->jam_selesai)->format('H:i') }}
             @else
                 -
             @endif
+        </td>
     </tr>
-    <tr>
-        <th>Kegiatan</th>
-        <td>{{ $peminjaman->peminjamanManual->kegiatan ?? '-' }}</td>
+    <th>Kegiatan</th>
+    <td>{{ $peminjaman->peminjamanManual->kegiatan ?? '-' }}</td>
     </tr>
 </table>
