@@ -48,8 +48,21 @@
                                         <td>{{ $pm->peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }}</td>
                                         <td>{{ $pm->peminjaman->user->mahasiswa->telepon ?? '-' }}</td>
                                         <td>{{ $pm->peminjaman->peminjamanManual->kegiatan ?? '-' }}</td>
-                                        <td><span
-                                                class="badge badge-info">{{ $pm->peminjaman->status_peminjaman }}</span>
+                                        @php
+                                            $status = strtolower($pm->peminjaman->status_peminjaman); // Normalize
+                                            $statusClass = match ($status) {
+                                                'tersedia' => 'badge-success',
+                                                'dipinjam' => 'badge-primary',
+                                                'kosong' => 'badge-secondary',
+                                                'pengajuan' => 'badge-warning',
+                                                'nonaktif' => 'badge-nonaktif',
+                                                default => 'badge-light',
+                                            };
+                                        @endphp
+
+                                        <td>
+                                            <span
+                                                class="badge-status {{ $statusClass }}">{{ ucfirst($status) }}</span>
                                         </td>
                                     </tr>
                                 @endforeach

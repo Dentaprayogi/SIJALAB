@@ -75,7 +75,6 @@ class UserController extends Controller
 
     public function updateFromAdmin(Request $request)
     {
-        // Validasi standar
         $request->validate([
             'id' => 'required|exists:users,id',
             'nim' => 'required|string|max:20|unique:mahasiswa,nim,' . $request->id . ',id',
@@ -88,24 +87,28 @@ class UserController extends Controller
             'id_kelas.required' => 'Kelas wajib dipilih.',
         ]);
 
-        // Ambil kelas berdasarkan ID
+        // Validasi kecocokan prodi dan kelas
         $kelas = \App\Models\Kelas::find($request->id_kelas);
-
-        // Cek apakah id_prodi pada kelas sesuai dengan yang dipilih
         if ($kelas->id_prodi != $request->id_prodi) {
             return redirect()->back()->withErrors(['id_kelas' => 'Kelas tidak sesuai dengan prodi yang dipilih.'])->withInput();
         }
 
-        // Update data mahasiswa
+        // Update mahasiswa
         $mahasiswa = Mahasiswa::where('id', $request->id)->firstOrFail();
-
         $mahasiswa->update([
             'nim' => $request->nim,
             'id_prodi' => $request->id_prodi,
             'id_kelas' => $request->id_kelas,
         ]);
 
-        return redirect()->back()->with('success', 'Data mahasiswa berhasil diperbarui.');
+        // Update username pada tabel users agar sama dengan NIM
+        $user = $mahasiswa->user; // menggunakan relasi belongsTo
+        if ($user) {
+            $user->username = $request->nim;
+            $user->save();
+        }
+
+        return redirect()->back()->with('success', 'Data mahasiswa dan username berhasil diperbarui.');
     }
 
     public function destroy($id)

@@ -86,16 +86,17 @@
                         <div class="card-body">
                             <h5 class="card-title">Lab. {{ $lab->nama_lab }}</h5>
                             @php
-                                $statusClass = match ($lab->status) {
-                                    'Tersedia' => 'badge bg-success',
-                                    'Dipinjam' => 'badge bg-primary',
-                                    'Kosong' => 'badge bg-secondary',
-                                    'Pengajuan' => 'badge bg-warning text-dark',
-                                    'Nonaktif' => 'badge bg-dark',
-                                    default => 'badge bg-light text-dark',
+                                $status = strtolower($lab->status); // Normalisasi
+                                $statusClass = match ($status) {
+                                    'tersedia' => 'badge-success',
+                                    'dipinjam' => 'badge-primary',
+                                    'kosong' => 'badge-secondary',
+                                    'pengajuan' => 'badge-warning',
+                                    'nonaktif' => 'badge-nonaktif',
+                                    default => 'badge-light',
                                 };
                             @endphp
-                            <span class="badge-status {{ $statusClass }}">{{ $lab->status }}</span>
+                            <span class="badge-status {{ $statusClass }}">{{ ucfirst($status) }}</span>
                         </div>
                     </div>
                 </div>

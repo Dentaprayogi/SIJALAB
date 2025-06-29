@@ -138,16 +138,16 @@
                             <span>Manajemen Lab</span>
                         </a>
                     </li>
+
+                    <!-- Nav Item - Sesi Jam -->
+                    <li class="nav-item {{ Request::is('sesi-jam*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('sesi-jam.index') }}">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>Sesi Jam</span>
+                        </a>
+                    </li>
                 @endif
             @endauth
-
-            <!-- Nav Item - Sesi Jam -->
-            <li class="nav-item {{ Request::is('sesi-jam*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('sesi-jam.index') }}">
-                    <i class="fas fa-hourglass-half"></i>
-                    <span>Sesi Jam</span>
-                </a>
-            </li>
 
             <!-- Nav Item - Jadwal Lab -->
             <li class="nav-item {{ Request::is('jadwal_lab*') ? 'active' : '' }}">
@@ -157,8 +157,20 @@
                 </a>
             </li>
 
+            @auth
+                @if (Auth::user()->role === 'mahasiswa')
+                    <li class="nav-item {{ Request::is('peminjaman/jadwal/create') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('peminjaman.create') }}">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Peminjaman Baru</span>
+                        </a>
+                    </li>
+                @endif
+            @endauth
+
             <!-- Nav Item - Riwayat Peminjaman Lab -->
-            <li class="nav-item {{ Request::is('peminjaman*') ? 'active' : '' }}">
+            <li
+                class="nav-item {{ Request::is('peminjaman') || (Request::is('peminjaman/*') && !Request::is('peminjaman/jadwal/*')) ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('peminjaman.index') }}">
                     <i class="fas fa-history"></i>
                     <span>Riwayat Peminjaman</span>

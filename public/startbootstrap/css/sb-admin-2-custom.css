@@ -32,6 +32,11 @@
     color: #6c757d !important;
 }
 
+.badge-secondary {
+    background-color: #757575;
+    color: #ffffff !important;
+}
+
 .table .thead-primary th {
     color: #fff;
     background-color: #4e73df;
