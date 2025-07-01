@@ -2,140 +2,166 @@
 
 namespace App\Imports;
 
-use App\Models\{Dosen, Hari, JadwalLab, Kelas, Lab, MataKuliah, Prodi, TahunAjaran};
+use App\Models\{
+    Dosen,
+    Hari,
+    JadwalLab,
+    Kelas,
+    Lab,
+    MataKuliah,
+    Prodi,
+    SesiJam,
+    TahunAjaran
+};
+
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
 class JadwalTemplateSheetImport implements ToCollection
 {
-    /* ==== Kolom wajib pada sheet Template ==== */
+    //HEADER WAJIB PADA SHEET TEMPLATE 
     private array $requiredColumns = [
         'hari',
         'tahun ajaran',
         'lab',
-        'jam mulai',
-        'jam selesai',
+        'sesi mulai',
+        'sesi selesai',
         'prodi',
         'kelas',
         'mata kuliah',
         'dosen',
     ];
 
-    // Fungsi bantu: normalisasi nama kolom header
-    private function normalizeColumnName(string $value): string
+    //Normalize kolom header: lowercase + trim + hapus simbol
+    private function normalize(string $val): string
     {
-        $value = strtolower($value);
-        $value = preg_replace('/[^a-z0-9 ]+/u', '', $value); // hanya huruf/angka/spasi
-        return trim($value);
+        return trim(preg_replace('/[^a-z0-9 ]+/u', '', strtolower($val)));
     }
 
-    // Fungsi bantu: konversi nilai waktu (dropdown teks / desimal)
-    private function parseTimeFromCell(string|float $value): string
+    //Split  ❝Nama (KODE)❞   →   ['name' => …, 'code' => …]
+    private function splitWithCode(string $val): array
     {
-        $value = trim((string) $value);
-
-        // 1. Format H:i  atau  H.i
-        if (preg_match('/^\d{1,2}[:.]\d{2}$/', $value)) {
-            $value = str_replace('.', ':', $value);
-            return date('H:i:s', strtotime($value));
-        }
-
-        // 2. Format H:i:s
-        if (preg_match('/^\d{1,2}:\d{2}:\d{2}$/', $value)) {
-            return $value;
-        }
-
-        // 3. Format desimal lama (7.5 => 07:50)
-        if (is_numeric($value)) {
-            $hours   = floor($value);
-            $minutes = round(($value - $hours) * 100);
-            return sprintf('%02d:%02d:00', $hours, $minutes);
-        }
-
-        // 4. Tidak dikenali
-        throw ValidationException::withMessages([
-            'jam' => ["Format jam tidak dikenali: \"$value\". Gunakan format 07:30 atau 13:15"],
-        ]);
-    }
-
-    // Fungsi bantu: split "Nama (KODE)"
-    private function parseWithCode(string $value): array
-    {
-        preg_match('/^(.*?)\s*\((.*?)\)$/', $value, $m);
+        preg_match('/^(.*?)\s*\((.*?)\)$/', $val, $m);
         return [
-            'name' => trim($m[1] ?? $value),
+            'name' => trim($m[1] ?? $val),
             'code' => trim($m[2] ?? ''),
         ];
     }
 
-    // ENTRY POINT IMPORT
+    //Konversi sel Excel (07.30, 7.5, 07:30, dst) → 07:30:00 
+    private function toTimeString(string|float $v): string
+    {
+        $v = trim((string) $v);
+
+        /* 07:30  |  07.30 */
+        if (preg_match('/^\d{1,2}([:.])\d{2}$/', $v)) {
+            $v = str_replace('.', ':', $v);
+            return date('H:i:s', strtotime($v));
+        }
+
+        /* 07:30:00 */
+        if (preg_match('/^\d{1,2}:\d{2}:\d{2}$/', $v)) {
+            return $v;
+        }
+
+        /* 7.5 → 07:50 */
+        if (is_numeric($v)) {
+            $h = (int) $v;
+            $m = (int) round(($v - $h) * 100);
+            return sprintf('%02d:%02d:00', $h, $m);
+        }
+
+        throw ValidationException::withMessages([
+            'jam' => ["Format jam tidak dikenali: \"$v\""],
+        ]);
+    }
+
+    //Cari id_sesi_jam berdasarkan jam mulai ATAU jam selesai  
+    private function getSesiJamId(string $jam, string $tipe): ?int
+    {
+        return $tipe === 'mulai'
+            ? SesiJam::where('jam_mulai', $jam)->value('id_sesi_jam')
+            : SesiJam::where('jam_selesai', $jam)->value('id_sesi_jam');
+    }
+
+    //ENTRY POINT  
     public function collection(Collection $rows): void
     {
         if ($rows->isEmpty()) {
             throw ValidationException::withMessages(['file' => ['File Excel kosong.']]);
         }
 
-        $headerRow = $rows->first();
-        $headerColumns = [];
-        foreach ($headerRow as $col) {
-            $headerColumns[] = $this->normalizeColumnName($col);
-        }
+        //Validasi Header
+        $headerRaw      = $rows->shift();
+        $headerColumns  = $headerRaw->map(fn($c) => $this->normalize($c))->toArray();
+        $missing        = array_diff($this->requiredColumns, $headerColumns);
 
-        $missingColumns = [];
-        foreach ($this->requiredColumns as $required) {
-            if (!in_array($required, $headerColumns, true)) {
-                $missingColumns[] = $required;
-            }
-        }
-        if ($missingColumns) {
+        if ($missing) {
             throw ValidationException::withMessages([
-                'header' => ['Kolom header kurang: ' . implode(', ', $missingColumns)],
+                'header' => ['Kolom header kurang: ' . implode(', ', $missing)],
             ]);
         }
 
-        $rows->shift();
+        //Dapatkan indeks kolom sekali saja (lebih cepat)
+        $colIdx = array_flip($headerColumns);
 
+        //Iterasi baris data
         foreach ($rows as $idx => $row) {
             $rowNum = $idx + 2;
 
+            //Pastikan jumlah kolom cukup
             if (count($row) < count($headerColumns)) {
                 throw ValidationException::withMessages([
                     "row_$rowNum" => ['Jumlah kolom tidak lengkap.'],
                 ]);
             }
 
-            $data = [];
-            foreach ($headerColumns as $key => $colName) {
-                $data[$colName] = trim((string) $row[$key]);
-            }
+            //Ambil dan bersihkan value 
+            $val = fn(string $key) => trim((string) $row[$colIdx[$key]]);
 
-            $hariName        = strtolower($data['hari']);
-            $tahunAjaranFull = $data['tahun ajaran'];
-            $labName         = strtolower($data['lab']);
-            $jamMulai        = $this->parseTimeFromCell($data['jam mulai']);
-            $jamSelesai      = $this->parseTimeFromCell($data['jam selesai']);
+            //Ambil nilai inti
+            $hariName       = strtolower($val('hari'));
+            $taFull         = $val('tahun ajaran');
+            $labName        = strtolower($val('lab'));
+            $prodiShort     = strtolower($val('prodi'));
 
-            if (strtotime($jamMulai) >= strtotime($jamSelesai)) {
+            $jamMulaiStr    = $this->toTimeString($val('sesi mulai'));
+            $jamSelesaiStr  = $this->toTimeString($val('sesi selesai'));
+
+            //Cari id sesi 
+            $idSesiMulai   = $this->getSesiJamId($jamMulaiStr,  'mulai');
+            $idSesiSelesai = $this->getSesiJamId($jamSelesaiStr, 'selesai');
+
+            if (!$idSesiMulai || !$idSesiSelesai) {
                 throw ValidationException::withMessages([
-                    "row_$rowNum" => ['Jam mulai harus lebih awal dari jam selesai.'],
+                    "row_$rowNum" => ['Sesi mulai / selesai tidak cocok dengan tabel sesi_jam.'],
                 ]);
             }
 
-            $prodiSingkatan = strtolower(trim($data['prodi']));
-            $kelasParts     = $this->parseWithCode($data['kelas']);
-            $mkParts        = $this->parseWithCode($data['mata kuliah']);
-            $dosenParts     = $this->parseWithCode($data['dosen']);
-            $tahunParts     = $this->parseWithCode($tahunAjaranFull);
+            //Pastikan urutan benar secara kronologis
+            $sesiMulai   = SesiJam::find($idSesiMulai);
+            $sesiSelesai = SesiJam::find($idSesiSelesai);
 
-            // RELASI
+            if ($sesiMulai->jam_mulai >= $sesiSelesai->jam_selesai) {
+                throw ValidationException::withMessages([
+                    "row_$rowNum" => ['Sesi mulai harus lebih awal dari sesi selesai.'],
+                ]);
+            }
+
+            //Split kolom bertanda kode
+            $kelasParts  = $this->splitWithCode($val('kelas'));
+            $mkParts     = $this->splitWithCode($val('mata kuliah'));
+            $dosenParts  = $this->splitWithCode($val('dosen'));
+            $taParts     = $this->splitWithCode($taFull);
+
+            //Ambil referensi DB
             $hari = Hari::whereRaw('LOWER(TRIM(nama_hari)) = ?', [$hariName])->first();
-            $tahunAjaran = TahunAjaran::whereRaw('LOWER(TRIM(tahun_ajaran)) = ?', [$tahunParts['name']])
-                ->whereRaw('LOWER(TRIM(semester)) = ?', [$tahunParts['code']])
+            $tahunAjaran = TahunAjaran::whereRaw('LOWER(TRIM(tahun_ajaran)) = ?', [$taParts['name']])
+                ->whereRaw('LOWER(TRIM(semester)) = ?', [$taParts['code']])
                 ->first();
             $lab = Lab::whereRaw('LOWER(TRIM(nama_lab)) = ?', [$labName])->first();
-            $prodi = Prodi::whereRaw('LOWER(TRIM(singkatan_prodi)) = ?', [$prodiSingkatan])->first();
+            $prodi = Prodi::whereRaw('LOWER(TRIM(singkatan_prodi)) = ?', [$prodiShort])->first();
 
             $kelas = $prodi ? Kelas::where('id_prodi', $prodi->id_prodi)
                 ->whereRaw('LOWER(TRIM(nama_kelas)) = ?', [strtolower($kelasParts['name'])])
@@ -151,40 +177,29 @@ class JadwalTemplateSheetImport implements ToCollection
 
             if (!$hari || !$tahunAjaran || !$lab || !$prodi || !$kelas || !$mk || !$dosen) {
                 throw ValidationException::withMessages([
-                    "row_$rowNum" => ['Data referensi tidak ditemukan atau salah.'],
+                    "row_$rowNum" => ['Data referensi tidak ditemukan / salah.'],
                 ]);
             }
 
-            $exists = JadwalLab::where([
-                'id_hari'        => $hari->id_hari,
-                'id_tahunAjaran' => $tahunAjaran->id_tahunAjaran,
-                'id_lab'         => $lab->id_lab,
-                'jam_mulai'      => $jamMulai,
-                'jam_selesai'    => $jamSelesai,
-                'id_prodi'       => $prodi->id_prodi,
-                'id_kelas'       => $kelas->id_kelas,
-                'id_mk'          => $mk->id_mk,
-                'id_dosen'       => $dosen->id_dosen,
-            ])->exists();
-
-            if ($exists) {
-                throw ValidationException::withMessages([
-                    "row_$rowNum" => ['Jadwal sudah ada di database.'],
-                ]);
-            }
-
-            JadwalLab::create([
+            //SIMPAN JADWAL
+            $jadwal = JadwalLab::create([
                 'id_hari'          => $hari->id_hari,
                 'id_tahunAjaran'   => $tahunAjaran->id_tahunAjaran,
                 'id_lab'           => $lab->id_lab,
-                'jam_mulai'        => $jamMulai,
-                'jam_selesai'      => $jamSelesai,
                 'id_prodi'         => $prodi->id_prodi,
                 'id_kelas'         => $kelas->id_kelas,
                 'id_mk'            => $mk->id_mk,
                 'id_dosen'         => $dosen->id_dosen,
                 'status_jadwalLab' => 'aktif',
             ]);
+
+            // Ambil seluruh sesi di rentang 
+            $sesiIds = SesiJam::whereBetween(
+                'id_sesi_jam',
+                [$idSesiMulai, $idSesiSelesai]
+            )->pluck('id_sesi_jam');
+
+            $jadwal->sesiJam()->attach($sesiIds);
         }
     }
 }

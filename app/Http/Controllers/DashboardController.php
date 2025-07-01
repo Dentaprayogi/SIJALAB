@@ -9,11 +9,9 @@ use App\Models\JadwalLab;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\SesiJam;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-
     public function index()
     {
         $labs = Lab::orderBy('nama_lab', 'asc')->get();
@@ -24,83 +22,76 @@ class DashboardController extends Controller
 
         $currentTime = now()->format('H:i:s');
 
-        // Ambil sesi jam saat ini berdasarkan waktu sekarang
+        // Sesi saat ini
         $currentSesi = SesiJam::where('jam_mulai', '<=', $currentTime)
             ->where('jam_selesai', '>=', $currentTime)
             ->first();
 
         foreach ($labs as $lab) {
-            $lab->status = 'Kosong';
 
-            if ($lab->status_lab === 'nonaktif') {
-                $lab->status = 'Nonaktif';
+            //STATUS DEFAULT
+            $lab->status = $lab->status_lab === 'nonaktif' ? 'Nonaktif' : 'Kosong';
+            if ($lab->status === 'Nonaktif' || !$currentSesi) {
                 continue;
             }
 
-            // Cek peminjaman status dipinjam
+            //DIPINJAM
             $isDipinjam =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
-                    $q->where('id_lab', $lab->id_lab)
-                        ->where('id_hari', $hari->id_hari);
-                })->whereHas('peminjaman', function ($q) use ($currentSesi) {
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
+                    $q->where('id_lab',  $lab->id_lab)
+                        ->where('id_hari', $hari->id_hari)
+                        ->whereHas('sesiJam', function ($q2) use ($currentSesi) {
+                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                        });
+                })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
                 })->exists()
+
                 ||
+
                 PeminjamanManual::where('id_lab', $lab->id_lab)
                 ->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
-                })->exists();
+                })->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
+                ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam)
+                ->exists();
 
-            // Cek peminjaman status pengajuan
+            //PENGAJUAN
             $isDiajukan =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
-                    $q->where('id_lab', $lab->id_lab)
-                        ->where('id_hari', $hari->id_hari);
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
+                    $q->where('id_lab',  $lab->id_lab)
+                        ->where('id_hari', $hari->id_hari)
+                        ->whereHas('sesiJam', function ($q2) use ($currentSesi) {
+                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                        });
                 })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'pengajuan')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
                 })->exists()
+
                 ||
+
                 PeminjamanManual::where('id_lab', $lab->id_lab)
                 ->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'pengajuan')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
-                })->exists();
+                })->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
+                ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam)
+                ->exists();
 
-            // Cek apakah ada jadwal aktif
+            //ADA JADWAL AKTIF TANPA PEMINJAMAN (TERSEDIA)
             $hasJadwal = JadwalLab::where('id_lab', $lab->id_lab)
                 ->where('id_hari', $hari->id_hari)
                 ->where('status_jadwalLab', 'aktif')
                 ->whereHas('sesiJam', function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
-                    }
+                    $q->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
                 })
+                ->doesntHave('peminjamanJadwal')   // tidak dipinjam
                 ->exists();
 
-            // Tentukan status
+            //TENTUKAN STATUS
             if ($isDipinjam) {
                 $lab->status = 'Dipinjam';
             } elseif ($isDiajukan) {
@@ -109,18 +100,16 @@ class DashboardController extends Controller
                 $lab->status = 'Tersedia';
             }
 
-            // Ambil data peminjaman aktif untuk modal
-            $lab->peminjamanAktif = PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
-                $q->where('id_lab', $lab->id_lab)
-                    ->where('id_hari', $hari->id_hari);
+            // DATA PEMINJAMAN AKTIF (modal) 
+            $lab->peminjamanAktif = PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
+                $q->where('id_lab',  $lab->id_lab)
+                    ->where('id_hari', $hari->id_hari)
+                    ->whereHas('sesiJam', function ($q2) use ($currentSesi) {
+                        $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                    });
             })->whereHas('peminjaman', function ($q) {
                 $q->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
                     ->whereDate('tgl_peminjaman', today());
-            })->where(function ($q) use ($currentSesi) {
-                if ($currentSesi) {
-                    $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                        ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                }
             })->with([
                 'peminjaman.user.mahasiswa.prodi',
                 'peminjaman.user.mahasiswa.kelas',
@@ -130,12 +119,9 @@ class DashboardController extends Controller
                 ->whereHas('peminjaman', function ($q) {
                     $q->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
-                })->with([
+                })->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
+                ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam)
+                ->with([
                     'peminjaman.user.mahasiswa.prodi',
                     'peminjaman.user.mahasiswa.kelas',
                 ])->get();

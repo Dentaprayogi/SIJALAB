@@ -34,11 +34,22 @@
                 </td>
                 <td>
                     @if ($p->peminjamanJadwal && $p->peminjamanJadwal->jadwalLab)
-                        {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') ?? '-' }} -
-                        {{ \Carbon\Carbon::parse($p->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') ?? '-' }}
+                        @php
+                            $sesiJam = $p->peminjamanJadwal->jadwalLab->sesiJam ?? collect();
+                            $jamMulai = optional($sesiJam->sortBy('jam_mulai')->first())->jam_mulai;
+                            $jamSelesai = optional($sesiJam->sortByDesc('jam_selesai')->first())->jam_selesai;
+                        @endphp
+                        {{ $jamMulai ? \Carbon\Carbon::parse($jamMulai)->format('H:i') : '-' }} -
+                        {{ $jamSelesai ? \Carbon\Carbon::parse($jamSelesai)->format('H:i') : '-' }}
+                    @elseif ($p->peminjamanManual)
+                        @php
+                            $jamMulaiManual = optional($p->peminjamanManual->sesiMulai)->jam_mulai;
+                            $jamSelesaiManual = optional($p->peminjamanManual->sesiSelesai)->jam_selesai;
+                        @endphp
+                        {{ $jamMulaiManual ? \Carbon\Carbon::parse($jamMulaiManual)->format('H:i') : '-' }} -
+                        {{ $jamSelesaiManual ? \Carbon\Carbon::parse($jamSelesaiManual)->format('H:i') : '-' }}
                     @else
-                        {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_mulai)->format('H:i') ?? '-' }} -
-                        {{ \Carbon\Carbon::parse($p->peminjamanManual->jam_selesai)->format('H:i') ?? '-' }}
+                        -
                     @endif
                 </td>
                 <td>{{ $p->user->name ?? '-' }}</td>

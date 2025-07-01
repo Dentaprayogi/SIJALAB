@@ -101,8 +101,8 @@
                                             @foreach ($sesiJamList as $sesi)
                                                 <option value="{{ $sesi->id_sesi_jam }}"
                                                     {{ old('id_sesi_mulai') == $sesi->id_sesi_jam ? 'selected' : '' }}>
-                                                    {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
-                                                    {{ $sesi->jam_selesai }})
+                                                    {{ $sesi->nama_sesi }}
+                                                    ({{ \Carbon\Carbon::parse($sesi->jam_mulai)->format('H:i') }})
                                                 </option>
                                             @endforeach
                                         </select>
@@ -121,8 +121,8 @@
                                             @foreach ($sesiJamList as $sesi)
                                                 <option value="{{ $sesi->id_sesi_jam }}"
                                                     {{ old('id_sesi_selesai') == $sesi->id_sesi_jam ? 'selected' : '' }}>
-                                                    {{ $sesi->nama_sesi }} ({{ $sesi->jam_mulai }} -
-                                                    {{ $sesi->jam_selesai }})
+                                                    {{ $sesi->nama_sesi }}
+                                                    ({{ \Carbon\Carbon::parse($sesi->jam_selesai)->format('H:i') }})
                                                 </option>
                                             @endforeach
                                         </select>

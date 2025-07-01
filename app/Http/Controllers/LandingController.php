@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Hari;
-use App\Models\JadwalLab;
 use Illuminate\Http\Request;
+use App\Models\Hari;
 use App\Models\Lab;
+use App\Models\JadwalLab;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\SesiJam;
@@ -29,27 +29,27 @@ class LandingController extends Controller
             ->first();
 
         foreach ($labs as $lab) {
+            $lab->status = 'Kosong';
+
             if ($lab->status_lab === 'nonaktif') {
                 $lab->status = 'Nonaktif';
                 continue;
             }
 
-            // Status default
-            $lab->status = 'Kosong';
-
-            // Cek peminjaman dengan status 'dipinjam'
+            // Cek status DIPINJAM
             $isDipinjam =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
                     $q->where('id_lab', $lab->id_lab)
                         ->where('id_hari', $hari->id_hari);
+
+                    if ($currentSesi) {
+                        $q->whereHas('sesiJam', function ($q2) use ($currentSesi) {
+                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                        });
+                    }
                 })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
                 })->exists()
 
                 ||
@@ -65,19 +65,20 @@ class LandingController extends Controller
                     }
                 })->exists();
 
-            // Cek peminjaman dengan status 'pengajuan'
+            // Cek status PENGAJUAN
             $isDiajukan =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
                     $q->where('id_lab', $lab->id_lab)
                         ->where('id_hari', $hari->id_hari);
+
+                    if ($currentSesi) {
+                        $q->whereHas('sesiJam', function ($q2) use ($currentSesi) {
+                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                        });
+                    }
                 })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'pengajuan')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
                 })->exists()
 
                 ||
@@ -93,7 +94,7 @@ class LandingController extends Controller
                     }
                 })->exists();
 
-            // Cek apakah ada jadwal aktif (tanpa peminjaman)
+            // Cek apakah ada jadwal aktif saat ini
             $hasJadwal = JadwalLab::where('id_lab', $lab->id_lab)
                 ->where('id_hari', $hari->id_hari)
                 ->where('status_jadwalLab', 'aktif')
@@ -103,7 +104,7 @@ class LandingController extends Controller
                     }
                 })->exists();
 
-            // Tentukan status akhir
+            // Tentukan status akhir lab
             if ($isDipinjam) {
                 $lab->status = 'Dipinjam';
             } elseif ($isDiajukan) {

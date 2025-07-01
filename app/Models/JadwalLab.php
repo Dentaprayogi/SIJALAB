@@ -28,9 +28,17 @@ class JadwalLab extends Model
     ];
 
     // format jam mulai dan jam berakhir H:i
-    public function getRentangJamAttribute()
+    public function getRentangJamDariSesiAttribute()
     {
-        return \Carbon\Carbon::parse($this->jam_mulai)->format('H:i') . ' - ' . \Carbon\Carbon::parse($this->jam_selesai)->format('H:i');
+        if ($this->relationLoaded('sesiJam') && $this->sesiJam->isNotEmpty()) {
+            $jamMulai = $this->sesiJam->first()->jam_mulai;
+            $jamSelesai = $this->sesiJam->last()->jam_selesai;
+
+            return \Carbon\Carbon::parse($jamMulai)->format('H:i') . ' - ' .
+                \Carbon\Carbon::parse($jamSelesai)->format('H:i');
+        }
+
+        return '-';
     }
 
     // Relasi ke Hari (One to Many)
@@ -88,6 +96,7 @@ class JadwalLab extends Model
 
     public function sesiJam()
     {
-        return $this->belongsToMany(SesiJam::class, 'jadwal_lab_sesi_jam', 'id_jadwalLab', 'id_sesi_jam');
+        return $this->belongsToMany(SesiJam::class, 'jadwal_lab_sesi_jam', 'id_jadwalLab', 'id_sesi_jam')
+            ->orderBy('sesi_jam.jam_mulai'); // agar urutan sesi dari awal ke akhir
     }
 }

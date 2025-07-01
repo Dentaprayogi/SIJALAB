@@ -18,12 +18,15 @@
                         <select name="tahun_ajaran" class="form-control" required>
                             <option value="" selected disabled>Pilih Tahun Ajaran</option>
                             @php
-                                $tahunAwal = 2020; // tahun mulai
                                 $tahunSekarang = date('Y');
+                                $tahunAwal = $tahunSekarang - 2; // dua tahun terakhir
+                                $tahunAkhir = $tahunSekarang + 2; // dua tahun ke depan
                             @endphp
-                            @for ($tahun = $tahunAwal; $tahun <= $tahunSekarang; $tahun++)
+
+                            @for ($tahun = $tahunAkhir; $tahun >= $tahunAwal; $tahun--)
                                 <option value="{{ $tahun }}/{{ $tahun + 1 }}">
-                                    {{ $tahun }}/{{ $tahun + 1 }}</option>
+                                    {{ $tahun }}/{{ $tahun + 1 }}
+                                </option>
                             @endfor
                         </select>
                     </div>

@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('id_jadwalLab');
             $table->foreignId('id_hari')->constrained('hari', 'id_hari')->onDelete('cascade');
             $table->foreignId('id_lab')->constrained('lab', 'id_lab')->onDelete('cascade');
-            $table->time('jam_mulai')->nullable();
-            $table->time('jam_selesai')->nullable();
+            // $table->time('jam_mulai')->nullable();
+            // $table->time('jam_selesai')->nullable();
             $table->foreignId('id_mk')->constrained('matakuliah', 'id_mk')->onDelete('cascade');
             $table->foreignId('id_dosen')->constrained('dosen', 'id_dosen')->onDelete('cascade');
             $table->foreignId('id_prodi')->constrained('prodi', 'id_prodi')->onDelete('cascade');

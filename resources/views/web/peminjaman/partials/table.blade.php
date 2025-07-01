@@ -41,13 +41,19 @@
                         @endif
                     </td>
                     <td>
-                        {{-- Peminjaman berdasarkan jadwal tetap --}}
-                        @if ($peminjaman->peminjamanJadwal && $peminjaman->peminjamanJadwal->jadwalLab)
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_mulai)->format('H:i') }}
-                            -
-                            {{ \Carbon\Carbon::parse($peminjaman->peminjamanJadwal->jadwalLab->jam_selesai)->format('H:i') }}
+                        {{-- Peminjaman berdasarkan JADWAL TETAP --}}
+                        @if ($pj = optional($peminjaman->peminjamanJadwal)->jadwalLab)
+                            @php
+                                // ambil sesi terawal & terlambat
+                                $firstSesi = $pj->sesiJam->sortBy('jam_mulai')->first();
+                                $lastSesi = $pj->sesiJam->sortByDesc('jam_selesai')->first();
+                            @endphp
 
-                            {{-- Peminjaman manual berbasis sesi --}}
+                            {{ $firstSesi ? \Carbon\Carbon::parse($firstSesi->jam_mulai)->format('H:i') : '-' }}
+                            -
+                            {{ $lastSesi ? \Carbon\Carbon::parse($lastSesi->jam_selesai)->format('H:i') : '-' }}
+
+                            {{-- Peminjaman MANUAL berbasis sesi --}}
                         @elseif ($pm = $peminjaman->peminjamanManual)
                             @if ($pm->sesiMulai && $pm->sesiSelesai)
                                 {{ \Carbon\Carbon::parse($pm->sesiMulai->jam_mulai)->format('H:i') }}
@@ -56,6 +62,8 @@
                             @else
                                 -
                             @endif
+
+                            {{-- Tidak ada data --}}
                         @else
                             -
                         @endif

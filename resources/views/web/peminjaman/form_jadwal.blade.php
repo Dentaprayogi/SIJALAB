@@ -21,8 +21,8 @@
                         {{ $jadwal->hari->nama_hari }} / Lab.
                         {{ $jadwal->lab->nama_lab }} /
                         {{ $jadwal->prodi->singkatan_prodi }} ({{ $jadwal->kelas->nama_kelas }}) /
-                        {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                        {{ optional($jadwal->sesiJam->sortBy('jam_mulai')->first())->jam_mulai }} -
+                        {{ optional($jadwal->sesiJam->sortByDesc('jam_selesai')->first())->jam_selesai }}
                     </option>
                 @endforeach
             </select>

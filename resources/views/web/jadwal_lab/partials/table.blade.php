@@ -40,7 +40,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->hari->nama_hari }}</td>
                     <td>{{ $item->lab->nama_lab }}</td>
-                    <td>{{ $item->rentang_jam }}</td>
+                    <td>{{ $item->rentang_jam_dari_sesi }}</td>
                     <td>{{ $item->mataKuliah->nama_mk }}</td>
                     <td>{{ $item->dosen->nama_dosen }}</td>
                     <td>{{ $item->prodi->singkatan_prodi }} ({{ $item->kelas->nama_kelas }})</td>

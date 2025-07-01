@@ -24,34 +24,37 @@ class PeminjamanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Peminjaman::with([
+        // Mahasiswa hanya melihat miliknya
+        $baseQuery = Peminjaman::with([
             'user',
             'peralatan',
             'peminjamanManual.lab',
             'peminjamanJadwal.jadwalLab.lab'
         ]);
 
-        // Cek apakah user adalah mahasiswa
         if (Auth::user()->role === 'mahasiswa') {
-            $query->where('id', auth::id());
+            $baseQuery->where('id', Auth::id());
         }
 
-        // Ambil input filter
         $bulan = $request->input('bulan');
         $tahun = $request->input('tahun');
 
-        // Terapkan filter jika ada
         if ($bulan) {
-            $query->whereMonth('tgl_peminjaman', $bulan);
+            $baseQuery->whereMonth('tgl_peminjaman', $bulan);
         }
 
         if ($tahun) {
-            $query->whereYear('tgl_peminjaman', $tahun);
+            $baseQuery->whereYear('tgl_peminjaman', $tahun);
         }
 
-        $peminjamans = $query->latest()->get();
+        // Clone untuk pemisahan query
+        $queryPengajuan = (clone $baseQuery)->where('status_peminjaman', 'pengajuan')->orderBy('id_peminjaman', 'asc');
+        $queryLainnya   = (clone $baseQuery)->where('status_peminjaman', '!=', 'pengajuan')->orderBy('id_peminjaman', 'desc');
 
-        // Ambil notifikasi peminjaman yang statusnya "pengajuan"
+        // Gabungkan hasilnya
+        $peminjamans = $queryPengajuan->get()->merge($queryLainnya->get());
+
+        // Notifikasi peminjaman yang statusnya "pengajuan"
         $notifikasi = Peminjaman::with('user')
             ->where('status_peminjaman', 'pengajuan')
             ->latest()
@@ -68,31 +71,32 @@ class PeminjamanController extends Controller
         $activeTab = session('active_tab', 'jadwal');
 
         $now = Carbon::now();
-
-        // Ambil nama hari sekarang, sesuaikan format kapitalisasi jika perlu
-        $namaHari = ucfirst(strtolower($now->locale('id')->isoFormat('dddd'))); // e.g. 'Senin'
-
-        // Cari id_hari berdasarkan nama hari
+        $namaHari = ucfirst(strtolower($now->locale('id')->isoFormat('dddd')));
         $hari = Hari::where('nama_hari', $namaHari)->first();
 
-        // Ambil user login
         $user = Auth::user();
-
         $nowTime = Carbon::now()->format('H:i:s');
-        $now     = Carbon::createFromFormat('H:i:s', $nowTime);
+        $now = Carbon::createFromFormat('H:i:s', $nowTime);
 
-        $jadwals = JadwalLab::where('status_jadwalLab', 'aktif')
+        $jadwals = JadwalLab::with('sesiJam') // pastikan eager load
+            ->where('status_jadwalLab', 'aktif')
             ->where('id_hari', $hari->id_hari ?? null)
             ->where('id_prodi', $user->mahasiswa->id_prodi)
             ->where('id_kelas', $user->mahasiswa->id_kelas)
             ->get()
             ->filter(function ($jadwal) use ($now) {
-                $jamMulai   = Carbon::createFromFormat('H:i:s', $jadwal->jam_mulai);
-                $jamSelesai = Carbon::createFromFormat('H:i:s', $jadwal->jam_selesai);
+                // Ambil sesi pertama dan terakhir dari relasi
+                $jamMulai = $jadwal->sesiJam->sortBy('jam_mulai')->first()?->jam_mulai;
+                $jamSelesai = $jadwal->sesiJam->sortByDesc('jam_selesai')->first()?->jam_selesai;
+
+                if (!$jamMulai || !$jamSelesai) return false;
+
+                $carbonMulai = Carbon::createFromFormat('H:i:s', $jamMulai);
+                $carbonSelesai = Carbon::createFromFormat('H:i:s', $jamSelesai);
 
                 return $now->between(
-                    $jamMulai->copy()->subHour(), // tampil 1 jam sebelum mulai
-                    $jamSelesai->copy()->subSecond() // hilang tepat saat jam_selesai
+                    $carbonMulai->copy()->subHour(),
+                    $carbonSelesai->copy()->subSecond()
                 );
             });
 

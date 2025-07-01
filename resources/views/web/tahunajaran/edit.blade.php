@@ -21,16 +21,19 @@
                             <label class="form-label">Tahun Ajaran</label>
                             <select name="tahun_ajaran" class="form-control" required>
                                 <option value="" disabled>Pilih Tahun Ajaran</option>
+
                                 @php
-                                    $tahunAwal = 2020;
                                     $tahunSekarang = date('Y');
+                                    $tahunAwal = $tahunSekarang - 2; // dua tahun terakhir
+                                    $tahunAkhir = $tahunSekarang + 2; // dua tahun ke depan
+                                    $terpilih = old('tahun_ajaran', $tahun->tahun_ajaran ?? null);
                                 @endphp
-                                @for ($t = $tahunAwal; $t <= $tahunSekarang; $t++)
+
+                                @for ($t = $tahunAkhir; $t >= $tahunAwal; $t--)
                                     @php
                                         $opsi = $t . '/' . ($t + 1);
                                     @endphp
-                                    <option value="{{ $opsi }}"
-                                        {{ $tahun->tahun_ajaran == $opsi ? 'selected' : '' }}>
+                                    <option value="{{ $opsi }}" {{ $terpilih === $opsi ? 'selected' : '' }}>
                                         {{ $opsi }}
                                     </option>
                                 @endfor
