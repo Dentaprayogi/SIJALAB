@@ -13,7 +13,20 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nama Kelas</label>
-                        <input type="text" class="form-control" name="nama_kelas" required>
+                        <div class="d-flex gap-2">
+                            <select class="form-control" name="angka_kelas" required>
+                                <option value="" selected disabled>Pilih Angka</option>
+                                @for ($i = 1; $i <= 4; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <select class="form-control" name="huruf_kelas" required>
+                                <option value="" selected disabled>Pilih Huruf</option>
+                                @foreach (range('A', 'Z') as $huruf)
+                                    <option value="{{ $huruf }}">{{ $huruf }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Prodi</label>

@@ -100,6 +100,7 @@ Route::middleware([
         Route::resource('sesi-jam', SesiJamController::class);
 
         // Route Jadwal Lab
+        Route::get('/jadwal-lab/check-bentrok', [JadwalLabController::class, 'checkBentrok']);
         Route::post('/jadwal_lab/import', [JadwalLabController::class, 'import'])->name('jadwal_lab.import');
         Route::get('/template-jadwal-lab', [JadwalLabController::class, 'downloadTemplate'])->name('jadwal_lab.template');
         Route::patch('/jadwal_lab/{id_jadwalLab}/toggle-status', [JadwalLabController::class, 'toggleStatus'])->name('jadwal_lab.toggle-status');

@@ -23,7 +23,8 @@
                         </ul>
                     </div>
                 @endif
-                <form action="{{ route('jadwal_lab.store') }}" method="POST" class="needs-validation" novalidate>
+                <form id="form-jadwal" action="{{ route('jadwal_lab.store') }}" method="POST" class="needs-validation"
+                    novalidate>
                     @csrf
                     <div class="row">
                         <!-- Kolom Kiri -->
@@ -35,7 +36,7 @@
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
-                                    <select name="id_tahunAjaran" class="form-control" required>
+                                    <select name="id_tahunAjaran" id="id_tahunAjaran" class="form-control" required>
                                         <option value="">-- Pilih Tahun Ajaran --</option>
                                         @foreach ($tahunAjaranList as $tahun)
                                             <option value="{{ $tahun->id_tahunAjaran }}"
@@ -55,7 +56,7 @@
                                     <span class="input-group-text bg-primary text-white">
                                         <i class="fas fa-calendar-day"></i>
                                     </span>
-                                    <select name="id_hari" class="form-control" required>
+                                    <select name="id_hari" id="id_hari" class="form-control" required>
                                         <option value="">-- Pilih Hari --</option>
                                         @foreach ($hariList as $hari)
                                             <option value="{{ $hari->id_hari }}"
@@ -65,26 +66,6 @@
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">Hari wajib dipilih.</div>
-                                </div>
-                            </div>
-
-                            {{-- Laboratorium --}}
-                            <div class="mb-3">
-                                <label for="id_lab" class="form-label">Laboratorium</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-primary text-white">
-                                        <i class="fas fa-desktop"></i>
-                                    </span>
-                                    <select name="id_lab" class="form-control" required>
-                                        <option value="">-- Pilih Lab --</option>
-                                        @foreach ($labList as $lab)
-                                            <option value="{{ $lab->id_lab }}"
-                                                {{ old('id_lab') == $lab->id_lab ? 'selected' : '' }}>
-                                                {{ $lab->nama_lab }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div class="invalid-feedback">Lab wajib dipilih.</div>
                                 </div>
                             </div>
 
@@ -127,6 +108,26 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            {{-- Laboratorium --}}
+                            <div class="mb-3">
+                                <label for="id_lab" class="form-label">Laboratorium</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary text-white">
+                                        <i class="fas fa-desktop"></i>
+                                    </span>
+                                    <select name="id_lab" id="id_lab" class="form-control" required>
+                                        <option value="">-- Pilih Lab --</option>
+                                        @foreach ($labList as $lab)
+                                            <option value="{{ $lab->id_lab }}"
+                                                {{ old('id_lab') == $lab->id_lab ? 'selected' : '' }}>
+                                                {{ $lab->nama_lab }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback bentrok-error" style="display: none;"></div>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +174,7 @@
                                             @endforeach
                                         @endif
                                     </select>
-                                    <div class="invalid-feedback">Kelas wajib dipilih.</div>
+                                    <div class="invalid-feedback bentrok-error" style="display: none;"></div>
                                 </div>
                             </div>
 
@@ -221,7 +222,7 @@
                                             @endforeach
                                         @endif
                                     </select>
-                                    <div class="invalid-feedback">Dosen wajib dipilih.</div>
+                                    <div class="invalid-feedback bentrok-error" style="display: none;"></div>
                                 </div>
                             </div>
                         </div>
@@ -235,11 +236,9 @@
                         </div>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if ($errors->any())
@@ -332,6 +331,116 @@
             });
             $('#id_dosen').select2({
                 placeholder: "-- Pilih Dosen --",
+                allowClear: true
+            });
+        });
+    </script>
+
+    {{-- Cek bentrok lab, dosen, kelas, sesi --}}
+    <script>
+        $(document).ready(function() {
+            /** 1. Bersihkan error **/
+            function clearBentrok() {
+                $('.bentrok-error').hide().text('');
+                $('.is-invalid').removeClass('is-invalid');
+                $('.select2-selection').removeClass('is-invalid');
+            }
+
+            /** 2. Tampilkan error **/
+            function showError(fieldName, message) {
+                const $input = $(`[name="${fieldName}"]`);
+                const $wrapper = $input.closest('.input-group');
+
+                $input.addClass('is-invalid');
+
+                // Jika pakai Select2
+                if ($input.hasClass('select2-hidden-accessible')) {
+                    $input.next('.select2-container')
+                        .find('.select2-selection')
+                        .addClass('is-invalid');
+                }
+
+                $wrapper.find('.bentrok-error').text(message).show();
+            }
+
+            /** 3. Cek bentrok via AJAX **/
+            function checkBentrok() {
+                clearBentrok();
+
+                const data = {
+                    id_hari: $('#id_hari').val(),
+                    id_lab: $('#id_lab').val(),
+                    id_dosen: $('#id_dosen').val(),
+                    id_kelas: $('#id_kelas').val(),
+                    id_tahunAjaran: $('#id_tahunAjaran').val(),
+                    id_sesi_mulai: $('#id_sesi_mulai').val(),
+                    id_sesi_selesai: $('#id_sesi_selesai').val(),
+                };
+
+                if (!data.id_hari || !data.id_lab || !data.id_tahunAjaran || !data.id_sesi_mulai || !data
+                    .id_sesi_selesai) {
+                    return; // tidak cukup data untuk validasi
+                }
+
+                $.ajax({
+                    url: "{{ url('/jadwal-lab/check-bentrok') }}",
+                    method: "GET",
+                    data: data,
+                    success: function() {
+                        // Tidak bentrok, tidak perlu tindakan
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const errs = xhr.responseJSON.errors;
+                            for (let field in errs) {
+                                showError(field, errs[field][0]);
+                            }
+                        }
+                    }
+                });
+            }
+
+            /** 4. Cek bentrok ketika field penting berubah **/
+            $('#id_hari, #id_lab, #id_dosen, #id_kelas, #id_tahunAjaran, #id_sesi_mulai, #id_sesi_selesai')
+                .on('change', checkBentrok);
+
+            /** 5. Ketika prodi berubah, ambil ulang data terkait dan re-init Select2 **/
+            $('#id_prodi').on('change', function() {
+                const prodiId = $(this).val();
+
+                if (!prodiId) {
+                    $('#id_kelas, #id_mk, #id_dosen').val(null).trigger('change');
+                    return;
+                }
+
+                $.getJSON('/get-dependent-data/' + prodiId, function(data) {
+                    // Utility untuk update & reinit Select2
+                    function reloadSelect($el, items, idField, textField, label) {
+                        $el.off('change.select2'); // cegah event duplikat
+                        $el.select2('destroy');
+                        $el.empty().append(`<option value="">-- Pilih ${label} --</option>`);
+                        $.each(items, function(_, item) {
+                            $el.append(
+                                `<option value="${item[idField]}">${item[textField]}</option>`
+                            );
+                        });
+                        $el.select2({
+                            placeholder: `-- Pilih ${label} --`,
+                            allowClear: true
+                        });
+                    }
+
+                    reloadSelect($('#id_kelas'), data.kelas, 'id_kelas', 'nama_kelas', 'Kelas');
+                    reloadSelect($('#id_mk'), data.mk, 'id_mk', 'nama_mk', 'Mata Kuliah');
+                    reloadSelect($('#id_dosen'), data.dosen, 'id_dosen', 'nama_dosen', 'Dosen');
+
+                    checkBentrok(); // trigger ulang pengecekan setelah isi berubah
+                });
+            });
+
+            /** 6. Inisialisasi awal Select2 **/
+            $('#id_kelas, #id_mk, #id_dosen').select2({
+                placeholder: "-- Pilih --",
                 allowClear: true
             });
         });

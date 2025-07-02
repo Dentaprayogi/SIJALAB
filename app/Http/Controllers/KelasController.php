@@ -23,61 +23,81 @@ class KelasController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validasi input
         $request->validate([
-            'id_prodi'   => 'required|exists:prodi,id_prodi',
-            'nama_kelas' => 'required|string|max:255',
+            'id_prodi'    => 'required|exists:prodi,id_prodi',
+            'angka_kelas' => 'required|in:1,2,3,4',
+            'huruf_kelas' => 'required|alpha|size:1',
         ]);
 
-        // Cek apakah kelas dengan nama yang sama sudah ada dalam prodi yang dipilih
-        $cekKelas = Kelas::where('id_prodi', $request->id_prodi)
-            ->where('nama_kelas', strtoupper($request->nama_kelas)) // cek dengan uppercase juga
+        // 2. Bangun nama_kelas (mis. 1A, 3C) dan pastikan huruf kapital
+        $namaKelas = $request->angka_kelas . strtoupper($request->huruf_kelas);
+
+        // 3. Cek duplikat kelas pada prodi yang sama
+        $duplikat = Kelas::where('id_prodi', $request->id_prodi)
+            ->where('nama_kelas', $namaKelas)
             ->exists();
 
-        if ($cekKelas) {
-            return redirect()->route('kelas.index')->with('error', 'Kelas dengan nama yang sama sudah ada dalam prodi ini!');
+        if ($duplikat) {
+            // Ambil singkatan prodi dari database
+            $prodi = \App\Models\Prodi::find($request->id_prodi);
+
+            return back()
+                ->withInput()
+                ->with('error', "Kelas $namaKelas sudah ada pada prodi $prodi->singkatan_prodi!");
         }
 
-        // Simpan data dengan nama_kelas uppercase
+        // 4. Simpan data
         Kelas::create([
             'id_prodi'   => $request->id_prodi,
-            'nama_kelas' => strtoupper($request->nama_kelas),
+            'nama_kelas' => $namaKelas,
         ]);
 
-        return redirect()->route('kelas.index')->with('success', 'Kelas berhasil ditambahkan!');
+        // 5. Beri notifikasi sukses
+        return redirect()
+            ->route('kelas.index')
+            ->with('success', "Kelas $namaKelas berhasil ditambahkan!");
     }
 
     public function update(Request $request, $id_kelas)
     {
+        /* 1. Validasi */
         $request->validate([
-            'id_prodi'   => 'required|exists:prodi,id_prodi',
-            'nama_kelas' => 'required|string|max:255',
+            'id_prodi'    => 'required|exists:prodi,id_prodi',
+            'angka_kelas' => 'required|in:1,2,3,4',
+            'huruf_kelas' => 'required|alpha|size:1',
         ]);
 
-        // Ambil data kelas berdasarkan ID
+        /* 2. Bangun nama_kelas (mis. 2B) */
+        $namaKelas = $request->angka_kelas . strtoupper($request->huruf_kelas);
+
+        /* 3. Ambil data kelas yang akan di‑update */
         $kelas = Kelas::findOrFail($id_kelas);
 
-        // Konversi nama_kelas ke uppercase
-        $namaKelasUpper = strtoupper($request->nama_kelas);
-
-        // Cek apakah sudah ada kelas dengan nama dan prodi yang sama, tapi bukan dirinya sendiri
-        $cekKelas = Kelas::where('id_prodi', $request->id_prodi)
-            ->where('nama_kelas', $namaKelasUpper)
+        /* 4. Cek duplikat di prodi yang sama (kecuali dirinya sendiri) */
+        $duplikat = Kelas::where('id_prodi', $request->id_prodi)
+            ->where('nama_kelas', $namaKelas)
             ->where('id_kelas', '!=', $kelas->id_kelas)
             ->exists();
 
-        if ($cekKelas) {
-            return redirect()->route('kelas.index')
+        if ($duplikat) {
+            $prodi = Prodi::find($request->id_prodi);   // ambil singkatan prodi
+
+            return back()
                 ->withInput()
-                ->with('error', 'Kelas dengan nama yang sama sudah ada dalam prodi ini!');
+                ->with('error', "Kelas $namaKelas sudah ada pada prodi $prodi->singkatan_prodi!");
         }
 
-        // Update data kelas
+        /* 5. Update data */
         $kelas->update([
             'id_prodi'   => $request->id_prodi,
-            'nama_kelas' => $namaKelasUpper,
+            'nama_kelas' => $namaKelas,
         ]);
 
-        return redirect()->route('kelas.index')->with('success', 'Kelas berhasil diperbarui!');
+        /* 6. Notifikasi sukses */
+        return redirect()
+            ->route('kelas.index')
+            ->with('success', "Kelas $namaKelas berhasil diperbarui!");
     }
 
     public function destroy($id_kelas)

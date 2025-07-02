@@ -12,6 +12,7 @@ use App\Models\Matakuliah;
 use App\Models\Prodi;
 use App\Models\SesiJam;
 use App\Models\TahunAjaran;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -78,6 +79,75 @@ class JadwalLabController extends Controller
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
             'sesiJamList' => SesiJam::orderBy('jam_mulai')->get(),
         ]);
+    }
+
+    public function checkBentrok(Request $request)
+    {
+        // Jika field utama kosong, jangan validasi dulu
+        if (!$request->filled(['id_hari', 'id_lab', 'id_tahunAjaran', 'id_sesi_mulai', 'id_sesi_selesai'])) {
+            return response()->json(['message' => 'Data belum lengkap untuk validasi.'], 200);
+        }
+
+        // Validasi form utama
+        $request->validate([
+            'id_hari' => 'required|exists:hari,id_hari',
+            'id_lab' => 'required|exists:lab,id_lab',
+            'id_tahunAjaran' => 'required|exists:tahun_ajaran,id_tahunAjaran',
+            'id_sesi_mulai' => 'required|exists:sesi_jam,id_sesi_jam',
+            'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam',
+        ]);
+
+        $sesiMulai = SesiJam::findOrFail($request->id_sesi_mulai);
+        $sesiSelesai = SesiJam::findOrFail($request->id_sesi_selesai);
+
+        if ($sesiMulai->id_sesi_jam > $sesiSelesai->id_sesi_jam) {
+            throw ValidationException::withMessages([
+                'id_sesi_mulai' => ['Jam mulai harus lebih awal dari jam selesai.'],
+            ]);
+        }
+
+        $sesiDipilih = SesiJam::whereBetween('id_sesi_jam', [
+            $sesiMulai->id_sesi_jam,
+            $sesiSelesai->id_sesi_jam
+        ])->pluck('id_sesi_jam');
+
+        // Ambil ID jadwal yang sedang diedit (jika ada)
+        $exceptId = $request->input('except_id');
+
+        // Cek bentrok dinamis
+        $isBentrok = function ($column, $value) use ($request, $sesiDipilih, $exceptId) {
+            return JadwalLab::where('id_hari', $request->id_hari)
+                ->where($column, $value)
+                ->where('id_tahunAjaran', $request->id_tahunAjaran)
+                ->whereHas('sesiJam', function ($q) use ($sesiDipilih) {
+                    $q->whereIn('sesi_jam.id_sesi_jam', $sesiDipilih);
+                })
+                ->when($exceptId, function ($query) use ($exceptId) {
+                    $query->where('id_jadwalLab', '!=', $exceptId);
+                })
+                ->exists();
+        };
+
+        // Validasi bentrok
+        if ($isBentrok('id_lab', $request->id_lab)) {
+            throw ValidationException::withMessages([
+                'id_lab' => ['Jadwal lab bentrok dengan hari dan sesi tersebut.'],
+            ]);
+        }
+
+        if ($request->filled('id_dosen') && $isBentrok('id_dosen', $request->id_dosen)) {
+            throw ValidationException::withMessages([
+                'id_dosen' => ['Dosen sudah mengajar pada hari dan sesi tersebut.'],
+            ]);
+        }
+
+        if ($request->filled('id_kelas') && $isBentrok('id_kelas', $request->id_kelas)) {
+            throw ValidationException::withMessages([
+                'id_kelas' => ['Kelas telah terjadwal pada hari dan sesi tersebut.'],
+            ]);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 
     public function import(Request $request)

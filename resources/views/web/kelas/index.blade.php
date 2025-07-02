@@ -59,7 +59,7 @@
     @include('web.kelas.edit')
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @if (session('error'))
+    {{-- @if (session('error'))
         <script>
             Swal.fire({
                 icon: 'error',
@@ -68,7 +68,7 @@
                 showConfirmButton: 'Ok'
             });
         </script>
-    @endif
+    @endif --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             @if (session('success'))

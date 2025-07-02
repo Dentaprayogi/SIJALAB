@@ -1,4 +1,8 @@
 @foreach ($kelas as $kelass)
+    @php
+        $angkaKelas = substr($kelass->nama_kelas, 0, 1); // ambil angka
+        $hurufKelas = strtoupper(substr($kelass->nama_kelas, 1, 1)); // ambil huruf kapital
+    @endphp
     <div class="modal fade" id="modalEditKelas{{ $kelass->id_kelas }}" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -16,8 +20,28 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Nama Kelas</label>
-                            <input type="text" class="form-control" name="nama_kelas"
-                                value="{{ $kelass->nama_kelas }}" required>
+                            <div class="d-flex gap-2">
+                                <!-- Dropdown angka -->
+                                <select class="form-control" name="angka_kelas" required>
+                                    <option value="" disabled>Pilih Angka</option>
+                                    @for ($i = 1; $i <= 4; $i++)
+                                        <option value="{{ $i }}" {{ $angkaKelas == $i ? 'selected' : '' }}>
+                                            {{ $i }}
+                                        </option>
+                                    @endfor
+                                </select>
+
+                                <!-- Dropdown huruf -->
+                                <select class="form-control" name="huruf_kelas" required>
+                                    <option value="" disabled>Pilih Huruf</option>
+                                    @foreach (range('A', 'Z') as $huruf)
+                                        <option value="{{ $huruf }}"
+                                            {{ $hurufKelas == $huruf ? 'selected' : '' }}>
+                                            {{ $huruf }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Prodi</label>
