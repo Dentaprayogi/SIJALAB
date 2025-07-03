@@ -78,7 +78,7 @@
                                         <i class="fas fa-clock"></i>
                                     </span>
                                     <select name="id_sesi_mulai" id="id_sesi_mulai" class="form-control" required>
-                                        <option value="">-- Pilih Jam Mulai --</option>
+                                        <option value="">-- Pilih Sesi Mulai --</option>
                                         @foreach ($sesiJamList as $sesi)
                                             <option value="{{ $sesi->id_sesi_jam }}"
                                                 {{ old('id_sesi_mulai', $jadwalLab->sesiJam->first()->id_sesi_jam ?? '') == $sesi->id_sesi_jam ? 'selected' : '' }}>
@@ -99,7 +99,7 @@
                                         <i class="fas fa-clock"></i>
                                     </span>
                                     <select name="id_sesi_selesai" id="id_sesi_selesai" class="form-control" required>
-                                        <option value="">-- Pilih Jam Selesai --</option>
+                                        <option value="">-- Pilih Sesi Selesai --</option>
                                         @foreach ($sesiJamList as $sesi)
                                             <option value="{{ $sesi->id_sesi_jam }}"
                                                 {{ old('id_sesi_selesai', $jadwalLab->sesiJam->last()->id_sesi_jam ?? '') == $sesi->id_sesi_jam ? 'selected' : '' }}>

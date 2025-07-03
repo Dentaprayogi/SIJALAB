@@ -110,44 +110,37 @@ class PeminjamanController extends Controller
             'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam|gt:id_sesi_mulai',
         ]);
 
-        $hari = Hari::where('nama_hari', now()->locale('id')->isoFormat('dddd'))->first();
+        $hari        = Hari::where('nama_hari', now()->locale('id')->isoFormat('dddd'))->first();
         $sesiMulai   = SesiJam::find($request->id_sesi_mulai);
         $sesiSelesai = SesiJam::find($request->id_sesi_selesai);
 
-        // Ambil semua sesi dalam rentang
         $rentangSesi = SesiJam::whereBetween('id_sesi_jam', [
             $sesiMulai->id_sesi_jam,
             $sesiSelesai->id_sesi_jam,
         ])->pluck('id_sesi_jam');
 
-        // Ambil semua lab aktif
-        $labs = Lab::where('status_lab', 'aktif')->get();
+        // Ambil semua lab aktif & sudah terurut berdasarkan nama
+        $labs = Lab::where('status_lab', 'aktif')
+            ->orderByRaw('LOWER(nama_lab)')
+            ->get();
 
         $availableLabs = $labs->filter(function ($lab) use ($hari, $sesiMulai, $sesiSelesai, $rentangSesi) {
-            // Cek bentrok dengan jadwal_lab
             $jadwalBentrok = $lab->jadwalLab()
                 ->where('status_jadwalLab', 'aktif')
                 ->where('id_hari', $hari->id_hari)
-                ->whereHas('sesiJam', function ($q) use ($rentangSesi) {
-                    $q->whereIn('sesi_jam.id_sesi_jam', $rentangSesi);
-                })
+                ->whereHas('sesiJam', fn($q) => $q->whereIn('sesi_jam.id_sesi_jam', $rentangSesi))
                 ->exists();
 
-            // Cek bentrok dengan peminjaman_manual
             $manualBentrok = PeminjamanManual::where('id_lab', $lab->id_lab)
-                ->whereHas(
-                    'peminjaman',
-                    fn($q) =>
-                    $q->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
-                )
-                ->where(function ($q) use ($sesiMulai, $sesiSelesai) {
-                    $q->where('id_sesi_mulai', '<=', $sesiSelesai->id_sesi_jam)
-                        ->where('id_sesi_selesai', '>=', $sesiMulai->id_sesi_jam);
-                })
+                ->whereHas('peminjaman', fn($q) =>
+                $q->whereIn('status_peminjaman', ['pengajuan', 'dipinjam']))
+                ->where(fn($q) =>
+                $q->where('id_sesi_mulai', '<=', $sesiSelesai->id_sesi_jam)
+                    ->where('id_sesi_selesai', '>=', $sesiMulai->id_sesi_jam))
                 ->exists();
 
             return !$jadwalBentrok && !$manualBentrok;
-        })->values();
+        })->values();   // index ulang
 
         return response()->json($availableLabs);
     }

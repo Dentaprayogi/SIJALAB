@@ -72,13 +72,13 @@
                             <div class="row">
                                 {{-- Jam Mulai --}}
                                 <div class="col-md-6 mb-3">
-                                    <label for="jam_mulai" class="form-label">Jam Mulai</label>
+                                    <label for="jam_mulai" class="form-label">Sesi Mulai</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-primary text-white">
                                             <i class="fas fa-clock"></i>
                                         </span>
                                         <select name="id_sesi_mulai" id="id_sesi_mulai" class="form-control" required>
-                                            <option value="">-- Pilih Jam Mulai --</option>
+                                            <option value="">-- Pilih Sesi Mulai --</option>
                                             @foreach ($sesiJamList as $sesi)
                                                 <option value="{{ $sesi->id_sesi_jam }}"
                                                     {{ old('id_sesi_mulai') == $sesi->id_sesi_jam ? 'selected' : '' }}>
@@ -92,13 +92,13 @@
 
                                 {{-- Jam Selesai --}}
                                 <div class="col-md-6 mb-3">
-                                    <label for="jam_selesai" class="form-label">Jam Selesai</label>
+                                    <label for="jam_selesai" class="form-label">Sesi Selesai</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-primary text-white">
                                             <i class="fas fa-clock"></i>
                                         </span>
                                         <select name="id_sesi_selesai" id="id_sesi_selesai" class="form-control" required>
-                                            <option value="">-- Pilih Jam Selesai --</option>
+                                            <option value="">-- Pilih Sesi Selesai --</option>
                                             @foreach ($sesiJamList as $sesi)
                                                 <option value="{{ $sesi->id_sesi_jam }}"
                                                     {{ old('id_sesi_selesai') == $sesi->id_sesi_jam ? 'selected' : '' }}>

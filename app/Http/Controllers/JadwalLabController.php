@@ -26,16 +26,6 @@ class JadwalLabController extends Controller
 {
     public function index()
     {
-        //Auto‑aktifkan kembali jadwal yang habis masa nonaktif
-        JadwalLab::where('status_jadwalLab', 'nonaktif')
-            ->whereNotNull('waktu_akhir_nonaktif')
-            ->where('waktu_akhir_nonaktif', '<=', now())
-            ->update([
-                'status_jadwalLab'       => 'aktif',
-                'waktu_mulai_nonaktif'   => null,
-                'waktu_akhir_nonaktif'   => null,
-            ]);
-
         // Ambil jadwal tahun ajaran aktif + eager‑load relasi
         $jadwalLabs = JadwalLab::with([
             'hari',
@@ -574,15 +564,22 @@ class JadwalLabController extends Controller
 
     public function getData($id_prodi)
     {
-        // Ambil data dari database berdasarkan id_prodi
-        $kelas = Kelas::where('id_prodi', $id_prodi)->get();
-        $mk = MataKuliah::where('id_prodi', $id_prodi)->get();
-        $dosen = Dosen::where('id_prodi', $id_prodi)->get();
+        // urutkan ASC + case‑insensitive
+        $kelas = Kelas::where('id_prodi', $id_prodi)
+            ->orderByRaw('LOWER(nama_kelas) ASC')
+            ->get();
 
-        // Return dalam bentuk JSON
+        $mk    = MataKuliah::where('id_prodi', $id_prodi)
+            ->orderByRaw('LOWER(nama_mk) ASC')
+            ->get();
+
+        $dosen = Dosen::where('id_prodi', $id_prodi)
+            ->orderByRaw('LOWER(nama_dosen) ASC')
+            ->get();
+
         return response()->json([
             'kelas' => $kelas,
-            'mk' => $mk,
+            'mk'    => $mk,
             'dosen' => $dosen,
         ]);
     }

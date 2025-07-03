@@ -6,14 +6,31 @@ use Illuminate\Http\Request;
 use App\Models\Hari;
 use App\Models\Lab;
 use App\Models\JadwalLab;
+use App\Models\Peminjaman;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\SesiJam;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        //Auto‑aktifkan kembali jadwal yang habis masa nonaktif
+        JadwalLab::where('status_jadwalLab', 'nonaktif')
+            ->whereNotNull('waktu_akhir_nonaktif')
+            ->where('waktu_akhir_nonaktif', '<=', now())
+            ->update([
+                'status_jadwalLab'       => 'aktif',
+                'waktu_mulai_nonaktif'   => null,
+                'waktu_akhir_nonaktif'   => null,
+            ]);
+
+        // Bersihkan pengajuan kadaluarsa
+        Peminjaman::where('status_peminjaman', 'pengajuan')
+            ->whereDate('tgl_peminjaman', '<', Carbon::today())
+            ->delete();
+
         $labs = Lab::orderBy('nama_lab', 'asc')->get();
         $namaHariSekarang = now()->locale('id')->isoFormat('dddd');
 
