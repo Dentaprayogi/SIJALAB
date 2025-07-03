@@ -126,22 +126,32 @@ class LandingController extends Controller
             return response()->json(['message' => 'Hari tidak ditemukan'], 404);
         }
 
-        $jadwal = JadwalLab::with('matakuliah', 'kelas.prodi', 'lab')
+        $jadwal = JadwalLab::with(['mataKuliah', 'kelas.prodi', 'sesiJam'])
             ->where('id_lab', $id_lab)
             ->where('id_hari', $hari->id_hari)
             ->where('status_jadwalLab', 'aktif')
-            ->orderBy('jam_mulai')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'jam_mulai' => \Carbon\Carbon::parse($item->jam_mulai)->format('H:i'),
-                    'jam_selesai' => \Carbon\Carbon::parse($item->jam_selesai)->format('H:i'),
-                    'nama_mk' => $item->matakuliah->nama_mk ?? '-',
+            ->get();
+
+        $data = [];
+
+        foreach ($jadwal as $item) {
+            if ($item->sesiJam->isNotEmpty()) {
+                $jamMulai = $item->sesiJam->sortBy('jam_mulai')->first()->jam_mulai;
+                $jamSelesai = $item->sesiJam->sortByDesc('jam_selesai')->first()->jam_selesai;
+
+                $data[] = [
+                    'jam_mulai' => \Carbon\Carbon::parse($jamMulai)->format('H:i'),
+                    'jam_selesai' => \Carbon\Carbon::parse($jamSelesai)->format('H:i'),
+                    'nama_mk' => $item->mataKuliah->nama_mk ?? '-',
                     'nama_kelas' => $item->kelas->nama_kelas ?? '-',
                     'singkatan_prodi' => $item->kelas->prodi->singkatan_prodi ?? '-',
                 ];
-            });
+            }
+        }
 
-        return response()->json($jadwal);
+        // Urutkan berdasarkan jam_mulai
+        $sorted = collect($data)->sortBy('jam_mulai')->values();
+
+        return response()->json($sorted);
     }
 }
