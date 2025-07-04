@@ -35,8 +35,16 @@
                                         <td>{{ $pj->peminjaman->user->mahasiswa->telepon ?? '-' }}</td>
                                         <td>{{ $pj->peminjaman->peminjamanJadwal->jadwalLab->matakuliah->nama_mk ?? '-' }}
                                         </td>
+                                        @php
+                                            $status = strtolower(trim($pj->peminjaman->status_peminjaman));
+                                            $statusClass = match ($status) {
+                                                'dipinjam' => 'badge-primary',
+                                                'pengajuan' => 'badge-warning',
+                                                default => 'badge-light',
+                                            };
+                                        @endphp
                                         <td><span
-                                                class="badge badge-info">{{ $pj->peminjaman->status_peminjaman }}</span>
+                                                class="badge badge-status {{ $statusClass }}">{{ ucfirst($status) }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -51,11 +59,8 @@
                                         @php
                                             $status = strtolower($pm->peminjaman->status_peminjaman); // Normalize
                                             $statusClass = match ($status) {
-                                                'tersedia' => 'badge-success',
                                                 'dipinjam' => 'badge-primary',
-                                                'kosong' => 'badge-secondary',
                                                 'pengajuan' => 'badge-warning',
-                                                'nonaktif' => 'badge-nonaktif',
                                                 default => 'badge-light',
                                             };
                                         @endphp

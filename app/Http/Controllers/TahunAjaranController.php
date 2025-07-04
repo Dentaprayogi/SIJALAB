@@ -64,7 +64,6 @@ class TahunAjaranController extends Controller
         return redirect()->route('tahunajaran.index')->with('success', 'Tahun Ajaran berhasil diperbarui');
     }
 
-
     public function destroy(TahunAjaran $tahunAjaran)
     {
         // Cek apakah ada jadwal lab yang terkait dengan tahun ajaran ini
@@ -88,17 +87,6 @@ class TahunAjaranController extends Controller
         $status = $request->status_tahunAjaran;
         if (!in_array($status, ['aktif', 'nonaktif'])) {
             return response()->json(['message' => 'Status tidak valid.'], 422);
-        }
-
-        // Cek jika ingin menonaktifkan dan masih ada jadwal lab yang terkait
-        if ($status === 'nonaktif') {
-            $hasJadwal = JadwalLab::where('id_tahunAjaran', $tahun->id_tahunAjaran)->exists();
-
-            if ($hasJadwal) {
-                return response()->json([
-                    'message' => 'Tidak dapat menonaktifkan Tahun Ajaran karena masih memiliki jadwal lab.'
-                ], 403);
-            }
         }
 
         $tahun->status_tahunAjaran = $status;

@@ -103,10 +103,10 @@ class DashboardController extends Controller
                 ->where('id_hari', $hari->id_hari)
                 ->where('status_jadwalLab', 'aktif')
                 ->whereHas('sesiJam', function ($q) use ($currentSesi) {
-                    $q->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
-                })
-                ->doesntHave('peminjamanJadwal')   // tidak dipinjam
-                ->exists();
+                    if ($currentSesi) {
+                        $q->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
+                    }
+                })->exists();
 
             //TENTUKAN STATUS
             if ($isDipinjam) {
