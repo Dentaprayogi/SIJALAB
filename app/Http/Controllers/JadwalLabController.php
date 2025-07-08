@@ -237,14 +237,11 @@ class JadwalLabController extends Controller
             ],
 
             'Dosen' => [
-                Dosen::with('prodi:id_prodi,singkatan_prodi')
-                    ->join('prodi', 'dosen.id_prodi', '=', 'prodi.id_prodi')
-                    ->orderBy('prodi.singkatan_prodi')
-                    ->orderBy('dosen.nama_dosen')
-                    ->select('dosen.*')->get(),
+                Dosen::orderBy('nama_dosen')->get(['id_dosen', 'nama_dosen']),
                 'id_dosen',
-                fn($item) => "{$item->nama_dosen} ({$item->prodi->singkatan_prodi})"
+                fn($item) => $item->nama_dosen
             ],
+
         ];
 
         // Mapping kolom di template (A1 sampai I1)
@@ -411,7 +408,7 @@ class JadwalLabController extends Controller
             'hariList' => Hari::all(),
             'labList' => Lab::where('status_lab', 'aktif')->orderBy('nama_lab', 'asc')->get(),
             'mkList' => Matakuliah::where('id_prodi', $prodiId)->orderBy('nama_mk', 'asc')->get(),
-            'dosenList' => Dosen::where('id_prodi', $prodiId)->orderBy('nama_dosen', 'asc')->get(),
+            'dosenList' => Dosen::orderBy('nama_dosen', 'asc')->get(),
             'prodiList' => Prodi::orderBy('singkatan_prodi', 'asc')->get(),
             'kelasList' => Kelas::where('id_prodi', $prodiId)->orderBy('nama_kelas', 'asc')->get(),
             'tahunAjaranList' => TahunAjaran::where('status_tahunAjaran', 'aktif')->orderBy('tahun_ajaran', 'desc')->get(),
@@ -573,14 +570,9 @@ class JadwalLabController extends Controller
             ->orderByRaw('LOWER(nama_mk) ASC')
             ->get();
 
-        $dosen = Dosen::where('id_prodi', $id_prodi)
-            ->orderByRaw('LOWER(nama_dosen) ASC')
-            ->get();
-
         return response()->json([
             'kelas' => $kelas,
             'mk'    => $mk,
-            'dosen' => $dosen,
         ]);
     }
 

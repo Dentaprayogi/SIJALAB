@@ -5,13 +5,6 @@
             <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h1 class="h3 mb-0 text-gray-800">Riwayat Peminjaman</h1>
-                    @auth
-                        @if (Auth::user()->role === 'mahasiswa')
-                            <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Tambah Peminjaman
-                            </a>
-                        @endif
-                    @endauth
                 </div>
                 <form method="GET" action="{{ route('peminjaman.index') }}" class="form-inline">
                     <div class="form-group mr-2">
@@ -42,6 +35,13 @@
                     <a href="{{ route('peminjaman.export', request()->query()) }}" class="btn btn-success ml-2">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
+                    @auth
+                        @if (Auth::user()->role === 'mahasiswa')
+                            <a href="{{ route('peminjaman.create') }}" class="btn btn-primary ml-2">
+                                <i class="fas fa-plus"></i> Tambah Peminjaman
+                            </a>
+                        @endif
+                    @endauth
                 </form>
             </div>
             <div class="card-body">

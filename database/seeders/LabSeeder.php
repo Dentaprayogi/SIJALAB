@@ -30,6 +30,18 @@ class LabSeeder extends Seeder
                 'nama_lab' => 'Multimedia',
                 'status_lab' => 'aktif',
             ],
+            [
+                'nama_lab' => 'Coworking',
+                'status_lab' => 'aktif',
+            ],
+            [
+                'nama_lab' => 'Design',
+                'status_lab' => 'aktif',
+            ],
+            [
+                'nama_lab' => 'TUK',
+                'status_lab' => 'aktif',
+            ],
         ];
 
         foreach ($dataLab as $lab) {

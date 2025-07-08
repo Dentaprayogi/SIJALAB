@@ -31,22 +31,17 @@ class LandingController extends Controller
         foreach ($labs as $lab) {
             $lab->status = 'Kosong';
 
-            if ($lab->status_lab === 'nonaktif') {
-                $lab->status = 'Nonaktif';
+            //STATUS DEFAULT
+            $lab->status = $lab->status_lab === 'nonaktif' ? 'Nonaktif' : 'Kosong';
+            if ($lab->status === 'Nonaktif' || !$currentSesi) {
                 continue;
             }
 
             // Cek status DIPINJAM
             $isDipinjam =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
-                    $q->where('id_lab', $lab->id_lab)
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
+                    $q->where('id_lab',  $lab->id_lab)
                         ->where('id_hari', $hari->id_hari);
-
-                    if ($currentSesi) {
-                        $q->whereHas('sesiJam', function ($q2) use ($currentSesi) {
-                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
-                        });
-                    }
                 })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
@@ -58,11 +53,6 @@ class LandingController extends Controller
                 ->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
-                })->where(function ($q) use ($currentSesi) {
-                    if ($currentSesi) {
-                        $q->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                            ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam);
-                    }
                 })->exists();
 
             // Cek status PENGAJUAN

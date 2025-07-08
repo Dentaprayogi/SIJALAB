@@ -347,7 +347,32 @@ class PeminjamanController extends Controller
 
     public function setujui($id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::with([
+            'peminjamanJadwal.jadwalLab.sesiJam',
+            'peminjamanManual'
+        ])->findOrFail($id);
+
+        $now = \Carbon\Carbon::now()->format('H:i:s');
+        $jamSelesai = null;
+
+        // Cek jika peminjaman adalah jenis jadwal
+        if ($peminjaman->peminjamanJadwal) {
+            $sesiJam = $peminjaman->peminjamanJadwal->jadwalLab->sesiJam;
+            $jamSelesai = $sesiJam->pluck('jam_selesai')->sortDesc()->first();
+        }
+
+        // Cek jika peminjaman adalah jenis manual
+        elseif ($peminjaman->peminjamanManual) {
+            $sesiSelesai = \App\Models\SesiJam::find($peminjaman->peminjamanManual->id_sesi_selesai);
+            $jamSelesai = $sesiSelesai?->jam_selesai;
+        }
+
+        // Validasi jam selesai
+        if ($jamSelesai && $now > $jamSelesai) {
+            return redirect()->back()->with('error', 'Peminjaman tidak dapat disetujui karena sesi sudah berakhir.');
+        }
+
+        // Setujui peminjaman
         $peminjaman->status_peminjaman = 'dipinjam';
         $peminjaman->save();
 

@@ -211,16 +211,12 @@
                                     </span>
                                     <select name="id_dosen" id="id_dosen" class="form-control" required>
                                         <option value="">-- Pilih Dosen --</option>
-                                        @if (old('id_prodi'))
-                                            @foreach ($dosenList as $dosen)
-                                                @if ($dosen->id_prodi == old('id_prodi'))
-                                                    <option value="{{ $dosen->id_dosen }}"
-                                                        {{ old('id_dosen') == $dosen->id_dosen ? 'selected' : '' }}>
-                                                        {{ $dosen->nama_dosen }}
-                                                    </option>
-                                                @endif
-                                            @endforeach
-                                        @endif
+                                        @foreach ($dosenList as $dosen)
+                                            <option value="{{ $dosen->id_dosen }}"
+                                                {{ old('id_dosen') == $dosen->id_dosen ? 'selected' : '' }}>
+                                                {{ $dosen->nama_dosen }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     <div class="invalid-feedback bentrok-error" style="display: none;"></div>
                                 </div>
@@ -270,8 +266,6 @@
                                 '<option value="">-- Pilih Kelas --</option>');
                             $('#id_mk').empty().append(
                                 '<option value="">-- Pilih Mata Kuliah --</option>');
-                            $('#id_dosen').empty().append(
-                                '<option value="">-- Pilih Dosen --</option>');
 
                             // Isi dengan data baru
                             $.each(data.kelas, function(index, value) {
@@ -285,12 +279,6 @@
                                     '">' + value.nama_mk + '</option>');
                             });
 
-                            $.each(data.dosen, function(index, value) {
-                                $('#id_dosen').append('<option value="' + value
-                                    .id_dosen + '">' + value.nama_dosen +
-                                    '</option>');
-                            });
-
                             // Setelah isi, refresh Select2
                             $('#id_kelas').select2({
                                 placeholder: "-- Pilih Kelas --",
@@ -298,10 +286,6 @@
                             });
                             $('#id_mk').select2({
                                 placeholder: "-- Pilih Mata Kuliah --",
-                                allowClear: true
-                            });
-                            $('#id_dosen').select2({
-                                placeholder: "-- Pilih Dosen --",
                                 allowClear: true
                             });
                         },
@@ -314,8 +298,6 @@
                     $('#id_kelas').empty().append('<option value="">-- Pilih Kelas --</option>').trigger(
                         'change');
                     $('#id_mk').empty().append('<option value="">-- Pilih Mata Kuliah --</option>').trigger(
-                        'change');
-                    $('#id_dosen').empty().append('<option value="">-- Pilih Dosen --</option>').trigger(
                         'change');
                 }
             });
@@ -409,7 +391,7 @@
                 const prodiId = $(this).val();
 
                 if (!prodiId) {
-                    $('#id_kelas, #id_mk, #id_dosen').val(null).trigger('change');
+                    $('#id_kelas, #id_mk').val(null).trigger('change');
                     return;
                 }
 
@@ -432,15 +414,17 @@
 
                     reloadSelect($('#id_kelas'), data.kelas, 'id_kelas', 'nama_kelas', 'Kelas');
                     reloadSelect($('#id_mk'), data.mk, 'id_mk', 'nama_mk', 'Mata Kuliah');
-                    reloadSelect($('#id_dosen'), data.dosen, 'id_dosen', 'nama_dosen', 'Dosen');
-
                     checkBentrok(); // trigger ulang pengecekan setelah isi berubah
                 });
             });
 
             /** 6. Inisialisasi awal Select2 **/
-            $('#id_kelas, #id_mk, #id_dosen').select2({
+            $('#id_kelas, #id_mk').select2({
                 placeholder: "-- Pilih --",
+                allowClear: true
+            });
+            $('#id_dosen').select2({
+                placeholder: "-- Pilih Dosen --",
                 allowClear: true
             });
         });

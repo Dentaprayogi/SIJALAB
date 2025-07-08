@@ -114,7 +114,7 @@
     <div id="unit-peralatan-container-manual"></div>
 
     <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-success">
+        <button id="btn-ajukan-manual" type="submit" class="btn btn-success d-none" disabled>
             <i class="fas fa-paper-plane"></i> Ajukan
         </button>
     </div>

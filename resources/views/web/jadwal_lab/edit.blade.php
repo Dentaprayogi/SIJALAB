@@ -278,8 +278,6 @@
                                 '<option value="">-- Pilih Kelas --</option>');
                             $('#id_mk').empty().append(
                                 '<option value="">-- Pilih Mata Kuliah --</option>');
-                            $('#id_dosen').empty().append(
-                                '<option value="">-- Pilih Dosen --</option>');
 
                             // Tambahkan data kelas
                             $.each(data.kelas, function(key, item) {
@@ -295,17 +293,10 @@
                                 );
                             });
 
-                            // Tambahkan data dosen
-                            $.each(data.dosen, function(key, item) {
-                                $('#id_dosen').append(
-                                    `<option value="${item.id_dosen}">${item.nama_dosen}</option>`
-                                );
-                            });
 
                             // Refresh select2 setelah update
                             $('#id_kelas').trigger('change.select2');
                             $('#id_mk').trigger('change.select2');
-                            $('#id_dosen').trigger('change.select2');
                         }
                     });
                 }
@@ -412,7 +403,7 @@
             $('#id_prodi').on('change', function() {
                 const pid = $(this).val();
                 if (!pid) {
-                    $('#id_kelas,#id_mk,#id_dosen').val(null).trigger('change');
+                    $('#id_kelas,#id_mk').val(null).trigger('change');
                     return;
                 }
 
@@ -430,16 +421,19 @@
 
                     reload($('#id_kelas'), res.kelas, 'id_kelas', 'nama_kelas', 'Kelas');
                     reload($('#id_mk'), res.mk, 'id_mk', 'nama_mk', 'Mata Kuliah');
-                    reload($('#id_dosen'), res.dosen, 'id_dosen', 'nama_dosen', 'Dosen');
 
-                    $('#id_kelas,#id_dosen').val(null).trigger('change');
+                    $('#id_kelas').val(null).trigger('change');
                     checkBentrok(); // cek lagi
                 });
             });
 
             /* 7. Inisialisasi Select2 */
-            $('#id_kelas, #id_mk, #id_dosen').select2({
+            $('#id_kelas, #id_mk').select2({
                 placeholder: '-- Pilih --',
+                allowClear: true
+            });
+            $('#id_dosen').select2({
+                placeholder: '-- Pilih Dosen --',
                 allowClear: true
             });
         });

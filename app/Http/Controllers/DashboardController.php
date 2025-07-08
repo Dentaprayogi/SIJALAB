@@ -54,12 +54,9 @@ class DashboardController extends Controller
 
             //DIPINJAM
             $isDipinjam =
-                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari, $currentSesi) {
+                PeminjamanJadwal::whereHas('jadwalLab', function ($q) use ($lab, $hari) {
                     $q->where('id_lab',  $lab->id_lab)
-                        ->where('id_hari', $hari->id_hari)
-                        ->whereHas('sesiJam', function ($q2) use ($currentSesi) {
-                            $q2->where('sesi_jam.id_sesi_jam', $currentSesi->id_sesi_jam);
-                        });
+                        ->where('id_hari', $hari->id_hari);
                 })->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
@@ -71,9 +68,7 @@ class DashboardController extends Controller
                 ->whereHas('peminjaman', function ($q) {
                     $q->where('status_peminjaman', 'dipinjam')
                         ->whereDate('tgl_peminjaman', today());
-                })->where('id_sesi_mulai', '<=', $currentSesi->id_sesi_jam)
-                ->where('id_sesi_selesai', '>=', $currentSesi->id_sesi_jam)
-                ->exists();
+                })->exists();
 
             //PENGAJUAN
             $isDiajukan =

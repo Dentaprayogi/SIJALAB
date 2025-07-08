@@ -152,7 +152,7 @@ class JadwalTemplateSheetImport implements ToCollection
             //Split kolom bertanda kode
             $kelasParts  = $this->splitWithCode($val('kelas'));
             $mkParts     = $this->splitWithCode($val('mata kuliah'));
-            $dosenParts  = $this->splitWithCode($val('dosen'));
+            $dosenName = trim($val('dosen'));
             $taParts     = $this->splitWithCode($taFull);
 
             //Ambil referensi DB
@@ -171,9 +171,9 @@ class JadwalTemplateSheetImport implements ToCollection
                 ->whereRaw('LOWER(TRIM(nama_mk)) = ?', [strtolower($mkParts['name'])])
                 ->first() : null;
 
-            $dosen = $prodi ? Dosen::where('id_prodi', $prodi->id_prodi)
-                ->whereRaw('LOWER(TRIM(nama_dosen)) = ?', [strtolower($dosenParts['name'])])
-                ->first() : null;
+            $dosen = Dosen::whereRaw('LOWER(TRIM(nama_dosen)) = ?', [strtolower($dosenName)])
+                ->first();
+
 
             if (!$hari || !$tahunAjaran || !$lab || !$prodi || !$kelas || !$mk || !$dosen) {
                 throw ValidationException::withMessages([

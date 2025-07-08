@@ -251,7 +251,9 @@
                                         <h6 class="dropdown-header">
                                             Notifikasi Pengajuan
                                         </h6>
-
+                                        @php
+                                            $notifikasi = $notifikasi->sortBy('id_peminjaman'); // ASC
+                                        @endphp
                                         @forelse ($notifikasi as $item)
                                             <a class="dropdown-item d-flex align-items-center"
                                                 href="{{ route('peminjaman.show', $item->id_peminjaman) }}">
@@ -497,6 +499,26 @@
 
             $('#peralatan_jadwal').on('change', function() {
                 loadUnits('#peralatan_jadwal', '#unit-peralatan-container-jadwal');
+            });
+
+            // Saat ada request AJAX mulai berjalan, sembunyikan tombol
+            $(document).ajaxStart(function() {
+                if ($('#manual').hasClass('active')) {
+                    $('#btn-ajukan-manual').prop('disabled', true).addClass('d-none');
+                }
+                if ($('#jadwal').hasClass('active')) {
+                    $('#btn-ajukan-jadwal').prop('disabled', true).addClass('d-none');
+                }
+            });
+
+            // Saat semua request AJAX selesai, tampilkan kembali tombol
+            $(document).ajaxStop(function() {
+                if ($('#manual').hasClass('active')) {
+                    $('#btn-ajukan-manual').prop('disabled', false).removeClass('d-none');
+                }
+                if ($('#jadwal').hasClass('active')) {
+                    $('#btn-ajukan-jadwal').prop('disabled', false).removeClass('d-none');
+                }
             });
         });
     </script>
