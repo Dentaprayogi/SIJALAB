@@ -97,17 +97,18 @@
                 const mulaiOpt = ddlMulai.options[ddlMulai.selectedIndex];
                 const selesaiOpt = ddlSelesai.options[ddlSelesai.selectedIndex];
 
+                /* pastikan keduanya sudah dipilih */
                 if (!mulaiOpt.value || !selesaiOpt.value) {
                     errLab.textContent = 'Pilih sesi mulai & sesi selesai dahulu.';
                     return;
                 }
 
-                /* pastikan urutan sesi benar (bandingkan jam_mulai via data‑attribute) */
-                const startMulai = mulaiOpt.dataset.start; // string "07:00:00"
-                const startSelesai = selesaiOpt.dataset.start; // string "09:30:00"
+                // validasi urutan sesi
+                const startMulai = mulaiOpt.dataset.start;
+                const startSelesai = selesaiOpt.dataset.start;
 
-                if (startMulai >= startSelesai) {
-                    errSelesai.textContent = 'Sesi selesai harus setelah sesi mulai.';
+                if (startMulai > startSelesai) {
+                    errSelesai.textContent = 'Sesi selesai tidak boleh sebelum sesi mulai.';
                     return;
                 }
 
@@ -139,10 +140,9 @@
                     .catch(() => errLab.textContent = 'Gagal mengambil data lab.');
             }
 
-            /* trigger saat sesi selesai diubah (atau sesi mulai) */
+            /* trigger saat sesi mulai / selesai diubah */
             ddlMulai.addEventListener('change', fetchLabs);
             ddlSelesai.addEventListener('change', fetchLabs);
-
         });
     </script>
 @endsection

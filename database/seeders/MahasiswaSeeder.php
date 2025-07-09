@@ -13,34 +13,36 @@ class MahasiswaSeeder extends Seeder
 {
     public function run(): void
     {
-        $allProdi = Prodi::all();
-        $counter = 1; // Untuk membuat NIM unik
+        // Ambil satu prodi dan satu kelas pertama yang ditemukan
+        $prodi = Prodi::first();
+        $kelas = Kelas::where('id_prodi', $prodi->id_prodi)->first();
 
-        foreach ($allProdi as $prodi) {
-            // Ambil kelas-kelas milik prodi ini saja
-            $kelasProdi = Kelas::where('id_prodi', $prodi->id_prodi)->get();
-
-            foreach ($kelasProdi as $kelas) {
-                for ($i = 1; $i <= 3; $i++) {
-                    // Buat user baru
-                    $user = User::create([
-                        'name' => 'Mahasiswa ' . $prodi->nama_prodi . ' ' . $kelas->nama_kelas . ' - ' . $i,
-                        'email' => 'mhs_' . strtolower(Str::slug($prodi->singkatan_prodi . '_' . $kelas->nama_kelas . '_' . $i)) . '_' . Str::random(5) . '@example.com',
-                        'password' => bcrypt('password'),
-                        'role' => 'mahasiswa',
-                    ]);
-
-                    // Buat data mahasiswa
-                    Mahasiswa::create([
-                        'id' => $user->id,
-                        'id_prodi' => $prodi->id_prodi,
-                        'id_kelas' => $kelas->id_kelas,
-                        'nim' => '36' . str_pad($counter++, 10, '0', STR_PAD_LEFT), // total 12 digit, diawali 36
-                        'telepon' => '0812' . rand(10000000, 99999999),
-                        'foto_ktm' => null,
-                    ]);
-                }
-            }
+        // Cek jika data tersedia
+        if (!$prodi || !$kelas) {
+            $this->command->error('Prodi atau Kelas tidak ditemukan. Seeder Mahasiswa dibatalkan.');
+            return;
         }
+
+        // Generate NIM (harus dilakukan sebelum create user karena dipakai di username)
+        $nim = '36' . str_pad(rand(1, 9999999999), 10, '0', STR_PAD_LEFT); // 12 digit
+
+        // Buat user baru
+        $user = User::create([
+            'name'     => 'MahasiswaTesting ' . $prodi->nama_prodi . ' ' . $kelas->nama_kelas,
+            'username' => $nim, // username diisi dengan nim
+            'email'    => 'mhs_' . strtolower(Str::slug($prodi->singkatan_prodi . '_' . $kelas->nama_kelas)) . '_' . Str::random(5) . '@example.com',
+            'password' => bcrypt('password'),
+            'role'     => 'mahasiswa',
+        ]);
+
+        // Buat data mahasiswa
+        Mahasiswa::create([
+            'id'        => $user->id,
+            'id_prodi'  => $prodi->id_prodi,
+            'id_kelas'  => $kelas->id_kelas,
+            'nim'       => $nim,
+            'telepon'   => '0812' . rand(10000000, 99999999),
+            'foto_ktm'  => null,
+        ]);
     }
 }

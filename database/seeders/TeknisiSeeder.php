@@ -15,14 +15,14 @@ class TeknisiSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Hida Jaya Habibi',
+                'name' => 'Hida Jaya Habibi, A.Md',
                 'username' => 'teknisi001',
                 'email' => 'teknisi1@gmail.com',
                 'password' => Hash::make('password'),
                 'role' => 'teknisi',
             ],
             [
-                'name' => 'Fendi',
+                'name' => 'Fendi Hermawanto, A.Md',
                 'username' => 'teknisi002',
                 'email' => 'teknisi2@gmail.com',
                 'password' => Hash::make('password'),

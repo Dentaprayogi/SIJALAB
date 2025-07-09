@@ -107,7 +107,7 @@ class PeminjamanController extends Controller
     {
         $request->validate([
             'id_sesi_mulai'   => 'required|exists:sesi_jam,id_sesi_jam',
-            'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam|gt:id_sesi_mulai',
+            'id_sesi_selesai' => 'required|exists:sesi_jam,id_sesi_jam|gte:id_sesi_mulai',
         ]);
 
         $hari        = Hari::where('nama_hari', now()->locale('id')->isoFormat('dddd'))->first();
@@ -251,7 +251,7 @@ class PeminjamanController extends Controller
         $sesiSelesai = SesiJam::find($request->id_sesi_selesai);
 
         /* pastikan urutan benar */
-        if ($sesiMulai->jam_mulai >= $sesiSelesai->jam_mulai) {
+        if ($sesiMulai->jam_mulai > $sesiSelesai->jam_mulai) {
             return back()->withInput()->withErrors([
                 'id_sesi_selesai' => 'Sesi selesai harus setelah sesi mulai.',
             ])->with('active_tab', 'manual');
@@ -421,7 +421,6 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman.show', $id)->with('success', 'Peminjaman diselesaikan.');
     }
 
-
     public function tolak(Request $request, $id)
     {
         $request->validate([
@@ -440,7 +439,6 @@ class PeminjamanController extends Controller
 
         return redirect()->route('peminjaman.show', $id)->with('success', 'Peminjaman ditolak.');
     }
-
 
     public function destroy(Peminjaman $peminjaman)
     {
