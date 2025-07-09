@@ -6,11 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Hari;
 use App\Models\Lab;
 use App\Models\JadwalLab;
-use App\Models\Peminjaman;
 use App\Models\PeminjamanJadwal;
 use App\Models\PeminjamanManual;
 use App\Models\SesiJam;
-use Carbon\Carbon;
+use App\Services\PeminjamanService;
 
 class DashboardController extends Controller
 {
@@ -26,10 +25,8 @@ class DashboardController extends Controller
                 'waktu_akhir_nonaktif'   => null,
             ]);
 
-        // Bersihkan pengajuan kadaluarsa
-        Peminjaman::where('status_peminjaman', 'pengajuan')
-            ->whereDate('tgl_peminjaman', '<', Carbon::today())
-            ->delete();
+        // Jalankan pengecekan penolakan otomatis
+        PeminjamanService::tolakPeminjamanExpired();
 
         $labs = Lab::orderBy('nama_lab', 'asc')->get();
         $namaHariSekarang = now()->locale('id')->isoFormat('dddd');

@@ -41,7 +41,7 @@
                         @endif
                     </td>
                     <td>
-                        {{-- Peminjaman berdasarkan JADWAL TETAP --}}
+                        {{-- Peminjaman berdasarkan JADWAL --}}
                         @if ($pj = optional($peminjaman->peminjamanJadwal)->jadwalLab)
                             @php
                                 // ambil sesi terawal & terlambat
@@ -53,7 +53,7 @@
                             -
                             {{ $lastSesi ? \Carbon\Carbon::parse($lastSesi->jam_selesai)->format('H:i') : '-' }}
 
-                            {{-- Peminjaman MANUAL berbasis sesi --}}
+                            {{-- Peminjaman MANUAL --}}
                         @elseif ($pm = $peminjaman->peminjamanManual)
                             @if ($pm->sesiMulai && $pm->sesiSelesai)
                                 {{ \Carbon\Carbon::parse($pm->sesiMulai->jam_mulai)->format('H:i') }}

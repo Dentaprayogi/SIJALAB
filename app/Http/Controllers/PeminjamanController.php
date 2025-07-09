@@ -369,7 +369,7 @@ class PeminjamanController extends Controller
 
         // Validasi jam selesai
         if ($jamSelesai && $now > $jamSelesai) {
-            return redirect()->back()->with('error', 'Peminjaman tidak dapat disetujui karena sesi sudah berakhir.');
+            return redirect()->back()->with('error', 'Peminjaman tidak dapat disetujui karena sesi selesai yang dipilih sudah berakhir.');
         }
 
         // Setujui peminjaman

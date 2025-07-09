@@ -22,6 +22,7 @@
                                     <th>Kelas</th>
                                     <th>Telepon</th>
                                     <th>Kegiatan/Matkul</th>
+                                    <th>Jam</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -34,6 +35,19 @@
                                         <td>{{ $pj->peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }}</td>
                                         <td>{{ $pj->peminjaman->user->mahasiswa->telepon ?? '-' }}</td>
                                         <td>{{ $pj->peminjaman->peminjamanJadwal->jadwalLab->matakuliah->nama_mk ?? '-' }}
+                                        </td>
+                                        <td>
+                                            @php
+                                                $sesiJam =
+                                                    $pj->peminjaman->peminjamanJadwal->jadwalLab->sesiJam ?? collect();
+                                                $jamMulai = optional($sesiJam->sortBy('jam_mulai')->first())->jam_mulai;
+                                                $jamSelesai = optional($sesiJam->sortByDesc('jam_selesai')->first())
+                                                    ->jam_selesai;
+                                            @endphp
+
+                                            {{ $jamMulai ? \Carbon\Carbon::parse($jamMulai)->format('H:i') : '-' }}
+                                            -
+                                            {{ $jamSelesai ? \Carbon\Carbon::parse($jamSelesai)->format('H:i') : '-' }}
                                         </td>
                                         @php
                                             $status = strtolower(trim($pj->peminjaman->status_peminjaman));
@@ -56,6 +70,11 @@
                                         <td>{{ $pm->peminjaman->user->mahasiswa->kelas->nama_kelas ?? '-' }}</td>
                                         <td>{{ $pm->peminjaman->user->mahasiswa->telepon ?? '-' }}</td>
                                         <td>{{ $pm->peminjaman->peminjamanManual->kegiatan ?? '-' }}</td>
+                                        <td>
+                                            {{ $pm->sesiMulai?->jam_mulai ? \Carbon\Carbon::parse($pm->sesiMulai->jam_mulai)->format('H:i') : '-' }}
+                                            -
+                                            {{ $pm->sesiSelesai?->jam_selesai ? \Carbon\Carbon::parse($pm->sesiSelesai->jam_selesai)->format('H:i') : '-' }}
+                                        </td>
                                         @php
                                             $status = strtolower($pm->peminjaman->status_peminjaman); // Normalize
                                             $statusClass = match ($status) {

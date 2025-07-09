@@ -69,8 +69,18 @@
     <tr>
         <th>Jam</th>
         <td>
-            {{ \Carbon\Carbon::parse($peminjaman->jadwalLab->jam_mulai)->format('H:i') }} -
-            {{ \Carbon\Carbon::parse($peminjaman->jadwalLab->jam_selesai)->format('H:i') }}
+            @if ($pj = optional($peminjaman->peminjamanJadwal)->jadwalLab)
+                @php
+                    $firstSesi = $pj->sesiJam->sortBy('jam_mulai')->first();
+                    $lastSesi = $pj->sesiJam->sortByDesc('jam_selesai')->first();
+                @endphp
+
+                {{ $firstSesi ? \Carbon\Carbon::parse($firstSesi->jam_mulai)->format('H:i') : '-' }}
+                -
+                {{ $lastSesi ? \Carbon\Carbon::parse($lastSesi->jam_selesai)->format('H:i') : '-' }}
+            @else
+                -
+            @endif
         </td>
     </tr>
 </table>
