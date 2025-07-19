@@ -56,7 +56,7 @@ class JadwalLab extends Model
     // Relasi ke Mata Kuliah (One to Many)
     public function mataKuliah()
     {
-        return $this->belongsTo(MataKuliah::class, 'id_mk');
+        return $this->belongsTo(Matakuliah::class, 'id_mk');
     }
 
     // Relasi ke Dosen (One to Many)

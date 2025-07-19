@@ -46,7 +46,7 @@ class LabController extends Controller
     public function update(Request $request, $id_lab)
     {
         $request->validate([
-            'nama_lab' => 'required|string|max:255|unique:lab,nama_lab',
+            'nama_lab' => 'required|string|max:255|unique:lab,nama_lab,' . $id_lab . ',id_lab',
             'status_lab' => 'required|in:aktif,nonaktif',
         ], [
             'nama_lab.unique' => 'Nama lab sudah terdaftar.',
