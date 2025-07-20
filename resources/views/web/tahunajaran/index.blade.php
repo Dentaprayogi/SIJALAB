@@ -103,7 +103,7 @@
                     showConfirmButton: true
                 }).then(() => {
                     let oldId =
-                    "{{ old('id_tahunAjaran', session('id_tahunAjaran')) }}"; // Cek old() dan session
+                        "{{ old('id_tahunAjaran', session('id_tahunAjaran')) }}"; // Cek old() dan session
 
                     if (oldId) {
                         var editModal = new bootstrap.Modal(document.getElementById('editTahunAjaranModal' +
@@ -126,7 +126,7 @@
                     showConfirmButton: true
                 }).then(() => {
                     let oldId =
-                    "{{ old('id_tahunAjaran', session('id_tahunAjaran')) }}"; // Cek old() dan session
+                        "{{ old('id_tahunAjaran', session('id_tahunAjaran')) }}"; // Cek old() dan session
 
                     if (oldId) {
                         var editModal = new bootstrap.Modal(document.getElementById('editTahunAjaranModal' +
@@ -186,12 +186,13 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         fetch(`/tahun-ajaran/${tahunId}/toggle-status`, {
-                                method: 'PATCH',
+                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                 },
                                 body: JSON.stringify({
+                                    _method: 'PATCH',
                                     status_tahunAjaran: newStatus
                                 })
                             })

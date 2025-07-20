@@ -8,7 +8,7 @@ use App\Models\{
     JadwalLab,
     Kelas,
     Lab,
-    MataKuliah,
+    Matakuliah,
     Prodi,
     SesiJam,
     TahunAjaran

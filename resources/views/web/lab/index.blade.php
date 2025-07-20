@@ -147,12 +147,13 @@
                             .charAt(0).toUpperCase() + newStatus.slice(1);
 
                         fetch(`/lab/${labId}/toggle-status`, {
-                                method: 'PATCH',
+                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                 },
                                 body: JSON.stringify({
+                                    _method: 'PATCH',
                                     status_lab: newStatus
                                 })
                             })

@@ -259,12 +259,13 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/users/${userId}/toggle-status`, {
-                                    method: 'PATCH',
+                                    method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
                                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                     },
                                     body: JSON.stringify({
+                                        _method: 'PATCH',
                                         status_user: newStatus
                                     })
                                 })
