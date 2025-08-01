@@ -9,9 +9,9 @@ return new class extends Migration {
     {
         Schema::create('dosen', function (Blueprint $table) {
             $table->id('id_dosen');
-            $table->string('nama_dosen')->unique();
+            $table->string('nama_dosen');
             $table->string('telepon');
-            $table->foreignId('id_prodi')->constrained('prodi', 'id_prodi')->onDelete('cascade'); 
+            $table->foreignId('id_prodi')->constrained('prodi', 'id_prodi')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -21,4 +21,3 @@ return new class extends Migration {
         Schema::dropIfExists('dosen');
     }
 };
-

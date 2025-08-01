@@ -204,12 +204,13 @@
             // Fungsi kirim data ke server
             function updateStatusJadwal(jadwalId, status, mulai = null, akhir = null) {
                 fetch(`/jadwal_lab/${jadwalId}/toggle-status`, {
-                        method: 'PATCH',
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
+                            _method: 'PATCH',
                             status_jadwalLab: status,
                             waktu_mulai_nonaktif: mulai,
                             waktu_akhir_nonaktif: akhir,
