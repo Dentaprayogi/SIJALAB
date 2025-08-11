@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +26,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Paksa root URL sesuai APP_URL agar asset (Livewire, dll) bekerja di subfolder
+        if (config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+        }
+
         // Set locale Carbon agar nama hari/bulan dalam Bahasa Indonesia
         Carbon::setLocale('id');
 

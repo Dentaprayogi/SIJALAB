@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
+use Illuminate\Support\Str;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -46,8 +47,17 @@ class CreateNewUser implements CreatesNewUsers
             ]);
 
             $foto = request()->file('foto_ktm');
-            $fotoPath = $foto->store('uploads/ktm', 'public');
+            $namaFile = 'ktm_' . Str::slug($input['nim']) . '_' . time() . '.' . $foto->getClientOriginalExtension();
+            $tujuanPath = public_path('uploads/ktm');
 
+            //$tujuanPath = base_path('../public_html/uploads/ktm'); // langsung ke public_html/uploads/ktm
+
+            // Buat folder jika belum ada
+            if (!file_exists($tujuanPath)) {
+                mkdir($tujuanPath, 0755, true);
+            }
+
+            $foto->move($tujuanPath, $namaFile);
 
             Mahasiswa::create([
                 'id' => $user->id,
@@ -55,7 +65,7 @@ class CreateNewUser implements CreatesNewUsers
                 'telepon' => $input['telepon'],
                 'id_prodi' => $input['id_prodi'],
                 'id_kelas' => $input['id_kelas'],
-                'foto_ktm' => $fotoPath, // nanti bisa diupdate lewat form edit profil
+                'foto_ktm' => 'uploads/ktm/' . $namaFile, // Simpan path relatif
             ]);
 
             return $user;

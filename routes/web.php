@@ -12,6 +12,7 @@ use App\Http\Controllers\MatakuliahController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PeralatanController;
 use App\Http\Controllers\ProdiController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SesiJamController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\UnitPeralatanController;
@@ -51,9 +52,14 @@ Route::middleware([
 ])->group(function () {
     route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile', function () {
-        return view('web.profile.show');
-    })->name('user.profile');
+    // Route::get('/profile', function () {
+    //     return view('web.profile.show');
+    // })->name('user.profile');
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/mahasiswa', [ProfileController::class, 'updateMahasiswa'])->name('profile.mahasiswa.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
     // Route khusus untuk teknisi
     Route::group(['middleware' => 'checkRole:teknisi'], function () {

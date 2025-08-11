@@ -61,8 +61,8 @@
                         @if ($user->mahasiswa && $user->mahasiswa->foto_ktm)
                             <label class="font-weight-bold">Foto KTM</label>
                             <div class="mt-2">
-                                <img src="{{ asset('storage/' . $user->mahasiswa->foto_ktm) }}" alt="Foto KTM"
-                                    class="img-thumbnail" style="max-width: 300px;">
+                                <img src="{{ asset($user->mahasiswa->foto_ktm) }}" alt="Foto KTM" class="img-thumbnail"
+                                    style="max-width: 500px;">
                             </div>
                         @else
                             <p class="text-danger">Foto KTM belum diunggah.</p>
