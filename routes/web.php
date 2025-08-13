@@ -64,6 +64,8 @@ Route::middleware([
     // Route khusus untuk teknisi
     Route::group(['middleware' => 'checkRole:teknisi'], function () {
         //Route Manajemen Users
+        Route::get('/users/{id}/reset-password', [UserController::class, 'resetPassword'])
+            ->name('users.resetPassword');
         Route::post('/users/toggle-akses-ubah-kelas', [UserController::class, 'toggleAksesUbahKelas'])->name('users.toggleAksesUbahKelas');
         Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
         Route::get('/get-kelas/{id_prodi}', function ($id_prodi) {

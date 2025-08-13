@@ -85,7 +85,7 @@ class UnitPeralatanController extends Controller
 
         if ($isUsedInPeminjaman) {
             return redirect()->route('unit-peralatan.index')
-                ->with('error', 'Unit tidak dapat dihapus karena masih terhubung dengan peminjaman yang aktif.');
+                ->with('error', 'Unit tidak dapat dihapus karena masih terhubung dengan peminjaman yang aktif atau bermasalah.');
         }
 
         $unit->delete();

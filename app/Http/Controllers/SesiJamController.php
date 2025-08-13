@@ -3,6 +3,8 @@
 // app/Http/Controllers/SesiJamController.php
 namespace App\Http\Controllers;
 
+use App\Models\JadwalLab;
+use App\Models\PeminjamanManual;
 use App\Models\SesiJam;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -116,7 +118,23 @@ class SesiJamController extends Controller
 
     public function destroy(SesiJam $sesi_jam)
     {
+        // Cek apakah sesi jam masih terhubung dengan jadwal lab
+        $hasJadwalLab = $sesi_jam->jadwalLab()->exists();
+
+        // Cek apakah sesi jam masih terhubung dengan peminjaman manual
+        $hasPeminjamanManual = PeminjamanManual::where(function ($q) use ($sesi_jam) {
+            $q->where('id_sesi_mulai', $sesi_jam->id_sesi_jam)
+                ->orWhere('id_sesi_selesai', $sesi_jam->id_sesi_jam);
+        })->exists();
+
+        if ($hasJadwalLab || $hasPeminjamanManual) {
+            return redirect()->route('sesi-jam.index')
+                ->with('error', 'Sesi jam tidak dapat dihapus karena masih terhubung dengan jadwal lab atau peminjaman manual.');
+        }
+
+        // Hapus sesi jam
         $sesi_jam->delete();
+
         return redirect()->route('sesi-jam.index')->with('success', 'Sesi jam berhasil dihapus.');
     }
 }

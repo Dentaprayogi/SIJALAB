@@ -38,7 +38,7 @@
                         @if ($peminjaman->user->mahasiswa->foto_ktm)
                             <label class="font-weight-bold">Foto KTM</label>
                             <div class="mt-2">
-                                <img src="{{ asset('storage/' . $peminjaman->user->mahasiswa->foto_ktm) }}" alt="Foto KTM"
+                                <img src="{{ asset($peminjaman->user->mahasiswa->foto_ktm) }}" alt="Foto KTM"
                                     class="img-thumbnail" style="max-width: 300px;">
                             </div>
                         @else

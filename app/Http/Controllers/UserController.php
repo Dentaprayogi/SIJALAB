@@ -7,6 +7,7 @@ use App\Models\Mahasiswa;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -23,6 +24,17 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         return view('web.user.show', compact('user'));
+    }
+
+    public function resetPassword($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Ubah password menjadi username
+        $user->password = Hash::make($user->username);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Password berhasil direset menjadi username.');
     }
 
     public function toggleStatus(Request $request, $id)
@@ -121,11 +133,11 @@ class UserController extends Controller
 
         // Cek apakah user masih memiliki peminjaman aktif atau bermasalah
         $peminjamanAktif = $user->peminjaman()
-            ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam'])
+            ->whereIn('status_peminjaman', ['pengajuan', 'dipinjam', 'bermasalah'])
             ->exists();
 
         if ($peminjamanAktif) {
-            return redirect()->back()->with('error', 'User tidak dapat dihapus karena masih memiliki peminjaman yang aktif.');
+            return redirect()->back()->with('error', 'User tidak dapat dihapus karena masih memiliki peminjaman yang aktif atau bermasalah.');
         }
 
         $user->delete();
@@ -142,7 +154,7 @@ class UserController extends Controller
         }
 
         // Status peminjaman yang dianggap aktif
-        $statusAktif = ['pengajuan', 'dipinjam'];
+        $statusAktif = ['pengajuan', 'dipinjam', 'bermasalah'];
 
         // Ambil ID user yang memiliki peminjaman aktif
         $userDenganPeminjamanAktif = User::whereIn('id', $ids)
@@ -162,7 +174,7 @@ class UserController extends Controller
             ->toArray();
 
         if (empty($userYangBolehDihapus)) {
-            return redirect()->back()->with('error', 'Semua user memiliki peminjaman aktif atau bukan berperan sebagai mahasiswa.');
+            return redirect()->back()->with('error', 'Semua user memiliki peminjaman aktif, bermasalah atau bukan berperan sebagai mahasiswa.');
         }
 
         // Hapus user yang valid

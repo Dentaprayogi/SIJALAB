@@ -453,8 +453,8 @@ class PeminjamanController extends Controller
         // Mengecek apakah user yang login adalah teknisi
         if (Auth::user()->role === 'teknisi') {
             // Teknisi bisa menghapus peminjaman dengan status pengajuan, ditolak, atau selesai
-            if (!in_array($peminjaman->status_peminjaman, ['ditolak', 'bermasalah', 'selesai'])) {
-                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya ditolak, bermasalah, atau selesai.');
+            if (!in_array($peminjaman->status_peminjaman, ['ditolak', 'selesai'])) {
+                return back()->with('error', 'Peminjaman hanya bisa dihapus jika statusnya ditolak atau selesai.');
             }
         }
 
@@ -475,11 +475,11 @@ class PeminjamanController extends Controller
 
         // Filter hanya peminjaman yang statusnya diizinkan untuk dihapus
         $deletable = Peminjaman::whereIn('id_peminjaman', $ids)
-            ->whereIn('status_peminjaman', ['ditolak', 'bermasalah', 'selesai'])
+            ->whereIn('status_peminjaman', ['ditolak', 'selesai'])
             ->pluck('id_peminjaman');
 
         if ($deletable->isEmpty()) {
-            return redirect()->back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam.');
+            return redirect()->back()->with('error', 'Peminjaman tidak dapat dihapus karena sedang dipinjam atau peminjaman bermasalah.');
         }
 
         Peminjaman::whereIn('id_peminjaman', $deletable)->delete();
