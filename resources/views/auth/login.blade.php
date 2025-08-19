@@ -89,11 +89,11 @@
                             Belum punya akun? <strong>Daftar di sini</strong>
                         </a>
                     @endif
-                    {{-- @if (Route::has('password.request'))
+                    @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-primary-custom text-decoration-none">
                             Forgot Password
                         </a>
-                    @endif --}}
+                    @endif
                 </div>
 
                 <!-- Submit Button -->

@@ -80,7 +80,7 @@
             @foreach ($labs as $lab)
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-sm text-center lab-card" data-id="{{ $lab->id_lab }}"
-                        style="cursor:pointer;">
+                        data-nama="{{ $lab->nama_lab }}" style="cursor:pointer;">
                         <img src="{{ asset('assets/img/lab.jpg') }}" class="mx-auto d-block mt-3"
                             style="max-width: 300px;" alt="Foto Lab">
                         <div class="card-body">
@@ -114,7 +114,13 @@
         document.querySelectorAll('.lab-card').forEach(card => {
             card.addEventListener('click', function() {
                 const idLab = this.getAttribute('data-id');
+                const namaLab = this.getAttribute('data-nama'); // ambil nama lab
                 const jadwalContent = document.getElementById('jadwal-content');
+                const modalTitle = document.getElementById('jadwalModalLabel');
+
+                // set judul modal sesuai lab yg ditekan
+                modalTitle.textContent = `Jadwal Lab. ${namaLab} Hari Ini`;
+
                 jadwalContent.innerHTML = 'Memuat jadwal...';
 
                 fetch(`/jadwal-lab/hari-ini/${idLab}`)
@@ -126,10 +132,10 @@
                             let html = '<ul class="list-group">';
                             data.forEach(item => {
                                 html += `<li class="list-group-item">
-                                    <strong>Jam: ${item.jam_mulai} - ${item.jam_selesai}
-                                    Matkul: ${item.nama_mk}  
-                                    Kelas: ${item.nama_kelas} (${item.singkatan_prodi})</strong> 
-                                </li>`;
+                            <strong>Jam: ${item.jam_mulai} - ${item.jam_selesai}
+                            Matkul: ${item.nama_mk}  
+                            Kelas: ${item.nama_kelas} (${item.singkatan_prodi})</strong> 
+                        </li>`;
                             });
                             html += '</ul>';
                             jadwalContent.innerHTML = html;
